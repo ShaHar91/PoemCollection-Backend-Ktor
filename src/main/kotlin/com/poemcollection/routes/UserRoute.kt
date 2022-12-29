@@ -1,8 +1,8 @@
 package com.poemcollection.routes
 
-import com.poemcollection.data.UserDao
-import com.poemcollection.models.InsertNewUser
-import com.poemcollection.models.UpdateUser
+import com.poemcollection.data.models.InsertNewUser
+import com.poemcollection.data.models.UpdateUser
+import com.poemcollection.domain.interfaces.IUserDao
 import io.ktor.http.*
 import io.ktor.http.ContentType.Application.FormUrlEncoded
 import io.ktor.http.ContentType.Application.Json
@@ -10,11 +10,11 @@ import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import org.koin.ktor.ext.inject
 
-fun Route.userRouting() {
+fun Route.userRouting(
+    userDao: IUserDao
+) {
 
-    val userDao by inject<UserDao>()
 
     route("/users") {
         post {

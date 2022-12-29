@@ -1,16 +1,17 @@
-package com.poemcollection.data
+package com.poemcollection.data.dao
 
 import com.poemcollection.data.DatabaseFactory.dbQuery
-import com.poemcollection.models.InsertNewUser
-import com.poemcollection.models.UpdateUser
-import com.poemcollection.models.User
-import com.poemcollection.models.Users
+import com.poemcollection.data.Users
+import com.poemcollection.data.models.InsertNewUser
+import com.poemcollection.data.models.UpdateUser
+import com.poemcollection.data.models.User
+import com.poemcollection.domain.interfaces.IUserDao
 import com.poemcollection.utils.toDatabaseString
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import java.time.LocalDateTime
 
-class UserDaoImpl : UserDao {
+class UserDaoImpl : IUserDao {
 
     private fun resultRowToUser(row: ResultRow) = User(
         userId = row[Users.id].value,

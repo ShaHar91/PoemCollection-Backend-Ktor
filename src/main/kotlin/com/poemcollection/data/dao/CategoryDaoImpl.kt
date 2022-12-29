@@ -1,15 +1,16 @@
-package com.poemcollection.data
+package com.poemcollection.data.dao
 
+import com.poemcollection.data.Categories
 import com.poemcollection.data.DatabaseFactory.dbQuery
-import com.poemcollection.models.Categories
-import com.poemcollection.models.Category
-import com.poemcollection.models.InsertOrUpdateCategory
+import com.poemcollection.data.models.Category
+import com.poemcollection.data.models.InsertOrUpdateCategory
+import com.poemcollection.domain.interfaces.ICategoryDao
 import com.poemcollection.utils.toDatabaseString
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import java.time.LocalDateTime
 
-class CategoryDaoImpl : CategoryDao {
+class CategoryDaoImpl : ICategoryDao {
 
     private fun resultRowToCategory(row: ResultRow) = Category(
         id = row[Categories.id].value,

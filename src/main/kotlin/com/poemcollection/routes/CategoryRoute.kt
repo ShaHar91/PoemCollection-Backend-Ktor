@@ -1,17 +1,17 @@
 package com.poemcollection.routes
 
-import com.poemcollection.data.CategoryDao
-import com.poemcollection.models.InsertOrUpdateCategory
+import com.poemcollection.data.models.InsertOrUpdateCategory
+import com.poemcollection.domain.interfaces.ICategoryDao
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import org.koin.ktor.ext.inject
 
-fun Route.categoryRouting() {
+fun Route.categoryRouting(
+    categoryDao: ICategoryDao
+) {
 
-    val categoryDao by inject<CategoryDao>()
 
     route("/categories") {
         post {

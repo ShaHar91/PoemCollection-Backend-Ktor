@@ -1,7 +1,5 @@
 package com.poemcollection.data
 
-import com.poemcollection.models.Categories
-import com.poemcollection.models.Users
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
