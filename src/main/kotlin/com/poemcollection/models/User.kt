@@ -9,6 +9,7 @@ data class User(
     val firstName: String = "",
     val lastName: String = "",
     val email: String = "",
+    @Transient
     val createdAt: String = "",
     val updatedAt: String = ""
 )
@@ -25,7 +26,6 @@ data class UpdateUser(
     val firstName: String = "",
     val lastName: String = ""
 )
-
 
 object Users : Table() {
     val userId = integer("id").autoIncrement()

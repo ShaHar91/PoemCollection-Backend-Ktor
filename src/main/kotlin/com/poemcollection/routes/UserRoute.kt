@@ -20,8 +20,6 @@ fun Route.userRouting() {
         post {
 
             try {
-
-
                 // This is merely to showcase the difference of different Content-Type's... will not be implemented for all calls
                 val type = call.request.headers["Content-Type"] ?: ""
                 val user = when {
@@ -63,7 +61,7 @@ fun Route.userRouting() {
             call.respond(HttpStatusCode.OK, users)
         }
 
-        get("/{id}") {
+        get("{id}") {
             val id = call.parameters["id"]?.toIntOrNull() ?: return@get call.respondText("Missing id", status = HttpStatusCode.BadRequest)
 
             val user = userDao.getUser(id)
@@ -89,6 +87,16 @@ fun Route.userRouting() {
             }
         }
 
-        delete("{id}") { }
+        delete("{id}") {
+            val id = call.parameters["id"]?.toIntOrNull() ?: return@delete call.respondText("Missing id", status = HttpStatusCode.BadRequest)
+
+            val success = userDao.deleteUser(id)
+
+            if (success) {
+                call.respond(HttpStatusCode.OK)
+            } else {
+                call.respondText("Not found", status = HttpStatusCode.NotFound)
+            }
+        }
     }
 }
