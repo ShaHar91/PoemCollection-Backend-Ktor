@@ -12,7 +12,7 @@ import java.time.LocalDateTime
 class CategoryDaoImpl : CategoryDao {
 
     private fun resultRowToCategory(row: ResultRow) = Category(
-        id = row[Categories.id],
+        id = row[Categories.id].value,
         name = row[Categories.name],
         createdAt = row[Categories.createdAt],
         updatedAt = row[Categories.updatedAt]

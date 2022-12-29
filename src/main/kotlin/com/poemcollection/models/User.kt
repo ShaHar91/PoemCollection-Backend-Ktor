@@ -1,7 +1,7 @@
 package com.poemcollection.models
 
 import kotlinx.serialization.Serializable
-import org.jetbrains.exposed.sql.Table
+import org.jetbrains.exposed.dao.id.IntIdTable
 
 @Serializable
 data class User(
@@ -26,13 +26,10 @@ data class UpdateUser(
     val lastName: String = ""
 )
 
-object Users : Table() {
-    val userId = integer("id").autoIncrement()
+object Users : IntIdTable() {
     val firstName = varchar("firstName", 255).default("")
     val lastName = varchar("lastName", 255).default("")
     val email = varchar("email", 255).uniqueIndex()
     val createdAt = varchar("createdAt", 255)
     val updatedAt = varchar("updatedAt", 255)
-
-    override val primaryKey = PrimaryKey(userId)
 }
