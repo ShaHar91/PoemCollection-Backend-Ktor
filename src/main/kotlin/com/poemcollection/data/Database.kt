@@ -1,5 +1,6 @@
 package com.poemcollection.data
 
+import com.poemcollection.models.Categories
 import com.poemcollection.models.Users
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.sql.Database
@@ -15,7 +16,7 @@ object DatabaseFactory {
         val database = Database.connect(jdbcURL, driverClassName)
 
         transaction(database) {
-            SchemaUtils.create(Users)
+            SchemaUtils.create(Users, Categories)
         }
     }
 

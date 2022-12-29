@@ -9,7 +9,6 @@ data class User(
     val firstName: String = "",
     val lastName: String = "",
     val email: String = "",
-    @Transient
     val createdAt: String = "",
     val updatedAt: String = ""
 )
