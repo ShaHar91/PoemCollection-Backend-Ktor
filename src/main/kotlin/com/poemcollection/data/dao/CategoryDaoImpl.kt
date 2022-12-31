@@ -12,19 +12,12 @@ import java.time.LocalDateTime
 
 class CategoryDaoImpl : ICategoryDao {
 
-    private fun resultRowToCategory(row: ResultRow) = Category(
-        id = row[Categories.id].value,
-        name = row[Categories.name],
-        createdAt = row[Categories.createdAt],
-        updatedAt = row[Categories.updatedAt]
-    )
-
     override suspend fun getCategory(id: Int): Category? = dbQuery {
-        Categories.select { Categories.id eq id }.map(::resultRowToCategory).firstOrNull()
+        Categories.select { Categories.id eq id }.toCategory().firstOrNull()
     }
 
     override suspend fun getCategories(): List<Category> = dbQuery {
-        Categories.selectAll().map(::resultRowToCategory)
+        Categories.selectAll().toCategory()
     }
 
     override suspend fun insertCategory(category: InsertOrUpdateCategory): Category? = dbQuery {
@@ -32,7 +25,7 @@ class CategoryDaoImpl : ICategoryDao {
             it[name] = category.name
             it[createdAt] = LocalDateTime.now().toDatabaseString()
             it[updatedAt] = LocalDateTime.now().toDatabaseString()
-        }.resultedValues?.map(::resultRowToCategory)?.singleOrNull()
+        }.resultedValues?.toCategories()?.singleOrNull()
     }
 
     override suspend fun updateCategory(id: Int, category: InsertOrUpdateCategory): Category? = dbQuery {
@@ -42,7 +35,7 @@ class CategoryDaoImpl : ICategoryDao {
         }
 
         if (result == 1) {
-            Categories.select { Categories.id eq id }.map(::resultRowToCategory).firstOrNull()
+            Categories.select { Categories.id eq id }.toCategory().firstOrNull()
         } else {
             null
         }

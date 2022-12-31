@@ -27,4 +27,9 @@ object Poems : IntIdTable() {
 object PoemCategoryJunction : IntIdTable() {
     val poemId = reference("poemId", Poems)
     val categoryId = reference("referenceId", Categories)
+
+    init {
+        // Only a single pair can exist, duplicates are not allowed/necessary
+        uniqueIndex(poemId, categoryId)
+    }
 }

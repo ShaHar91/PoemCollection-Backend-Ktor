@@ -8,7 +8,7 @@ interface IPoemDao {
 
     suspend fun getPoem(id: Int): Poem?
     suspend fun getPoems(categoryId: Int?): List<Poem>
-    suspend fun insertPoem(insertPoem: InsertPoem): Int?
+    suspend fun insertPoem(insertPoem: InsertPoem): Poem?
 
     suspend fun updatePoem(id: Int, updatePoem: UpdatePoem): Poem?
     suspend fun deletePoem(id: Int): Boolean

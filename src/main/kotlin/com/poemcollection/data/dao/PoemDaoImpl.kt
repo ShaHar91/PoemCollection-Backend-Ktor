@@ -5,66 +5,41 @@ import com.poemcollection.data.DatabaseFactory.dbQuery
 import com.poemcollection.data.PoemCategoryJunction
 import com.poemcollection.data.Poems
 import com.poemcollection.data.Users
-import com.poemcollection.data.models.*
+import com.poemcollection.data.models.InsertPoem
+import com.poemcollection.data.models.Poem
+import com.poemcollection.data.models.UpdatePoem
 import com.poemcollection.domain.interfaces.IPoemDao
 import com.poemcollection.utils.toDatabaseString
 import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.notInList
 import java.time.LocalDateTime
 
 class PoemDaoImpl : IPoemDao {
-
-    private fun resultRowToPoem(row: ResultRow) = Poem(
-        id = row[Poems.id].value,
-        title = row[Poems.title],
-        body = row[Poems.body],
-        createdAt = row[Poems.createdAt],
-        updatedAt = row[Poems.updatedAt]
-    )
-
-    private fun resultRowToPoemWithUser(row: ResultRow) = Poem(
-        id = row[Poems.id].value,
-        title = row[Poems.title],
-        body = row[Poems.body],
-        writer = resultRowToUser(row),
-        createdAt = row[Poems.createdAt],
-        updatedAt = row[Poems.updatedAt]
-    )
-
-    private fun resultRowToUser(row: ResultRow) = User(
-        userId = row[Users.id].value,
-        firstName = row[Users.firstName],
-        lastName = row[Users.lastName],
-        email = row[Users.email],
-        createdAt = row[Users.createdAt],
-        updatedAt = row[Users.updatedAt]
-    )
-
-    private fun resultRowToCategory(row: ResultRow) = Category(
-        id = row[Categories.id].value,
-        name = row[Categories.name],
-        createdAt = row[Categories.createdAt],
-        updatedAt = row[Categories.updatedAt]
-    )
-
-    override suspend fun getPoem(id: Int): Poem? = dbQuery {
-        val poemsWithAllRelations = Poems innerJoin Users innerJoin PoemCategoryJunction innerJoin Categories
-        poemsWithAllRelations
-            .select { Poems.id eq id }
-            .toPoems()
-            .singleOrNull()
-    }
 
     // Used this as a guide... not sure of it's correct or anything
     // https://medium.com/@pjagielski/how-we-use-kotlin-with-exposed-at-touk-eacaae4565b5
     private fun Iterable<ResultRow>.toPoems(): List<Poem> {
         return (fold(mutableMapOf<Int, Poem>()) { map, resultRow ->
-            val poem = resultRowToPoemWithUser(resultRow)
+            val poem = resultRow.toPoemWithUser()
             val categoryId = resultRow.getOrNull(PoemCategoryJunction.categoryId)
-            val category = categoryId?.let { resultRowToCategory(resultRow) }
+            val category = categoryId?.let { resultRow.toCategory() }
             val current = map.getOrDefault(poem.id, poem)
             map[poem.id] = current.copy(categories = current.categories + listOfNotNull(category))
             map
         }).values.toList()
+    }
+
+    private fun findPoemById(id: Int): Poem? {
+        val poemsWithAllRelations = Poems innerJoin Users innerJoin PoemCategoryJunction innerJoin Categories
+        return poemsWithAllRelations
+            .select { Poems.id eq id }
+            .toPoems()
+            .singleOrNull()
+    }
+
+    override suspend fun getPoem(id: Int): Poem? = dbQuery {
+        findPoemById(id)
     }
 
     override suspend fun getPoems(categoryId: Int?): List<Poem> = dbQuery {
@@ -81,31 +56,54 @@ class PoemDaoImpl : IPoemDao {
             .toPoems()
     }
 
-    override suspend fun insertPoem(insertPoem: InsertPoem): Int? = dbQuery {
+    override suspend fun insertPoem(insertPoem: InsertPoem): Poem? = dbQuery {
 
-        val poem = Poems.insertAndGetId {
+        val id = Poems.insertAndGetId {
             it[title] = insertPoem.title
             it[body] = insertPoem.body
             it[writerId] = insertPoem.writerId
             it[createdAt] = LocalDateTime.now().toDatabaseString()
             it[updatedAt] = LocalDateTime.now().toDatabaseString()
-        }
+        }.value
 
         insertPoem.categoryIds.forEach { catId ->
             PoemCategoryJunction.insert {
-                it[poemId] = poem.value
+                it[poemId] = id
                 it[categoryId] = catId
             }
         }
 
-        poem.value
+        findPoemById(id)
     }
 
-    override suspend fun updatePoem(id: Int, updatePoem: UpdatePoem): Poem? {
-        TODO("Not yet implemented")
+    override suspend fun updatePoem(id: Int, updatePoem: UpdatePoem): Poem? = dbQuery {
+        val result = Poems.update({ Poems.id eq id }) {
+            it[title] = updatePoem.title
+            it[body] = updatePoem.body
+        }
+
+        // Delete the pivot rows for the categories that are not returned anymored
+        PoemCategoryJunction.deleteWhere { poemId eq id and (categoryId notInList updatePoem.categoryIds) }
+        updatePoem.categoryIds.forEach { catId ->
+            // Ignore the "UNIQUE constraint error for the 'poemId' and 'categoryId'
+            PoemCategoryJunction.insertIgnore {
+                it[poemId] = id
+                it[categoryId] = catId
+            }
+        }
+
+        if (result == 1) {
+            val poemsWithAllRelations = Poems innerJoin Users innerJoin PoemCategoryJunction innerJoin Categories
+            poemsWithAllRelations.select { Poems.id eq id }.toPoems().singleOrNull()
+        } else {
+            null
+        }
     }
 
-    override suspend fun deletePoem(id: Int): Boolean {
-        TODO("Not yet implemented")
+    override suspend fun deletePoem(id: Int): Boolean = dbQuery {
+        // TODO: Also delete any reviews that are created for this particular poem!
+        val result = Poems.deleteWhere { Poems.id eq id }
+        val result2 = PoemCategoryJunction.deleteWhere { poemId eq id }
+        result == 1 && result2 == 1
     }
 }

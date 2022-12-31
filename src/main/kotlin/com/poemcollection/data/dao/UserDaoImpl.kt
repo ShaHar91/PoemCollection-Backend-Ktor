@@ -13,21 +13,12 @@ import java.time.LocalDateTime
 
 class UserDaoImpl : IUserDao {
 
-    private fun resultRowToUser(row: ResultRow) = User(
-        userId = row[Users.id].value,
-        firstName = row[Users.firstName],
-        lastName = row[Users.lastName],
-        email = row[Users.email],
-        createdAt = row[Users.createdAt],
-        updatedAt = row[Users.updatedAt]
-    )
-
     override suspend fun getUser(id: Int): User? = dbQuery {
-        Users.select { Users.id eq id }.map(::resultRowToUser).firstOrNull()
+        Users.select { Users.id eq id }.toUser().firstOrNull()
     }
 
     override suspend fun getUsers(): List<User> = dbQuery {
-        Users.selectAll().map(::resultRowToUser)
+        Users.selectAll().toUser()
     }
 
     override suspend fun insertUser(user: InsertNewUser): User? = dbQuery {
@@ -37,7 +28,7 @@ class UserDaoImpl : IUserDao {
             it[email] = user.email
             it[createdAt] = LocalDateTime.now().toDatabaseString()
             it[updatedAt] = LocalDateTime.now().toDatabaseString()
-        }.resultedValues?.map(::resultRowToUser)?.singleOrNull()
+        }.resultedValues?.toUsers()?.singleOrNull()
     }
 
     override suspend fun updateUser(id: Int, user: UpdateUser): User? = dbQuery {
@@ -48,7 +39,7 @@ class UserDaoImpl : IUserDao {
         }
 
         if (result == 1) {
-            Users.select { Users.id eq id }.map(::resultRowToUser).firstOrNull()
+            Users.select { Users.id eq id }.toUser().firstOrNull()
         } else {
             null
         }
