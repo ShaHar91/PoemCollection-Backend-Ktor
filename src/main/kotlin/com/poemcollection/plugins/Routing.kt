@@ -1,8 +1,10 @@
 package com.poemcollection.plugins
 
 import com.poemcollection.domain.interfaces.ICategoryDao
+import com.poemcollection.domain.interfaces.IPoemDao
 import com.poemcollection.domain.interfaces.IUserDao
 import com.poemcollection.routes.categoryRouting
+import com.poemcollection.routes.poemRouting
 import com.poemcollection.routes.userRouting
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
@@ -17,5 +19,8 @@ fun Application.configureRouting() {
 
         val categoryDao by inject<ICategoryDao>()
         categoryRouting(categoryDao)
+
+        val poemDao by inject<IPoemDao>()
+        poemRouting(poemDao)
     }
 }

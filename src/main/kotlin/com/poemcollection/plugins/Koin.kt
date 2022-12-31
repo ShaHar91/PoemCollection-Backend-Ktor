@@ -1,8 +1,10 @@
 package com.poemcollection.plugins
 
 import com.poemcollection.data.dao.CategoryDaoImpl
+import com.poemcollection.data.dao.PoemDaoImpl
 import com.poemcollection.data.dao.UserDaoImpl
 import com.poemcollection.domain.interfaces.ICategoryDao
+import com.poemcollection.domain.interfaces.IPoemDao
 import com.poemcollection.domain.interfaces.IUserDao
 import io.ktor.server.application.*
 import org.koin.dsl.module
@@ -19,4 +21,5 @@ fun Application.configureKoin() {
 val daoModule = module {
     single<IUserDao> { UserDaoImpl() }
     single<ICategoryDao> { CategoryDaoImpl() }
+    single<IPoemDao> { PoemDaoImpl() }
 }
