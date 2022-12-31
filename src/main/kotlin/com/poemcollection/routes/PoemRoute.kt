@@ -85,9 +85,11 @@ fun Route.poemRouting(
             }
 
             get("ratings") {
-                //TODO:
-                // { "total": 20, "five_star" : 7, "four_star" : 2, "three_star" : 2, "two_star" : 1, "one_star" : 0 }
-                // ((7 * 5) + (2*4) + (3*2) + (1*2) + (1*0)) / (7+2+2+1) ---> general review number!!!
+                val id = call.parameters["id"]?.toIntOrNull() ?: return@get call.respondText("Missing id", status = HttpStatusCode.BadRequest)
+
+                val ratings = reviewDao.calculateRatings(id)
+
+                call.respond(HttpStatusCode.OK, ratings)
             }
 
             reviewRouting(reviewDao)

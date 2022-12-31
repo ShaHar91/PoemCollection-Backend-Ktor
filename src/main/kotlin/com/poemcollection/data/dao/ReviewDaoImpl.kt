@@ -5,6 +5,7 @@ import com.poemcollection.data.Poems
 import com.poemcollection.data.Reviews
 import com.poemcollection.data.Users
 import com.poemcollection.data.models.InsertOrUpdateReview
+import com.poemcollection.data.models.Ratings
 import com.poemcollection.data.models.Review
 import com.poemcollection.domain.interfaces.IReviewDao
 import com.poemcollection.utils.toDatabaseString
@@ -68,5 +69,16 @@ class ReviewDaoImpl : IReviewDao {
     override suspend fun deleteReview(id: Int): Boolean = dbQuery {
         val result = Reviews.deleteWhere { Reviews.id eq id }
         result == 1
+    }
+
+    override suspend fun calculateRatings(id: Int): Ratings = dbQuery {
+        val reviewWithRelations = Reviews innerJoin Users
+        val reviews = reviewWithRelations.select { Reviews.poemId eq id }.toReviews()
+
+        val grouped = reviews.groupBy { it.rating }
+        val average = grouped.map { it.key * it.value.size }.sum().toDouble().div(reviews.size)
+
+
+        Ratings(reviews.size, grouped[5]?.size ?: 0, grouped[4]?.size ?: 0, grouped[3]?.size ?: 0, grouped[2]?.size ?: 0, grouped[1]?.size ?: 0, average)
     }
 }

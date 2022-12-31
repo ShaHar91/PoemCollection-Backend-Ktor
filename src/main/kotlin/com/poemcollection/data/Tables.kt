@@ -39,7 +39,7 @@ object PoemCategoryJunction : IntIdTable() {
 
 object Reviews : IntIdTable() {
     val body = mediumText("body")
-    val rating = double("rating").default(0.0)
+    val rating = integer("rating").default(0)
     val userId = reference("userId", Users, onDelete = ReferenceOption.SET_NULL) // As long as this foreign key references the primary key of the Users table this is enough.
     val poemId = reference("poemId", Poems, onDelete = ReferenceOption.CASCADE) // As long as this foreign key references the primary key of the Poems table this is enough.
     val createdAt = varchar("createdAt", 255).default(LocalDateTime.now().toDatabaseString())

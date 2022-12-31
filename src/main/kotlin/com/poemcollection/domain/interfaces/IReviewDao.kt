@@ -1,6 +1,7 @@
 package com.poemcollection.domain.interfaces
 
 import com.poemcollection.data.models.InsertOrUpdateReview
+import com.poemcollection.data.models.Ratings
 import com.poemcollection.data.models.Review
 
 interface IReviewDao {
@@ -11,4 +12,5 @@ interface IReviewDao {
 
     suspend fun updateReview(id: Int, updateReview: InsertOrUpdateReview): Review?
     suspend fun deleteReview(id: Int): Boolean
+    suspend fun calculateRatings(id: Int): Ratings
 }
