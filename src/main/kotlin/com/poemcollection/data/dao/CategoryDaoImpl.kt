@@ -13,11 +13,11 @@ import java.time.LocalDateTime
 class CategoryDaoImpl : ICategoryDao {
 
     override suspend fun getCategory(id: Int): Category? = dbQuery {
-        Categories.select { Categories.id eq id }.toCategory().firstOrNull()
+        Categories.select { Categories.id eq id }.toCategory()
     }
 
     override suspend fun getCategories(): List<Category> = dbQuery {
-        Categories.selectAll().toCategory()
+        Categories.selectAll().toCategories()
     }
 
     override suspend fun insertCategory(category: InsertOrUpdateCategory): Category? = dbQuery {
@@ -35,7 +35,7 @@ class CategoryDaoImpl : ICategoryDao {
         }
 
         if (result == 1) {
-            Categories.select { Categories.id eq id }.toCategory().firstOrNull()
+            Categories.select { Categories.id eq id }.toCategory()
         } else {
             null
         }

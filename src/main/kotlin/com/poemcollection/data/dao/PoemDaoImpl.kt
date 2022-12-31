@@ -1,10 +1,7 @@
 package com.poemcollection.data.dao
 
-import com.poemcollection.data.Categories
+import com.poemcollection.data.*
 import com.poemcollection.data.DatabaseFactory.dbQuery
-import com.poemcollection.data.PoemCategoryJunction
-import com.poemcollection.data.Poems
-import com.poemcollection.data.Users
 import com.poemcollection.data.models.InsertPoem
 import com.poemcollection.data.models.Poem
 import com.poemcollection.data.models.UpdatePoem
@@ -93,6 +90,7 @@ class PoemDaoImpl : IPoemDao {
         }
 
         if (result == 1) {
+            findPoemById(id)
             val poemsWithAllRelations = Poems innerJoin Users innerJoin PoemCategoryJunction innerJoin Categories
             poemsWithAllRelations.select { Poems.id eq id }.toPoems().singleOrNull()
         } else {
@@ -101,9 +99,10 @@ class PoemDaoImpl : IPoemDao {
     }
 
     override suspend fun deletePoem(id: Int): Boolean = dbQuery {
-        // TODO: Also delete any reviews that are created for this particular poem!
+        //TODO: check if the cascade deletion can be used instead of this!!!
         val result = Poems.deleteWhere { Poems.id eq id }
         val result2 = PoemCategoryJunction.deleteWhere { poemId eq id }
-        result == 1 && result2 == 1
+        Reviews.deleteWhere { poemId eq id }
+        result >= 1 && result2 >= 1
     }
 }

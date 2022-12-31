@@ -47,7 +47,7 @@ fun Route.poemRouting(
                 val poem = poemDao.getPoem(id)
 
                 //TODO: maybe get a couple of things in a collection so the app doesn't have to do 3 seperate calls?
-                // e.g. { "poem": {}, "ratings" : {}, "reviews": {}} ----> where reviews are limited to 3 or 5 reviews...
+                // e.g. { "poem": {}, "ratings" : {}, "ownReview": {}, "reviews": {}} ----> where reviews are limited to 3 or 5 reviews...
 
                 if (poem != null) {
                     call.respond(HttpStatusCode.OK, poem)

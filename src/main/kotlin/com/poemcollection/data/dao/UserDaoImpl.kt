@@ -14,11 +14,11 @@ import java.time.LocalDateTime
 class UserDaoImpl : IUserDao {
 
     override suspend fun getUser(id: Int): User? = dbQuery {
-        Users.select { Users.id eq id }.toUser().firstOrNull()
+        Users.select { Users.id eq id }.toUser()
     }
 
     override suspend fun getUsers(): List<User> = dbQuery {
-        Users.selectAll().toUser()
+        Users.selectAll().toUsers()
     }
 
     override suspend fun insertUser(user: InsertNewUser): User? = dbQuery {
@@ -39,7 +39,7 @@ class UserDaoImpl : IUserDao {
         }
 
         if (result == 1) {
-            Users.select { Users.id eq id }.toUser().firstOrNull()
+            Users.select { Users.id eq id }.toUser()
         } else {
             null
         }

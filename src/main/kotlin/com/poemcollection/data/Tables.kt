@@ -2,6 +2,7 @@ package com.poemcollection.data
 
 import com.poemcollection.utils.toDatabaseString
 import org.jetbrains.exposed.dao.id.IntIdTable
+import org.jetbrains.exposed.sql.ReferenceOption
 import java.time.LocalDateTime
 
 object Users : IntIdTable() {
@@ -27,8 +28,8 @@ object Poems : IntIdTable() {
 }
 
 object PoemCategoryJunction : IntIdTable() {
-    val poemId = reference("poemId", Poems) // As long as this foreign key references the primary key of the Poems table this is enough.
-    val categoryId = reference("referenceId", Categories) // As long as this foreign key references the primary key of the Categories table this is enough.
+    val poemId = reference("poemId", Poems, onDelete = ReferenceOption.CASCADE) // As long as this foreign key references the primary key of the Poems table this is enough.
+    val categoryId = reference("referenceId", Categories, onDelete = ReferenceOption.CASCADE) // As long as this foreign key references the primary key of the Categories table this is enough.
 
     init {
         // Only a single pair can exist, duplicates are not allowed/necessary
@@ -39,8 +40,8 @@ object PoemCategoryJunction : IntIdTable() {
 object Reviews : IntIdTable() {
     val body = mediumText("body")
     val rating = double("rating").default(0.0)
-    val userId = reference("userId", Users) // As long as this foreign key references the primary key of the Users table this is enough.
-    val poemId = reference("poemId", Poems) // As long as this foreign key references the primary key of the Poems table this is enough.
+    val userId = reference("userId", Users, onDelete = ReferenceOption.SET_NULL) // As long as this foreign key references the primary key of the Users table this is enough.
+    val poemId = reference("poemId", Poems, onDelete = ReferenceOption.CASCADE) // As long as this foreign key references the primary key of the Poems table this is enough.
     val createdAt = varchar("createdAt", 255).default(LocalDateTime.now().toDatabaseString())
     val updatedAt = varchar("updatedAt", 255).default(LocalDateTime.now().toDatabaseString())
 }

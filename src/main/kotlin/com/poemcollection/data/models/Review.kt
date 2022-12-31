@@ -4,7 +4,7 @@ package com.poemcollection.data.models
 data class Review(
     val id: Int = 0,
     val body: String = "",
-    val review: Double = 0.0,
+    val rating: Double = 0.0,
     val user: User = User(),
     val createdAt: String = "",
     val updatedAt: String = ""
@@ -13,6 +13,6 @@ data class Review(
 @kotlinx.serialization.Serializable
 data class InsertOrUpdateReview(
     val body: String = "",
-    val review: Double = 0.0,
+    val rating: Double = 0.0,
     val userId: Int = 0
 )
