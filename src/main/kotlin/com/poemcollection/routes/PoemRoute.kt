@@ -4,6 +4,8 @@ import com.poemcollection.data.models.InsertPoem
 import com.poemcollection.data.models.UpdatePoem
 import com.poemcollection.domain.interfaces.IPoemDao
 import com.poemcollection.domain.interfaces.IReviewDao
+import com.poemcollection.routes.ParamConstants.CATEGORY_ID_KEY
+import com.poemcollection.routes.ParamConstants.POEM_ID_KEY
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -33,16 +35,16 @@ fun Route.poemRouting(
         }
 
         get {
-            val categoryId = call.request.queryParameters["category_id"]?.toIntOrNull()
+            val categoryId = call.request.queryParameters[CATEGORY_ID_KEY]?.toIntOrNull()
 
             val poems = poemDao.getPoems(categoryId)
             call.respond(HttpStatusCode.OK, poems)
         }
 
-        route("{id}") {
+        route("{$POEM_ID_KEY}") {
 
             get {
-                val id = call.parameters["id"]?.toIntOrNull() ?: return@get call.respondText("Missing id", status = HttpStatusCode.BadRequest)
+                val id = call.parameters[POEM_ID_KEY]?.toIntOrNull() ?: return@get call.respondText("Missing id", status = HttpStatusCode.BadRequest)
 
                 val poem = poemDao.getPoem(id)
 
@@ -58,7 +60,7 @@ fun Route.poemRouting(
 
             put {
                 // TODO: should only be able to update when the writerId is the same as the authenticated user!! (Or is an admin)
-                val id = call.parameters["id"]?.toIntOrNull() ?: return@put call.respondText("Missing id", status = HttpStatusCode.BadRequest)
+                val id = call.parameters[POEM_ID_KEY]?.toIntOrNull() ?: return@put call.respondText("Missing id", status = HttpStatusCode.BadRequest)
 
                 val updatePoem = call.receive<UpdatePoem>()
 
@@ -73,7 +75,7 @@ fun Route.poemRouting(
 
             delete {
                 // TODO: should only be able to delete when the writerId is the same as the authenticated user!! (Or is an admin)
-                val id = call.parameters["id"]?.toIntOrNull() ?: return@delete call.respondText("Missing id", status = HttpStatusCode.BadRequest)
+                val id = call.parameters[POEM_ID_KEY]?.toIntOrNull() ?: return@delete call.respondText("Missing id", status = HttpStatusCode.BadRequest)
 
                 val success = poemDao.deletePoem(id)
 
@@ -85,7 +87,7 @@ fun Route.poemRouting(
             }
 
             get("ratings") {
-                val id = call.parameters["id"]?.toIntOrNull() ?: return@get call.respondText("Missing id", status = HttpStatusCode.BadRequest)
+                val id = call.parameters[POEM_ID_KEY]?.toIntOrNull() ?: return@get call.respondText("Missing id", status = HttpStatusCode.BadRequest)
 
                 val ratings = reviewDao.calculateRatings(id)
 

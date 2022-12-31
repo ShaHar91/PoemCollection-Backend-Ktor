@@ -2,6 +2,7 @@ package com.poemcollection.routes
 
 import com.poemcollection.data.models.InsertOrUpdateCategory
 import com.poemcollection.domain.interfaces.ICategoryDao
+import com.poemcollection.routes.ParamConstants.CATEGORY_ID_KEY
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -35,8 +36,8 @@ fun Route.categoryRouting(
             call.respond(HttpStatusCode.OK, categories)
         }
 
-        get("{id}") {
-            val id = call.parameters["id"]?.toIntOrNull() ?: return@get call.respondText("Missing id", status = HttpStatusCode.BadRequest)
+        get("{$CATEGORY_ID_KEY}") {
+            val id = call.parameters[CATEGORY_ID_KEY]?.toIntOrNull() ?: return@get call.respondText("Missing id", status = HttpStatusCode.BadRequest)
 
             val category = categoryDao.getCategory(id)
 
@@ -47,8 +48,8 @@ fun Route.categoryRouting(
             }
         }
 
-        put("{id}") {
-            val id = call.parameters["id"]?.toIntOrNull() ?: return@put call.respondText("Missing id", status = HttpStatusCode.BadRequest)
+        put("{$CATEGORY_ID_KEY}") {
+            val id = call.parameters[CATEGORY_ID_KEY]?.toIntOrNull() ?: return@put call.respondText("Missing id", status = HttpStatusCode.BadRequest)
 
             val updateCategory = call.receive<InsertOrUpdateCategory>()
 
@@ -61,8 +62,8 @@ fun Route.categoryRouting(
             }
         }
 
-        delete("{id}") {
-            val id = call.parameters["id"]?.toIntOrNull() ?: return@delete call.respondText("Missing id", status = HttpStatusCode.BadRequest)
+        delete("{$CATEGORY_ID_KEY}") {
+            val id = call.parameters[CATEGORY_ID_KEY]?.toIntOrNull() ?: return@delete call.respondText("Missing id", status = HttpStatusCode.BadRequest)
 
             val success = categoryDao.deleteCategory(id)
 

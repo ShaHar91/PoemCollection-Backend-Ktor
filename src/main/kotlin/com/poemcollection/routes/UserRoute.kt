@@ -3,6 +3,7 @@ package com.poemcollection.routes
 import com.poemcollection.data.models.InsertNewUser
 import com.poemcollection.data.models.UpdateUser
 import com.poemcollection.domain.interfaces.IUserDao
+import com.poemcollection.routes.ParamConstants.USER_ID_KEY
 import io.ktor.http.*
 import io.ktor.http.ContentType.Application.FormUrlEncoded
 import io.ktor.http.ContentType.Application.Json
@@ -61,8 +62,8 @@ fun Route.userRouting(
             call.respond(HttpStatusCode.OK, users)
         }
 
-        get("{id}") {
-            val id = call.parameters["id"]?.toIntOrNull() ?: return@get call.respondText("Missing id", status = HttpStatusCode.BadRequest)
+        get("{$USER_ID_KEY}}") {
+            val id = call.parameters[USER_ID_KEY]?.toIntOrNull() ?: return@get call.respondText("Missing id", status = HttpStatusCode.BadRequest)
 
             val user = userDao.getUser(id)
 
@@ -73,8 +74,8 @@ fun Route.userRouting(
             }
         }
 
-        put("{id}") {
-            val id = call.parameters["id"]?.toIntOrNull() ?: return@put call.respondText("Missing id", status = HttpStatusCode.BadRequest)
+        put("{$USER_ID_KEY}") {
+            val id = call.parameters[USER_ID_KEY]?.toIntOrNull() ?: return@put call.respondText("Missing id", status = HttpStatusCode.BadRequest)
 
             val updateUser = call.receive<UpdateUser>()
 
@@ -87,8 +88,8 @@ fun Route.userRouting(
             }
         }
 
-        delete("{id}") {
-            val id = call.parameters["id"]?.toIntOrNull() ?: return@delete call.respondText("Missing id", status = HttpStatusCode.BadRequest)
+        delete("{$USER_ID_KEY}") {
+            val id = call.parameters[USER_ID_KEY]?.toIntOrNull() ?: return@delete call.respondText("Missing id", status = HttpStatusCode.BadRequest)
 
             val success = userDao.deleteUser(id)
 

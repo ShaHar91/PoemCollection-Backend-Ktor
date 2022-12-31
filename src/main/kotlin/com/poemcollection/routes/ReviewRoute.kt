@@ -2,6 +2,8 @@ package com.poemcollection.routes
 
 import com.poemcollection.data.models.InsertOrUpdateReview
 import com.poemcollection.domain.interfaces.IReviewDao
+import com.poemcollection.routes.ParamConstants.POEM_ID_KEY
+import com.poemcollection.routes.ParamConstants.REVIEW_ID_KEY
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -14,7 +16,7 @@ fun Route.reviewRouting(
 
     route("reviews") {
         post {
-            val id = call.parameters["id"]?.toIntOrNull() ?: return@post call.respondText("Missing id", status = HttpStatusCode.BadRequest)
+            val id = call.parameters[POEM_ID_KEY]?.toIntOrNull() ?: return@post call.respondText("Missing id", status = HttpStatusCode.BadRequest)
 
             val insertReview = call.receiveNullable<InsertOrUpdateReview>() ?: run {
                 call.respond(HttpStatusCode.BadRequest)
@@ -31,14 +33,14 @@ fun Route.reviewRouting(
         }
 
         get {
-            val id = call.parameters["id"]?.toIntOrNull() ?: return@get call.respondText("Missing id", status = HttpStatusCode.BadRequest)
+            val id = call.parameters[POEM_ID_KEY]?.toIntOrNull() ?: return@get call.respondText("Missing id", status = HttpStatusCode.BadRequest)
 
             val reviews = reviewDao.getReviews(id)
             call.respond(HttpStatusCode.OK, reviews)
         }
 
-        get("{id}") {
-            val id = call.parameters["id"]?.toIntOrNull() ?: return@get call.respondText("Missing id", status = HttpStatusCode.BadRequest)
+        get("{$REVIEW_ID_KEY}") {
+            val id = call.parameters[REVIEW_ID_KEY]?.toIntOrNull() ?: return@get call.respondText("Missing id", status = HttpStatusCode.BadRequest)
 
             val review = reviewDao.getReview(id)
 
@@ -49,8 +51,8 @@ fun Route.reviewRouting(
             }
         }
 
-        put("{reviewId}") {
-            val id = call.parameters["reviewId"]?.toIntOrNull() ?: return@put call.respondText("Missing id", status = HttpStatusCode.BadRequest)
+        put("{$REVIEW_ID_KEY}") {
+            val id = call.parameters[REVIEW_ID_KEY]?.toIntOrNull() ?: return@put call.respondText("Missing id", status = HttpStatusCode.BadRequest)
 
             val updateReview = call.receive<InsertOrUpdateReview>()
 
@@ -63,8 +65,8 @@ fun Route.reviewRouting(
             }
         }
 
-        delete("{reviewId}") {
-            val id = call.parameters["reviewId"]?.toIntOrNull() ?: return@delete call.respondText("Missing id", status = HttpStatusCode.BadRequest)
+        delete("{$REVIEW_ID_KEY}") {
+            val id = call.parameters[REVIEW_ID_KEY]?.toIntOrNull() ?: return@delete call.respondText("Missing id", status = HttpStatusCode.BadRequest)
 
             val success = reviewDao.deleteReview(id)
 
