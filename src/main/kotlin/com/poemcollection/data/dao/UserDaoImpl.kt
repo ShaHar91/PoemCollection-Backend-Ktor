@@ -17,6 +17,10 @@ class UserDaoImpl : IUserDao {
         Users.select { Users.id eq id }.toUser()
     }
 
+    override suspend fun getUserByEmail(email: String): User? = dbQuery {
+        Users.select { Users.email eq email }.toUser()
+    }
+
     override suspend fun getUsers(): List<User> = dbQuery {
         Users.selectAll().toUsers()
     }
@@ -26,6 +30,8 @@ class UserDaoImpl : IUserDao {
             it[firstName] = user.firstName
             it[lastName] = user.lastName
             it[email] = user.email
+            it[password] = user.password
+            it[salt] = user.salt
             it[createdAt] = LocalDateTime.now().toDatabaseString()
             it[updatedAt] = LocalDateTime.now().toDatabaseString()
         }.resultedValues?.toUsers()?.singleOrNull()

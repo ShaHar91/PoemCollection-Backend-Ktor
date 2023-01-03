@@ -9,6 +9,8 @@ object Users : IntIdTable() {
     val firstName = varchar("firstName", 255).default("")
     val lastName = varchar("lastName", 255).default("")
     val email = varchar("email", 255).uniqueIndex()
+    val password = varchar("password", 255)
+    val salt = varchar("salt", 255)
     val createdAt = varchar("createdAt", 255).default(LocalDateTime.now().toDatabaseString())
     val updatedAt = varchar("updatedAt", 255).default(LocalDateTime.now().toDatabaseString())
 }

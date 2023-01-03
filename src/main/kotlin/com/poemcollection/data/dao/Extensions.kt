@@ -20,10 +20,12 @@ fun ResultRow.toPoemWithUser() = Poem(
 )
 
 fun ResultRow.toUser() = User(
-    userId = this[Users.id].value,
+    id = this[Users.id].value,
     firstName = this[Users.firstName],
     lastName = this[Users.lastName],
     email = this[Users.email],
+    password = this[Users.password],
+    salt = this[Users.salt],
     createdAt = this[Users.createdAt],
     updatedAt = this[Users.updatedAt]
 )

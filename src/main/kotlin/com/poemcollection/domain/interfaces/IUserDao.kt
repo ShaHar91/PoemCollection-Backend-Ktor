@@ -7,6 +7,7 @@ import com.poemcollection.data.models.User
 interface IUserDao {
 
     suspend fun getUser(id: Int): User?
+    suspend fun getUserByEmail(email: String): User?
     suspend fun getUsers(): List<User>
     suspend fun insertUser(user: InsertNewUser): User?
 

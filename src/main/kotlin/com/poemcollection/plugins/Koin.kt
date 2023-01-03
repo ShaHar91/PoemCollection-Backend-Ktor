@@ -8,6 +8,10 @@ import com.poemcollection.domain.interfaces.ICategoryDao
 import com.poemcollection.domain.interfaces.IPoemDao
 import com.poemcollection.domain.interfaces.IReviewDao
 import com.poemcollection.domain.interfaces.IUserDao
+import com.poemcollection.security.security.hashing.HashingService
+import com.poemcollection.security.security.hashing.SHA256HashingService
+import com.poemcollection.security.security.token.JwtTokenService
+import com.poemcollection.security.security.token.TokenService
 import io.ktor.server.application.*
 import org.koin.dsl.module
 import org.koin.ktor.plugin.Koin
@@ -25,4 +29,8 @@ val daoModule = module {
     single<ICategoryDao> { CategoryDaoImpl() }
     single<IPoemDao> { PoemDaoImpl() }
     single<IReviewDao> { ReviewDaoImpl() }
+
+
+    single<HashingService> { SHA256HashingService() }
+    single<TokenService> { JwtTokenService() }
 }

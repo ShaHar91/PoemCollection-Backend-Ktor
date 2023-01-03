@@ -6,8 +6,11 @@ import com.poemcollection.domain.interfaces.IPoemDao
 import com.poemcollection.domain.interfaces.IReviewDao
 import com.poemcollection.routes.ParamConstants.CATEGORY_ID_KEY
 import com.poemcollection.routes.ParamConstants.POEM_ID_KEY
+import com.poemcollection.security.security.token.TokenClaim
 import io.ktor.http.*
 import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.auth.jwt.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -18,19 +21,24 @@ fun Route.poemRouting(
 ) {
 
     route("poems") {
-        post {
-            // TODO: writerId should not come from the body, but should be from the authenticated user!!
-            val insertPoem = call.receiveNullable<InsertPoem>() ?: run {
-                call.respond(HttpStatusCode.BadRequest)
-                return@post
-            }
+        authenticate {
+            post {
+                val principal = call.principal<JWTPrincipal>()
+                val userId = principal?.getClaim(TokenClaim.TOKEN_CLAIM_USER_ID_KEY, String::class)
 
-            val newPoem = poemDao.insertPoem(insertPoem)
+                val insertPoem = call.receiveNullable<InsertPoem>() ?: run {
+                    call.respond(HttpStatusCode.BadRequest)
+                    return@post
+                }
 
-            if (newPoem != null) {
-                call.respond(HttpStatusCode.Created, newPoem)
-            } else {
-                call.respondText("Not created", status = HttpStatusCode.InternalServerError)
+                // TODO: `writerId` should be taken out of the `insertPoem` class since this can be a security risk!!!
+                val newPoem = poemDao.insertPoem(insertPoem.copy(writerId = userId?.toIntOrNull() ?: -1))
+
+                if (newPoem != null) {
+                    call.respond(HttpStatusCode.Created, newPoem)
+                } else {
+                    call.respondText("Not created", status = HttpStatusCode.InternalServerError)
+                }
             }
         }
 
@@ -58,31 +66,35 @@ fun Route.poemRouting(
                 }
             }
 
-            put {
-                // TODO: should only be able to update when the writerId is the same as the authenticated user!! (Or is an admin)
-                val id = call.parameters[POEM_ID_KEY]?.toIntOrNull() ?: return@put call.respondText("Missing id", status = HttpStatusCode.BadRequest)
+            authenticate {
+                put {
+                    // TODO: should only be able to update when the writerId is the same as the authenticated user!! (Or is an admin)
+                    val id = call.parameters[POEM_ID_KEY]?.toIntOrNull() ?: return@put call.respondText("Missing id", status = HttpStatusCode.BadRequest)
 
-                val updatePoem = call.receive<UpdatePoem>()
+                    val updatePoem = call.receive<UpdatePoem>()
 
-                val poem = poemDao.updatePoem(id, updatePoem)
+                    val poem = poemDao.updatePoem(id, updatePoem)
 
-                if (poem != null) {
-                    call.respond(HttpStatusCode.OK, poem)
-                } else {
-                    call.respondText("Not created", status = HttpStatusCode.InternalServerError)
+                    if (poem != null) {
+                        call.respond(HttpStatusCode.OK, poem)
+                    } else {
+                        call.respondText("Not created", status = HttpStatusCode.InternalServerError)
+                    }
                 }
             }
 
-            delete {
-                // TODO: should only be able to delete when the writerId is the same as the authenticated user!! (Or is an admin)
-                val id = call.parameters[POEM_ID_KEY]?.toIntOrNull() ?: return@delete call.respondText("Missing id", status = HttpStatusCode.BadRequest)
+            authenticate {
+                delete {
+                    // TODO: should only be able to delete when the writerId is the same as the authenticated user!! (Or is an admin)
+                    val id = call.parameters[POEM_ID_KEY]?.toIntOrNull() ?: return@delete call.respondText("Missing id", status = HttpStatusCode.BadRequest)
 
-                val success = poemDao.deletePoem(id)
+                    val success = poemDao.deletePoem(id)
 
-                if (success) {
-                    call.respond(HttpStatusCode.OK)
-                } else {
-                    call.respondText("Not found", status = HttpStatusCode.NotFound)
+                    if (success) {
+                        call.respond(HttpStatusCode.OK)
+                    } else {
+                        call.respondText("Not found", status = HttpStatusCode.NotFound)
+                    }
                 }
             }
 
