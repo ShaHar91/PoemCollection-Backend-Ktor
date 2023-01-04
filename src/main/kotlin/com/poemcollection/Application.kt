@@ -2,7 +2,6 @@ package com.poemcollection
 
 import com.poemcollection.data.DatabaseFactory
 import com.poemcollection.plugins.*
-import com.poemcollection.security.security.token.TokenConfig
 import io.ktor.server.application.*
 import io.ktor.server.plugins.cors.routing.*
 
@@ -15,17 +14,11 @@ fun Application.module() {
     }
 
     DatabaseFactory.init()
-    val tokenConfig = TokenConfig(
-        environment.config.property("jwt.issuer").getString(),
-        environment.config.property("jwt.audience").getString(),
-        1000L * 60L * 60L, // Valid for 1 hour...
-        System.getenv("JWT_SECRET")
-    )
 
-    configureSecurity(tokenConfig)
+    configureKoin(environment)
+    configureSecurity()
     configureValidation()
-    configureKoin()
-    configureRouting(tokenConfig)
+    configureRouting()
     configureSerialization()
 }
 

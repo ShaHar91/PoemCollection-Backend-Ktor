@@ -6,8 +6,11 @@ import com.poemcollection.security.security.token.TokenConfig
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
+import org.koin.ktor.ext.inject
 
-fun Application.configureSecurity(config: TokenConfig) {
+fun Application.configureSecurity() {
+
+    val config by inject<TokenConfig>()
 
     authentication {
         jwt {

@@ -78,7 +78,6 @@ class ReviewDaoImpl : IReviewDao {
         val grouped = reviews.groupBy { it.rating }
         val average = grouped.map { it.key * it.value.size }.sum().toDouble().div(reviews.size)
 
-
-        Ratings(reviews.size, grouped[5]?.size ?: 0, grouped[4]?.size ?: 0, grouped[3]?.size ?: 0, grouped[2]?.size ?: 0, grouped[1]?.size ?: 0, average)
+        Ratings(reviews.size, grouped[5]?.size ?: 0, grouped[4]?.size ?: 0, grouped[3]?.size ?: 0, grouped[2]?.size ?: 0, grouped[1]?.size ?: 0, if (average.isFinite()) average else 0.0)
     }
 }

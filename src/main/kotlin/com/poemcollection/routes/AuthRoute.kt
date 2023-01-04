@@ -16,38 +16,50 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
 fun Route.authRouting(
-    hashingService: HashingService,
-    userDao: IUserDao,
-    tokenService: TokenService,
-    tokenConfig: TokenConfig
+    authRoutes: IAuthRoutes
 ) {
 
-    route("/oauth") {
-        post("token") {
-            val request = call.receiveNullable<AuthRequest>() ?: run {
-                call.respond(HttpStatusCode.BadRequest)
-                return@post
-            }
+//    route("/oauth") {
+    post("oauth/token") {
+        authRoutes.authorizeUser(call)
+    }
+//    }
+}
 
-            val user = userDao.getUserByEmail(request.email)
-            if (user == null) {
-                call.respond(HttpStatusCode.Conflict)
-                return@post
-            }
+interface IAuthRoutes {
+    suspend fun authorizeUser(call: ApplicationCall)
+}
 
-            val isValidPassword = hashingService.verify(request.password, SaltedHash(user.password, user.salt))
-
-            if (!isValidPassword) {
-                call.respond(HttpStatusCode.Conflict)
-                return@post
-            }
-
-            val token = tokenService.generate(
-                tokenConfig,
-                TokenClaim(TOKEN_CLAIM_USER_ID_KEY, user.id)
-            )
-
-            call.respond(HttpStatusCode.OK, AuthResponse(token, "Bearer", tokenConfig.expiresIn))
+class AuthRoutesImpl(
+    private val hashingService: HashingService,
+    private val userDao: IUserDao,
+    private val tokenService: TokenService,
+    private val tokenConfig: TokenConfig
+) : IAuthRoutes {
+    override suspend fun authorizeUser(call: ApplicationCall) {
+        val request = call.receiveNullable<AuthRequest>() ?: run {
+            call.respond(HttpStatusCode.BadRequest)
+            return
         }
+
+        val user = userDao.getUserByEmail(request.email)
+        if (user == null) {
+            call.respond(HttpStatusCode.Conflict)
+            return
+        }
+
+        val isValidPassword = hashingService.verify(request.password, SaltedHash(user.password, user.salt))
+
+        if (!isValidPassword) {
+            call.respond(HttpStatusCode.Conflict)
+            return
+        }
+
+        val token = tokenService.generate(
+            tokenConfig,
+            TokenClaim(TOKEN_CLAIM_USER_ID_KEY, user.id)
+        )
+
+        call.respond(HttpStatusCode.OK, AuthResponse(token, "Bearer", tokenConfig.expiresIn))
     }
 }

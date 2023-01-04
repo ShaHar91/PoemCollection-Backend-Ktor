@@ -11,74 +11,91 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
 fun Route.categoryRouting(
-    categoryDao: ICategoryDao
+    categoryRoutes: ICategoryRoutes
 ) {
 
-
     route("/categories") {
-        authenticate {
-            post {
-                val insertCategory = call.receiveNullable<InsertOrUpdateCategory>() ?: run {
-                    call.respond(HttpStatusCode.BadRequest)
-                    return@post
-                }
+        get { categoryRoutes.getAllCategories(call) }
 
-                val newCategory = categoryDao.insertCategory(insertCategory)
-
-                if (newCategory != null) {
-                    call.respond(HttpStatusCode.Created, newCategory)
-                } else {
-                    call.respondText("Not created", status = HttpStatusCode.InternalServerError)
-                }
-            }
-        }
-
-        get {
-            val categories = categoryDao.getCategories()
-
-            call.respond(HttpStatusCode.OK, categories)
-        }
-
-        get("{$CATEGORY_ID_KEY}") {
-            val id = call.parameters[CATEGORY_ID_KEY]?.toIntOrNull() ?: return@get call.respondText("Missing id", status = HttpStatusCode.BadRequest)
-
-            val category = categoryDao.getCategory(id)
-
-            if (category != null) {
-                call.respond(HttpStatusCode.OK, category)
-            } else {
-                call.respondText("Not found", status = HttpStatusCode.NotFound)
-            }
-        }
+        get("{$CATEGORY_ID_KEY}") { categoryRoutes.getCategoryById(call) }
 
         authenticate {
-            put("{$CATEGORY_ID_KEY}") {
-                val id = call.parameters[CATEGORY_ID_KEY]?.toIntOrNull() ?: return@put call.respondText("Missing id", status = HttpStatusCode.BadRequest)
+            post { categoryRoutes.postCategory(call) }
 
-                val updateCategory = call.receive<InsertOrUpdateCategory>()
+            put("{$CATEGORY_ID_KEY}") { categoryRoutes.updateCategoryById(call) }
 
-                val category = categoryDao.updateCategory(id, updateCategory)
+            delete("{$CATEGORY_ID_KEY}") { categoryRoutes.deleteCategoryById(call) }
+        }
+    }
+}
 
-                if (category != null) {
-                    call.respond(HttpStatusCode.OK, category)
-                } else {
-                    call.respondText("Not found", status = HttpStatusCode.NotFound)
-                }
-            }
+interface ICategoryRoutes {
+    suspend fun postCategory(call: ApplicationCall)
+    suspend fun getAllCategories(call: ApplicationCall)
+    suspend fun getCategoryById(call: ApplicationCall)
+    suspend fun updateCategoryById(call: ApplicationCall)
+    suspend fun deleteCategoryById(call: ApplicationCall)
+}
+
+class CategoryRoutesImpl(
+    private val categoryDao: ICategoryDao
+) : ICategoryRoutes {
+    override suspend fun postCategory(call: ApplicationCall) {
+        val insertCategory = call.receiveNullable<InsertOrUpdateCategory>() ?: run {
+            call.respond(HttpStatusCode.BadRequest)
+            return
         }
 
-        authenticate {
-            delete("{$CATEGORY_ID_KEY}") {
-                val id = call.parameters[CATEGORY_ID_KEY]?.toIntOrNull() ?: return@delete call.respondText("Missing id", status = HttpStatusCode.BadRequest)
+        val newCategory = categoryDao.insertCategory(insertCategory)
 
-                val success = categoryDao.deleteCategory(id)
+        if (newCategory != null) {
+            call.respond(HttpStatusCode.Created, newCategory)
+        } else {
+            call.respondText("Not created", status = HttpStatusCode.InternalServerError)
+        }
+    }
 
-                if (success) {
-                    call.respond(HttpStatusCode.OK)
-                } else {
-                    call.respondText("Not found", status = HttpStatusCode.NotFound)
-                }
-            }
+    override suspend fun getAllCategories(call: ApplicationCall) {
+        val categories = categoryDao.getCategories()
+
+        call.respond(HttpStatusCode.OK, categories)
+    }
+
+    override suspend fun getCategoryById(call: ApplicationCall) {
+        val id = call.parameters[CATEGORY_ID_KEY]?.toIntOrNull() ?: return call.respondText("Missing id", status = HttpStatusCode.BadRequest)
+
+        val category = categoryDao.getCategory(id)
+
+        if (category != null) {
+            call.respond(HttpStatusCode.OK, category)
+        } else {
+            call.respondText("Not found", status = HttpStatusCode.NotFound)
+        }
+    }
+
+    override suspend fun updateCategoryById(call: ApplicationCall) {
+        val id = call.parameters[CATEGORY_ID_KEY]?.toIntOrNull() ?: return call.respondText("Missing id", status = HttpStatusCode.BadRequest)
+
+        val updateCategory = call.receive<InsertOrUpdateCategory>()
+
+        val category = categoryDao.updateCategory(id, updateCategory)
+
+        if (category != null) {
+            call.respond(HttpStatusCode.OK, category)
+        } else {
+            call.respondText("Not found", status = HttpStatusCode.NotFound)
+        }
+    }
+
+    override suspend fun deleteCategoryById(call: ApplicationCall) {
+        val id = call.parameters[CATEGORY_ID_KEY]?.toIntOrNull() ?: return call.respondText("Missing id", status = HttpStatusCode.BadRequest)
+
+        val success = categoryDao.deleteCategory(id)
+
+        if (success) {
+            call.respond(HttpStatusCode.OK)
+        } else {
+            call.respondText("Not found", status = HttpStatusCode.NotFound)
         }
     }
 }
