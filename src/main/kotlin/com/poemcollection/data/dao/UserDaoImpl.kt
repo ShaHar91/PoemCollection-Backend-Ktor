@@ -6,6 +6,7 @@ import com.poemcollection.data.models.InsertNewUser
 import com.poemcollection.data.models.UpdateUser
 import com.poemcollection.data.models.User
 import com.poemcollection.domain.interfaces.IUserDao
+import com.poemcollection.security.security.hashing.SaltedHash
 import com.poemcollection.utils.toDatabaseString
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -25,13 +26,13 @@ class UserDaoImpl : IUserDao {
         Users.selectAll().toUsers()
     }
 
-    override suspend fun insertUser(user: InsertNewUser): User? = dbQuery {
+    override suspend fun insertUser(user: InsertNewUser, saltedHash: SaltedHash): User? = dbQuery {
         Users.insert {
             it[firstName] = user.firstName
             it[lastName] = user.lastName
             it[email] = user.email
-            it[password] = user.password
-            it[salt] = user.salt
+            it[password] = saltedHash.hash
+            it[salt] = saltedHash.salt
             it[createdAt] = LocalDateTime.now().toDatabaseString()
             it[updatedAt] = LocalDateTime.now().toDatabaseString()
         }.resultedValues?.toUsers()?.singleOrNull()
@@ -55,5 +56,9 @@ class UserDaoImpl : IUserDao {
         val result = Users.deleteWhere { Users.id eq id }
 
         result == 1
+    }
+
+    override suspend fun userUnique(email: String): Boolean = dbQuery {
+        Users.select { Users.email eq email }.empty()
     }
 }

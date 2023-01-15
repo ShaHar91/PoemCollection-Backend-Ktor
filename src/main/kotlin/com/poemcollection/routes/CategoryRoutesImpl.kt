@@ -3,39 +3,11 @@ package com.poemcollection.routes
 import com.poemcollection.data.models.InsertOrUpdateCategory
 import com.poemcollection.domain.interfaces.ICategoryDao
 import com.poemcollection.routes.ParamConstants.CATEGORY_ID_KEY
+import com.poemcollection.routes.interfaces.ICategoryRoutes
 import io.ktor.http.*
 import io.ktor.server.application.*
-import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
-import io.ktor.server.routing.*
-
-fun Route.categoryRouting(
-    categoryRoutes: ICategoryRoutes
-) {
-
-    route("/categories") {
-        get { categoryRoutes.getAllCategories(call) }
-
-        get("{$CATEGORY_ID_KEY}") { categoryRoutes.getCategoryById(call) }
-
-        authenticate {
-            post { categoryRoutes.postCategory(call) }
-
-            put("{$CATEGORY_ID_KEY}") { categoryRoutes.updateCategoryById(call) }
-
-            delete("{$CATEGORY_ID_KEY}") { categoryRoutes.deleteCategoryById(call) }
-        }
-    }
-}
-
-interface ICategoryRoutes {
-    suspend fun postCategory(call: ApplicationCall)
-    suspend fun getAllCategories(call: ApplicationCall)
-    suspend fun getCategoryById(call: ApplicationCall)
-    suspend fun updateCategoryById(call: ApplicationCall)
-    suspend fun deleteCategoryById(call: ApplicationCall)
-}
 
 class CategoryRoutesImpl(
     private val categoryDao: ICategoryDao

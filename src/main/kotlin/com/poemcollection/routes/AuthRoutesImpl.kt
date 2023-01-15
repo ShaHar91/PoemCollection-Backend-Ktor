@@ -2,7 +2,9 @@ package com.poemcollection.routes
 
 import com.poemcollection.data.requests.AuthRequest
 import com.poemcollection.data.responses.AuthResponse
+import com.poemcollection.data.responses.ErrorCodes
 import com.poemcollection.domain.interfaces.IUserDao
+import com.poemcollection.routes.interfaces.IAuthRoutes
 import com.poemcollection.security.security.hashing.HashingService
 import com.poemcollection.security.security.hashing.SaltedHash
 import com.poemcollection.security.security.token.TokenClaim
@@ -13,22 +15,6 @@ import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
-import io.ktor.server.routing.*
-
-fun Route.authRouting(
-    authRoutes: IAuthRoutes
-) {
-
-//    route("/oauth") {
-    post("oauth/token") {
-        authRoutes.authorizeUser(call)
-    }
-//    }
-}
-
-interface IAuthRoutes {
-    suspend fun authorizeUser(call: ApplicationCall)
-}
 
 class AuthRoutesImpl(
     private val hashingService: HashingService,
@@ -38,20 +24,20 @@ class AuthRoutesImpl(
 ) : IAuthRoutes {
     override suspend fun authorizeUser(call: ApplicationCall) {
         val request = call.receiveNullable<AuthRequest>() ?: run {
-            call.respond(HttpStatusCode.BadRequest)
+            call.respond(HttpStatusCode.BadRequest, ErrorCodes.InvalidGrantError.asResponse)
             return
         }
 
         val user = userDao.getUserByEmail(request.email)
         if (user == null) {
-            call.respond(HttpStatusCode.Conflict)
+            call.respond(HttpStatusCode.Conflict, ErrorCodes.InvalidCredentialsError.asResponse)
             return
         }
 
         val isValidPassword = hashingService.verify(request.password, SaltedHash(user.password, user.salt))
 
         if (!isValidPassword) {
-            call.respond(HttpStatusCode.Conflict)
+            call.respond(HttpStatusCode.Conflict, ErrorCodes.InvalidCredentialsError.asResponse)
             return
         }
 

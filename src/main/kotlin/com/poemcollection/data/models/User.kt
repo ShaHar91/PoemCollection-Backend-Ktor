@@ -20,7 +20,7 @@ data class InsertNewUser(
     val firstName: String = "",
     val lastName: String = "",
     val password: String = "",
-    val salt: String = "",
+    val repeatPassword: String = "",
     val email: String = ""
 )
 

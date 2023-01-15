@@ -9,6 +9,7 @@ import com.poemcollection.domain.interfaces.IPoemDao
 import com.poemcollection.domain.interfaces.IReviewDao
 import com.poemcollection.domain.interfaces.IUserDao
 import com.poemcollection.routes.*
+import com.poemcollection.routes.interfaces.*
 import com.poemcollection.security.security.hashing.HashingService
 import com.poemcollection.security.security.hashing.SHA256HashingService
 import com.poemcollection.security.security.token.JwtTokenService
@@ -22,11 +23,14 @@ import org.koin.logger.slf4jLogger
 fun Application.configureKoin(environment: ApplicationEnvironment) {
     install(Koin) {
         slf4jLogger()
-        modules(daoModule(environment))
+
+        modules(securityModule(environment))
+        modules(daoModule())
+        modules(routeModule())
     }
 }
 
-fun daoModule(environment: ApplicationEnvironment) = module {
+fun securityModule(environment: ApplicationEnvironment) = module {
     single {
         TokenConfig(
             environment.config.property("jwt.issuer").getString(),
@@ -35,17 +39,21 @@ fun daoModule(environment: ApplicationEnvironment) = module {
             System.getenv("JWT_SECRET")
         )
     }
-    single<IUserDao> { UserDaoImpl() }
-    single<ICategoryDao> { CategoryDaoImpl() }
-    single<IPoemDao> { PoemDaoImpl() }
-    single<IReviewDao> { ReviewDaoImpl() }
-    single<IUserRoutes> { UserRouteImpl(get(), get()) }
+    single<HashingService> { SHA256HashingService() }
+    single<TokenService> { JwtTokenService() }
+}
+
+fun routeModule() = module {
+    single<IUserRoutes> { UserRoutesImpl(get(), get()) }
     single<IAuthRoutes> { AuthRoutesImpl(get(), get(), get(), get()) }
     single<ICategoryRoutes> { CategoryRoutesImpl(get()) }
     single<IPoemRoutes> { PoemRoutesImpl(get(), get()) }
     single<IReviewRoutes> { ReviewRoutesImpl(get()) }
+}
 
-
-    single<HashingService> { SHA256HashingService() }
-    single<TokenService> { JwtTokenService() }
+fun daoModule() = module {
+    single<IUserDao> { UserDaoImpl() }
+    single<ICategoryDao> { CategoryDaoImpl() }
+    single<IPoemDao> { PoemDaoImpl() }
+    single<IReviewDao> { ReviewDaoImpl() }
 }

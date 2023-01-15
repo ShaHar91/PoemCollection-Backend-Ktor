@@ -4,6 +4,7 @@ import com.poemcollection.data.models.InsertOrUpdateReview
 import com.poemcollection.domain.interfaces.IReviewDao
 import com.poemcollection.routes.ParamConstants.POEM_ID_KEY
 import com.poemcollection.routes.ParamConstants.REVIEW_ID_KEY
+import com.poemcollection.routes.interfaces.IReviewRoutes
 import com.poemcollection.security.security.token.TokenClaim
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -11,39 +12,6 @@ import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
-import io.ktor.server.routing.*
-
-fun Route.reviewRouting(
-    reviewRoutes: IReviewRoutes
-) {
-
-    route("poems/{$POEM_ID_KEY}/reviews") {
-        authenticate {
-            post { reviewRoutes.postReview(call) }
-        }
-
-        get { reviewRoutes.getAllReviews(call) }
-
-        route("{$REVIEW_ID_KEY}") {
-
-            get { reviewRoutes.getReviewById(call) }
-
-            authenticate {
-                put { reviewRoutes.updateReview(call) }
-
-                delete { reviewRoutes.deleteReview(call) }
-            }
-        }
-    }
-}
-
-interface IReviewRoutes {
-    suspend fun postReview(call: ApplicationCall)
-    suspend fun getAllReviews(call: ApplicationCall)
-    suspend fun getReviewById(call: ApplicationCall)
-    suspend fun updateReview(call: ApplicationCall)
-    suspend fun deleteReview(call: ApplicationCall)
-}
 
 class ReviewRoutesImpl(
     private val reviewDao: IReviewDao

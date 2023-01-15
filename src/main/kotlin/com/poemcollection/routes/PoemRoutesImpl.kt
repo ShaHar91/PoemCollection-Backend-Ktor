@@ -6,6 +6,7 @@ import com.poemcollection.domain.interfaces.IPoemDao
 import com.poemcollection.domain.interfaces.IReviewDao
 import com.poemcollection.routes.ParamConstants.CATEGORY_ID_KEY
 import com.poemcollection.routes.ParamConstants.POEM_ID_KEY
+import com.poemcollection.routes.interfaces.IPoemRoutes
 import com.poemcollection.security.security.token.TokenClaim
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -13,42 +14,6 @@ import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
-import io.ktor.server.routing.*
-
-fun Route.poemRouting(
-    poemRoutes: IPoemRoutes
-) {
-
-    route("poems") {
-        authenticate {
-            post { poemRoutes.postPoem(call) }
-        }
-
-        get { poemRoutes.getAllPoems(call) }
-
-        route("{$POEM_ID_KEY}") {
-
-            get { poemRoutes.getPoemById(call) }
-
-            authenticate {
-                put { poemRoutes.updatePoemById(call) }
-
-                delete { poemRoutes.deletePoemById(call) }
-            }
-
-            get("ratings") { poemRoutes.getRatingsForPoem(call) }
-        }
-    }
-}
-
-interface IPoemRoutes {
-    suspend fun postPoem(call: ApplicationCall)
-    suspend fun getAllPoems(call: ApplicationCall)
-    suspend fun getPoemById(call: ApplicationCall)
-    suspend fun updatePoemById(call: ApplicationCall)
-    suspend fun deletePoemById(call: ApplicationCall)
-    suspend fun getRatingsForPoem(call: ApplicationCall)
-}
 
 class PoemRoutesImpl(
     private val poemDao: IPoemDao,

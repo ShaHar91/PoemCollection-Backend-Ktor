@@ -2,6 +2,7 @@ package com.poemcollection.plugins
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
+import com.poemcollection.security.security.token.TokenClaim
 import com.poemcollection.security.security.token.TokenConfig
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -19,6 +20,7 @@ fun Application.configureSecurity() {
                 JWT.require(Algorithm.HMAC256(config.secret))
                     .withAudience(config.audience)
                     .withIssuer(config.issuer)
+                    .withClaimPresence(TokenClaim.TOKEN_CLAIM_USER_ID_KEY)
                     .build()
             )
 
