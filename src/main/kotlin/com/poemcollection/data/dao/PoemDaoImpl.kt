@@ -73,26 +73,28 @@ class PoemDaoImpl : IPoemDao {
         findPoemById(id)
     }
 
-    override suspend fun updatePoem(id: Int, updatePoem: UpdatePoem): Poem? = dbQuery {
-        val result = PoemsTable.update({ PoemsTable.id eq id }) {
-            it[title] = updatePoem.title
-            it[body] = updatePoem.body
-        }
-
-        // Delete the pivot rows for the categories that are not returned anymored
-        PoemCategoryJunctionTable.deleteWhere { poemId eq id and (categoryId notInList updatePoem.categoryIds) }
-        updatePoem.categoryIds.forEach { catId ->
-            // Ignore the "UNIQUE constraint error for the 'poemId' and 'categoryId'
-            PoemCategoryJunctionTable.insertIgnore {
-                it[poemId] = id
-                it[categoryId] = catId
+    override suspend fun updatePoem(id: Int, updatePoem: UpdatePoem): Poem? {
+        val result = dbQuery {
+            val res = PoemsTable.update({ PoemsTable.id eq id }) {
+                it[title] = updatePoem.title
+                it[body] = updatePoem.body
             }
+
+            // Delete the pivot rows for the categories that are not returned anymore
+            PoemCategoryJunctionTable.deleteWhere { poemId eq id and (categoryId notInList updatePoem.categoryIds) }
+            updatePoem.categoryIds.forEach { catId ->
+                // Ignore the "UNIQUE constraint error for the 'poemId' and 'categoryId'
+                PoemCategoryJunctionTable.insertIgnore {
+                    it[poemId] = id
+                    it[categoryId] = catId
+                }
+            }
+
+            return@dbQuery res
         }
 
-        if (result == 1) {
-            findPoemById(id)
-            val poemsWithAllRelations = PoemsTable innerJoin UsersTable innerJoin PoemCategoryJunctionTable innerJoin CategoriesTable
-            poemsWithAllRelations.select { PoemsTable.id eq id }.toPoems().singleOrNull()
+        return if (result == 1) {
+            dbQuery { findPoemById(id) }
         } else {
             null
         }

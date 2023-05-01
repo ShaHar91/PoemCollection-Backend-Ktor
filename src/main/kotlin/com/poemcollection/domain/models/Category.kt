@@ -8,7 +8,3 @@ data class Category(
     val updatedAt: String = ""
 )
 
-@kotlinx.serialization.Serializable
-data class InsertOrUpdateCategory(
-    val name: String = ""
-)

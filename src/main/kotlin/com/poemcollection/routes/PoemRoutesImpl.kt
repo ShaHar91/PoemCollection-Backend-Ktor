@@ -1,5 +1,6 @@
 package com.poemcollection.routes
 
+import com.poemcollection.domain.interfaces.ICategoryDao
 import com.poemcollection.domain.interfaces.IPoemDao
 import com.poemcollection.domain.interfaces.IReviewDao
 import com.poemcollection.domain.interfaces.IUserDao
@@ -18,6 +19,7 @@ import io.ktor.server.response.*
 class PoemRoutesImpl(
     private val userDao: IUserDao,
     private val poemDao: IPoemDao,
+    private val categoryDao: ICategoryDao,
     private val reviewDao: IReviewDao
 ) : IPoemRoutes {
     override suspend fun postPoem(call: ApplicationCall) {
@@ -26,6 +28,12 @@ class PoemRoutesImpl(
         val insertPoem = call.receiveNullable<InsertPoem>() ?: run {
             call.respond(HttpStatusCode.BadRequest)
             return
+        }
+
+        val categoryIds = categoryDao.getListOfExistingCategoryIds(insertPoem.categoryIds)
+        if (categoryIds.count() != insertPoem.categoryIds.count()) {
+            val nonExistingIds = insertPoem.categoryIds.filterNot { categoryIds.contains(it) }
+            return call.respondText("The following categories do not exist: ${nonExistingIds.joinToString { it.toString() }}")
         }
 
         //TODO: It would be better to have 2 separate objects, one Dto that comes in, parsing the object to a proper data class and filling in the writerId
@@ -77,6 +85,12 @@ class PoemRoutesImpl(
         if (!isUserWriter && !isUserAdmin) return call.respondText("You don't have the right permissions to update this poem.", status = HttpStatusCode.BadRequest)
 
         val updatePoem = call.receive<UpdatePoem>()
+
+        val categoryIds = categoryDao.getListOfExistingCategoryIds(updatePoem.categoryIds)
+        if (categoryIds.count() != updatePoem.categoryIds.count()) {
+            val nonExistingIds = updatePoem.categoryIds.filterNot { categoryIds.contains(it) }
+            return call.respondText("The following categories do not exist: ${nonExistingIds.joinToString { it.toString() }}")
+        }
 
         val poem = poemDao.updatePoem(poemId, updatePoem)
 

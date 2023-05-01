@@ -47,7 +47,7 @@ fun routeModule() = module {
     single<IUserRoutes> { UserRoutesImpl(get(), get()) }
     single<IAuthRoutes> { AuthRoutesImpl(get(), get(), get(), get()) }
     single<ICategoryRoutes> { CategoryRoutesImpl(get()) }
-    single<IPoemRoutes> { PoemRoutesImpl(get(), get(), get()) }
+    single<IPoemRoutes> { PoemRoutesImpl(get(), get(), get(), get()) }
     single<IReviewRoutes> { ReviewRoutesImpl(get(), get()) }
 }
 

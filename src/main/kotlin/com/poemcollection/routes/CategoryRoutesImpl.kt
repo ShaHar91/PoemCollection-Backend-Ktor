@@ -1,7 +1,7 @@
 package com.poemcollection.routes
 
+import com.poemcollection.data.requests.InsertOrUpdateCategoryReq
 import com.poemcollection.domain.interfaces.ICategoryDao
-import com.poemcollection.domain.models.InsertOrUpdateCategory
 import com.poemcollection.routes.ParamConstants.CATEGORY_ID_KEY
 import com.poemcollection.routes.interfaces.ICategoryRoutes
 import io.ktor.http.*
@@ -13,7 +13,7 @@ class CategoryRoutesImpl(
     private val categoryDao: ICategoryDao
 ) : ICategoryRoutes {
     override suspend fun postCategory(call: ApplicationCall) {
-        val insertCategory = call.receiveNullable<InsertOrUpdateCategory>() ?: run {
+        val insertCategory = call.receiveNullable<InsertOrUpdateCategoryReq>() ?: run {
             call.respond(HttpStatusCode.BadRequest)
             return
         }
@@ -48,7 +48,7 @@ class CategoryRoutesImpl(
     override suspend fun updateCategoryById(call: ApplicationCall) {
         val id = call.parameters[CATEGORY_ID_KEY]?.toIntOrNull() ?: return call.respondText("Missing id", status = HttpStatusCode.BadRequest)
 
-        val updateCategory = call.receive<InsertOrUpdateCategory>()
+        val updateCategory = call.receive<InsertOrUpdateCategoryReq>()
 
         val category = categoryDao.updateCategory(id, updateCategory)
 
