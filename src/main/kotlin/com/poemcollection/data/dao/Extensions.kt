@@ -1,9 +1,9 @@
 package com.poemcollection.data.dao
 
-import com.poemcollection.data.Categories
-import com.poemcollection.data.Poems
-import com.poemcollection.data.Reviews
-import com.poemcollection.data.Users
+import com.poemcollection.data.CategoriesTable
+import com.poemcollection.data.PoemsTable
+import com.poemcollection.data.ReviewsTable
+import com.poemcollection.data.UsersTable
 import com.poemcollection.domain.models.Category
 import com.poemcollection.domain.models.Poem
 import com.poemcollection.domain.models.Review
@@ -11,40 +11,40 @@ import com.poemcollection.domain.models.User
 import org.jetbrains.exposed.sql.ResultRow
 
 fun ResultRow.toPoemWithUser() = Poem(
-    id = this[Poems.id].value,
-    title = this[Poems.title],
-    body = this[Poems.body],
+    id = this[PoemsTable.id].value,
+    title = this[PoemsTable.title],
+    body = this[PoemsTable.body],
     writer = this.toUser(),
-    createdAt = this[Poems.createdAt],
-    updatedAt = this[Poems.updatedAt]
+    createdAt = this[PoemsTable.createdAt],
+    updatedAt = this[PoemsTable.updatedAt]
 )
 
 fun ResultRow.toUser() = User(
-    id = this[Users.id].value,
-    firstName = this[Users.firstName],
-    lastName = this[Users.lastName],
-    email = this[Users.email],
-    password = this[Users.password],
-    salt = this[Users.salt],
-    createdAt = this[Users.createdAt],
-    updatedAt = this[Users.updatedAt],
-    role = this[Users.role]
+    id = this[UsersTable.id].value,
+    firstName = this[UsersTable.firstName],
+    lastName = this[UsersTable.lastName],
+    email = this[UsersTable.email],
+    password = this[UsersTable.password],
+    salt = this[UsersTable.salt],
+    createdAt = this[UsersTable.createdAt],
+    updatedAt = this[UsersTable.updatedAt],
+    role = this[UsersTable.role]
 )
 
 fun ResultRow.toCategory() = Category(
-    id = this[Categories.id].value,
-    name = this[Categories.name],
-    createdAt = this[Categories.createdAt],
-    updatedAt = this[Categories.updatedAt]
+    id = this[CategoriesTable.id].value,
+    name = this[CategoriesTable.name],
+    createdAt = this[CategoriesTable.createdAt],
+    updatedAt = this[CategoriesTable.updatedAt]
 )
 
 fun ResultRow.toReviewWithUser() = Review(
-    id = this[Reviews.id].value,
-    body = this[Reviews.body],
-    rating = this[Reviews.rating],
+    id = this[ReviewsTable.id].value,
+    body = this[ReviewsTable.body],
+    rating = this[ReviewsTable.rating],
     user = this.toUser(),
-    createdAt = this[Reviews.createdAt],
-    updatedAt = this[Reviews.updatedAt]
+    createdAt = this[ReviewsTable.createdAt],
+    updatedAt = this[ReviewsTable.updatedAt]
 )
 
 fun Iterable<ResultRow>.toCategories() = this.map { it.toCategory() }

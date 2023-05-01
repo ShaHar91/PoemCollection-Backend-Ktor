@@ -19,7 +19,7 @@ class PoemDaoImpl : IPoemDao {
     private fun Iterable<ResultRow>.toPoems(): List<Poem> {
         return (fold(mutableMapOf<Int, Poem>()) { map, resultRow ->
             val poem = resultRow.toPoemWithUser()
-            val categoryId = resultRow.getOrNull(PoemCategoryJunction.categoryId)
+            val categoryId = resultRow.getOrNull(PoemCategoryJunctionTable.categoryId)
             val category = categoryId?.let { resultRow.toCategory() }
             val current = map.getOrDefault(poem.id, poem)
             map[poem.id] = current.copy(categories = current.categories + listOfNotNull(category))
@@ -28,9 +28,9 @@ class PoemDaoImpl : IPoemDao {
     }
 
     private fun findPoemById(id: Int): Poem? {
-        val poemsWithAllRelations = Poems innerJoin Users innerJoin PoemCategoryJunction innerJoin Categories
+        val poemsWithAllRelations = PoemsTable innerJoin UsersTable innerJoin PoemCategoryJunctionTable innerJoin CategoriesTable
         return poemsWithAllRelations
-            .select { Poems.id eq id }
+            .select { PoemsTable.id eq id }
             .toPoems()
             .singleOrNull()
     }
@@ -40,14 +40,14 @@ class PoemDaoImpl : IPoemDao {
     }
 
     override suspend fun getPoems(categoryId: Int?): List<Poem> = dbQuery {
-        val poemsWithAllRelations = Poems innerJoin Users innerJoin PoemCategoryJunction innerJoin Categories
+        val poemsWithAllRelations = PoemsTable innerJoin UsersTable innerJoin PoemCategoryJunctionTable innerJoin CategoriesTable
         poemsWithAllRelations
 //            .select { categoryId?.let { PoemCategoryJunction.categoryId eq categoryId } ?: Op.TRUE }
             .let {
                 if (categoryId == null) {
                     it.selectAll()
                 } else {
-                    it.select { PoemCategoryJunction.categoryId eq categoryId }
+                    it.select { PoemCategoryJunctionTable.categoryId eq categoryId }
                 }
             }
             .toPoems()
@@ -55,7 +55,7 @@ class PoemDaoImpl : IPoemDao {
 
     override suspend fun insertPoem(insertPoem: InsertPoem): Poem? = dbQuery {
 
-        val id = Poems.insertAndGetId {
+        val id = PoemsTable.insertAndGetId {
             it[title] = insertPoem.title
             it[body] = insertPoem.body
             it[writerId] = insertPoem.writerId
@@ -64,7 +64,7 @@ class PoemDaoImpl : IPoemDao {
         }.value
 
         insertPoem.categoryIds.forEach { catId ->
-            PoemCategoryJunction.insert {
+            PoemCategoryJunctionTable.insert {
                 it[poemId] = id
                 it[categoryId] = catId
             }
@@ -74,16 +74,16 @@ class PoemDaoImpl : IPoemDao {
     }
 
     override suspend fun updatePoem(id: Int, updatePoem: UpdatePoem): Poem? = dbQuery {
-        val result = Poems.update({ Poems.id eq id }) {
+        val result = PoemsTable.update({ PoemsTable.id eq id }) {
             it[title] = updatePoem.title
             it[body] = updatePoem.body
         }
 
         // Delete the pivot rows for the categories that are not returned anymored
-        PoemCategoryJunction.deleteWhere { poemId eq id and (categoryId notInList updatePoem.categoryIds) }
+        PoemCategoryJunctionTable.deleteWhere { poemId eq id and (categoryId notInList updatePoem.categoryIds) }
         updatePoem.categoryIds.forEach { catId ->
             // Ignore the "UNIQUE constraint error for the 'poemId' and 'categoryId'
-            PoemCategoryJunction.insertIgnore {
+            PoemCategoryJunctionTable.insertIgnore {
                 it[poemId] = id
                 it[categoryId] = catId
             }
@@ -91,8 +91,8 @@ class PoemDaoImpl : IPoemDao {
 
         if (result == 1) {
             findPoemById(id)
-            val poemsWithAllRelations = Poems innerJoin Users innerJoin PoemCategoryJunction innerJoin Categories
-            poemsWithAllRelations.select { Poems.id eq id }.toPoems().singleOrNull()
+            val poemsWithAllRelations = PoemsTable innerJoin UsersTable innerJoin PoemCategoryJunctionTable innerJoin CategoriesTable
+            poemsWithAllRelations.select { PoemsTable.id eq id }.toPoems().singleOrNull()
         } else {
             null
         }
@@ -100,13 +100,13 @@ class PoemDaoImpl : IPoemDao {
 
     override suspend fun deletePoem(id: Int): Boolean = dbQuery {
         //TODO: check if the cascade deletion can be used instead of this!!!
-        val result = Poems.deleteWhere { Poems.id eq id }
-        val result2 = PoemCategoryJunction.deleteWhere { poemId eq id }
-        Reviews.deleteWhere { poemId eq id }
+        val result = PoemsTable.deleteWhere { PoemsTable.id eq id }
+        val result2 = PoemCategoryJunctionTable.deleteWhere { poemId eq id }
+        ReviewsTable.deleteWhere { poemId eq id }
         result >= 1 && result2 >= 1
     }
 
     override suspend fun isUserWriter(poemId: Int, userId: Int): Boolean = dbQuery {
-        Poems.select { Poems.id eq poemId }.first()[Poems.writerId].value == userId
+        PoemsTable.select { PoemsTable.id eq poemId }.first()[PoemsTable.writerId].value == userId
     }
 }

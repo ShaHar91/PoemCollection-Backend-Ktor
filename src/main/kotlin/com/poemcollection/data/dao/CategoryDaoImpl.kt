@@ -1,6 +1,6 @@
 package com.poemcollection.data.dao
 
-import com.poemcollection.data.Categories
+import com.poemcollection.data.CategoriesTable
 import com.poemcollection.data.DatabaseFactory.dbQuery
 import com.poemcollection.domain.interfaces.ICategoryDao
 import com.poemcollection.domain.models.Category
@@ -13,15 +13,15 @@ import java.time.LocalDateTime
 class CategoryDaoImpl : ICategoryDao {
 
     override suspend fun getCategory(id: Int): Category? = dbQuery {
-        Categories.select { Categories.id eq id }.toCategory()
+        CategoriesTable.select { CategoriesTable.id eq id }.toCategory()
     }
 
     override suspend fun getCategories(): List<Category> = dbQuery {
-        Categories.selectAll().toCategories()
+        CategoriesTable.selectAll().toCategories()
     }
 
     override suspend fun insertCategory(category: InsertOrUpdateCategory): Category? = dbQuery {
-        Categories.insert {
+        CategoriesTable.insert {
             it[name] = category.name
             it[createdAt] = LocalDateTime.now().toDatabaseString()
             it[updatedAt] = LocalDateTime.now().toDatabaseString()
@@ -29,20 +29,20 @@ class CategoryDaoImpl : ICategoryDao {
     }
 
     override suspend fun updateCategory(id: Int, category: InsertOrUpdateCategory): Category? = dbQuery {
-        val result = Categories.update({ Categories.id eq id }) {
+        val result = CategoriesTable.update({ CategoriesTable.id eq id }) {
             it[name] = category.name
             it[updatedAt] = LocalDateTime.now().toDatabaseString()
         }
 
         if (result == 1) {
-            Categories.select { Categories.id eq id }.toCategory()
+            CategoriesTable.select { CategoriesTable.id eq id }.toCategory()
         } else {
             null
         }
     }
 
     override suspend fun deleteCategory(id: Int): Boolean = dbQuery {
-        val result = Categories.deleteWhere { Categories.id eq id }
+        val result = CategoriesTable.deleteWhere { CategoriesTable.id eq id }
 
         result == 1
     }

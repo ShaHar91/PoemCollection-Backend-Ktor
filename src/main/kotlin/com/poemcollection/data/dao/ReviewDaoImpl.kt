@@ -1,9 +1,9 @@
 package com.poemcollection.data.dao
 
 import com.poemcollection.data.DatabaseFactory.dbQuery
-import com.poemcollection.data.Poems
-import com.poemcollection.data.Reviews
-import com.poemcollection.data.Users
+import com.poemcollection.data.PoemsTable
+import com.poemcollection.data.ReviewsTable
+import com.poemcollection.data.UsersTable
 import com.poemcollection.domain.interfaces.IReviewDao
 import com.poemcollection.domain.models.InsertOrUpdateReview
 import com.poemcollection.domain.models.Ratings
@@ -20,25 +20,25 @@ class ReviewDaoImpl : IReviewDao {
     }
 
     override suspend fun getReviews(poemId: Int?): List<Review> = dbQuery {
-        val reviewWithRelations = Reviews innerJoin Users
-        reviewWithRelations.select { Reviews.poemId eq poemId }.toReviews()
+        val reviewWithRelations = ReviewsTable innerJoin UsersTable
+        reviewWithRelations.select { ReviewsTable.poemId eq poemId }.toReviews()
     }
 
     private fun findReviewById(reviewId: Int): Review? {
-        val reviewWithRelations = Reviews innerJoin Users
-        return reviewWithRelations.select { Reviews.id eq reviewId }.toReview()
+        val reviewWithRelations = ReviewsTable innerJoin UsersTable
+        return reviewWithRelations.select { ReviewsTable.id eq reviewId }.toReview()
     }
 
     override suspend fun insertReview(poemId: Int, insertReview: InsertOrUpdateReview): Review? = dbQuery {
 
-        val existsOp = exists(Poems.select { Poems.id eq poemId })
+        val existsOp = exists(PoemsTable.select { PoemsTable.id eq poemId })
         val result = Table.Dual.slice(existsOp).selectAll().first()
         val existsResult = result[existsOp]
 
         //TODO: user can only create 1 review per poem!!
 
         if (existsResult) {
-            val id = Reviews.insertAndGetId {
+            val id = ReviewsTable.insertAndGetId {
                 it[body] = insertReview.body
                 it[rating] = insertReview.rating
                 it[userId] = insertReview.userId
@@ -54,7 +54,7 @@ class ReviewDaoImpl : IReviewDao {
     }
 
     override suspend fun updateReview(id: Int, updateReview: InsertOrUpdateReview): Review? = dbQuery {
-        val result = Reviews.update({ Reviews.id eq id }) {
+        val result = ReviewsTable.update({ ReviewsTable.id eq id }) {
             it[body] = updateReview.body
             it[rating] = updateReview.rating
         }
@@ -67,13 +67,13 @@ class ReviewDaoImpl : IReviewDao {
     }
 
     override suspend fun deleteReview(id: Int): Boolean = dbQuery {
-        val result = Reviews.deleteWhere { Reviews.id eq id }
+        val result = ReviewsTable.deleteWhere { ReviewsTable.id eq id }
         result == 1
     }
 
     override suspend fun calculateRatings(id: Int): Ratings = dbQuery {
-        val reviewWithRelations = Reviews innerJoin Users
-        val reviews = reviewWithRelations.select { Reviews.poemId eq id }.toReviews()
+        val reviewWithRelations = ReviewsTable innerJoin UsersTable
+        val reviews = reviewWithRelations.select { ReviewsTable.poemId eq id }.toReviews()
 
         val grouped = reviews.groupBy { it.rating }
         val average = grouped.map { it.key * it.value.size }.sum().toDouble().div(reviews.size)
@@ -82,6 +82,6 @@ class ReviewDaoImpl : IReviewDao {
     }
 
     override suspend fun isUserWriter(reviewId: Int, userId: Int): Boolean = dbQuery {
-        Reviews.select { Reviews.id eq reviewId }.first()[Reviews.userId].value == userId
+        ReviewsTable.select { ReviewsTable.id eq reviewId }.first()[ReviewsTable.userId].value == userId
     }
 }
