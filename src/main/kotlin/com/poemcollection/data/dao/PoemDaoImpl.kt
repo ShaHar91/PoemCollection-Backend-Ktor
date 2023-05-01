@@ -105,4 +105,8 @@ class PoemDaoImpl : IPoemDao {
         Reviews.deleteWhere { poemId eq id }
         result >= 1 && result2 >= 1
     }
+
+    override suspend fun isUserWriter(poemId: Int, userId: Int): Boolean = dbQuery {
+        Poems.select { Poems.id eq poemId }.first()[Poems.writerId].value == userId
+    }
 }

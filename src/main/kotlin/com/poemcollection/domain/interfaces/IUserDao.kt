@@ -15,4 +15,5 @@ interface IUserDao {
     suspend fun updateUser(id: Int, user: UpdateUser): User?
     suspend fun deleteUser(id: Int): Boolean
     suspend fun userUnique(email: String): Boolean
+    suspend fun isUserRoleAdmin(userId: Int): Boolean
 }

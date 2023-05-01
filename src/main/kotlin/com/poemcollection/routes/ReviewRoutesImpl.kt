@@ -56,6 +56,7 @@ class ReviewRoutesImpl(
         }
     }
 
+    //TODO: only an admin or the user who created the review can edit the review
     override suspend fun updateReview(call: ApplicationCall) {
         val id = call.parameters[REVIEW_ID_KEY]?.toIntOrNull() ?: return call.respondText("Missing id", status = HttpStatusCode.BadRequest)
 
@@ -70,6 +71,7 @@ class ReviewRoutesImpl(
         }
     }
 
+    //TODO: only an admin or the user who created the review can delete the review
     override suspend fun deleteReview(call: ApplicationCall) {
         val id = call.parameters[REVIEW_ID_KEY]?.toIntOrNull() ?: return call.respondText("Missing id", status = HttpStatusCode.BadRequest)
 

@@ -13,7 +13,7 @@ object Users : IntIdTable() {
     val salt = varchar("salt", 255)
     val createdAt = varchar("createdAt", 255).default(LocalDateTime.now().toDatabaseString())
     val updatedAt = varchar("updatedAt", 255).default(LocalDateTime.now().toDatabaseString())
-    val user = enumeration<UserRoles>("role").default(UserRoles.User)
+    val role = enumeration<UserRoles>("role").default(UserRoles.User)
 }
 
 enum class UserRoles {

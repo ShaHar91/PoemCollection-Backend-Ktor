@@ -4,32 +4,32 @@ import com.poemcollection.data.models.InsertPoem
 import com.poemcollection.data.models.UpdatePoem
 import com.poemcollection.domain.interfaces.IPoemDao
 import com.poemcollection.domain.interfaces.IReviewDao
+import com.poemcollection.domain.interfaces.IUserDao
 import com.poemcollection.routes.ParamConstants.CATEGORY_ID_KEY
 import com.poemcollection.routes.ParamConstants.POEM_ID_KEY
 import com.poemcollection.routes.interfaces.IPoemRoutes
-import com.poemcollection.security.security.token.TokenClaim
+import com.poemcollection.utils.getPoemId
+import com.poemcollection.utils.getUserId
 import io.ktor.http.*
 import io.ktor.server.application.*
-import io.ktor.server.auth.*
-import io.ktor.server.auth.jwt.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 
 class PoemRoutesImpl(
+    private val userDao: IUserDao,
     private val poemDao: IPoemDao,
     private val reviewDao: IReviewDao
 ) : IPoemRoutes {
     override suspend fun postPoem(call: ApplicationCall) {
-        val principal = call.principal<JWTPrincipal>()
-        val userId = principal?.getClaim(TokenClaim.TOKEN_CLAIM_USER_ID_KEY, String::class)
+        val userId = call.getUserId()
 
         val insertPoem = call.receiveNullable<InsertPoem>() ?: run {
             call.respond(HttpStatusCode.BadRequest)
             return
         }
 
-        // TODO: `writerId` should be taken out of the `insertPoem` class since this can be a security risk!!!
-        val newPoem = poemDao.insertPoem(insertPoem.copy(writerId = userId?.toIntOrNull() ?: -1))
+        //TODO: It would be better to have 2 separate objects, one Dto that comes in, parsing the object to a proper data class and filling in the writerId
+        val newPoem = poemDao.insertPoem(insertPoem.copy(writerId = userId ?: -1))
 
         if (newPoem != null) {
             call.respond(HttpStatusCode.Created, newPoem)
@@ -46,9 +46,11 @@ class PoemRoutesImpl(
     }
 
     override suspend fun getPoemById(call: ApplicationCall) {
-        val id = call.parameters[POEM_ID_KEY]?.toIntOrNull() ?: return call.respondText("Missing id", status = HttpStatusCode.BadRequest)
+        val poemId = call.getPoemId {
+            return@getPoemId respondText("Missing id", status = HttpStatusCode.BadRequest)
+        }
 
-        val poem = poemDao.getPoem(id)
+        val poem = poemDao.getPoem(poemId)
 
         //TODO: maybe get a couple of things in a collection so the app doesn't have to do 3 seperate calls?
         // e.g. { "poem": {}, "ratings" : {}, "ownReview": {}, "reviews": {}} ----> where reviews are limited to 3 or 5 reviews...
@@ -60,16 +62,23 @@ class PoemRoutesImpl(
         }
     }
 
-    override suspend fun updatePoemById(call: ApplicationCall) {
-        val principal = call.principal<JWTPrincipal>()
-        val userId = principal?.getClaim(TokenClaim.TOKEN_CLAIM_USER_ID_KEY, String::class)
 
-        // TODO: should only be able to update when the userId (principal) is the same as the authenticated user!! (Or is an admin)
-        val id = call.parameters[POEM_ID_KEY]?.toIntOrNull() ?: return call.respondText("Missing id", status = HttpStatusCode.BadRequest)
+    override suspend fun updatePoemById(call: ApplicationCall) {
+        val poemId = call.getPoemId {
+            return@getPoemId respondText("Missing id", status = HttpStatusCode.BadRequest)
+        }
+
+        // TODO: should return a better error!!
+        val userId = call.getUserId() ?: return call.respondText("Missing id", status = HttpStatusCode.BadRequest)
+
+        val isUserAdmin = userDao.isUserRoleAdmin(userId)
+        val isUserWriter = poemDao.isUserWriter(poemId, userId)
+
+        if (!isUserWriter && !isUserAdmin) return call.respondText("You don't have the right permissions to update this poem.", status = HttpStatusCode.BadRequest)
 
         val updatePoem = call.receive<UpdatePoem>()
 
-        val poem = poemDao.updatePoem(id, updatePoem)
+        val poem = poemDao.updatePoem(poemId, updatePoem)
 
         if (poem != null) {
             call.respond(HttpStatusCode.OK, poem)
@@ -79,10 +88,19 @@ class PoemRoutesImpl(
     }
 
     override suspend fun deletePoemById(call: ApplicationCall) {
-        // TODO: should only be able to delete when the writerId is the same as the authenticated user!! (Or is an admin)
-        val id = call.parameters[POEM_ID_KEY]?.toIntOrNull() ?: return call.respondText("Missing id", status = HttpStatusCode.BadRequest)
+        val poemId = call.getPoemId {
+            return@getPoemId respondText("Missing id", status = HttpStatusCode.BadRequest)
+        }
 
-        val success = poemDao.deletePoem(id)
+        // TODO: should return a better error!!
+        val userId = call.getUserId() ?: return call.respondText("Missing id", status = HttpStatusCode.BadRequest)
+
+        val isUserAdmin = userDao.isUserRoleAdmin(userId)
+        val isUserWriter = poemDao.isUserWriter(poemId, userId)
+
+        if (!isUserWriter && !isUserAdmin) return call.respondText("You don't have the right permissions to delete this poem.", status = HttpStatusCode.BadRequest)
+
+        val success = poemDao.deletePoem(poemId)
 
         if (success) {
             call.respond(HttpStatusCode.OK)

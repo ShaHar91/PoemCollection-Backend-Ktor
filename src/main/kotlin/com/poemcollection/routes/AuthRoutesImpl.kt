@@ -24,20 +24,20 @@ class AuthRoutesImpl(
 ) : IAuthRoutes {
     override suspend fun authorizeUser(call: ApplicationCall) {
         val request = call.receiveNullable<AuthRequest>() ?: run {
-            call.respond(HttpStatusCode.BadRequest, ErrorCodes.InvalidGrantError.asResponse)
+            call.respond(HttpStatusCode.BadRequest, ErrorCodes.ErrorInvalidGrant.asResponse)
             return
         }
 
         val user = userDao.getUserByEmail(request.email)
-        if (user == null) {
-            call.respond(HttpStatusCode.Conflict, ErrorCodes.InvalidCredentialsError.asResponse)
+        if (user == null || !user.email.contains("@")) {
+            call.respond(HttpStatusCode.Conflict, ErrorCodes.ErrorInvalidCredentials.asResponse)
             return
         }
 
         val isValidPassword = hashingService.verify(request.password, SaltedHash(user.password, user.salt))
 
         if (!isValidPassword) {
-            call.respond(HttpStatusCode.Conflict, ErrorCodes.InvalidCredentialsError.asResponse)
+            call.respond(HttpStatusCode.Conflict, ErrorCodes.ErrorInvalidCredentials.asResponse)
             return
         }
 

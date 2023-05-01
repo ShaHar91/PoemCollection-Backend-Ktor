@@ -14,48 +14,59 @@ import io.ktor.server.auth.jwt.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 
+suspend inline fun <reified T> ApplicationCall.receiveOrRespondWithError(): T? {
+    return try {
+        receiveNullable<T>() ?: run {
+            respond(HttpStatusCode.BadRequest, ErrorCodes.ErrorInvalidParameters.asResponse)
+            null
+        }
+
+    } catch (e: Exception) {
+        respond(HttpStatusCode.InternalServerError, ErrorCodes.ErrorInvalidContentType.asResponse)
+        null
+    }
+}
+
 class UserRoutesImpl(
     private val userDao: IUserDao,
     private val hashingService: HashingService
 ) : IUserRoutes {
 
     override suspend fun postUser(call: ApplicationCall) {
-        try {
-            val user = call.receiveNullable<InsertNewUser>() ?: run {
-                call.respond(HttpStatusCode.BadRequest, ErrorCodes.ErrorInvalidParameters.asResponse)
-                return
-            }
+        val user = call.receiveOrRespondWithError<InsertNewUser>() ?: return
 
-            val userUnique = userDao.userUnique(user.email)
-            if (!userUnique) {
-                call.respond(HttpStatusCode.Conflict, ErrorCodes.UserAlreadyExistsError.asResponse) // Email already exists
-            }
+        if (!user.isValid) {
+            call.respond(HttpStatusCode.BadRequest, ErrorCodes.ErrorInvalidParameters.asResponse)
+            return
+        }
 
-            val passwordSame = user.password == user.repeatPassword
-            if (!passwordSame) {
-                call.respond(HttpStatusCode.Conflict, "same") // repeatPassword is not the same
-            }
+        val userUnique = userDao.userUnique(user.email)
+        if (!userUnique || !user.email.contains("@")) {
+            call.respond(HttpStatusCode.Conflict, ErrorCodes.ErrorInvalidEmail.asResponse) // Email already exists
+            return
+        }
 
-            val isPwTooShort = user.password.length > 8
-            if (!isPwTooShort) {
-                call.respond(HttpStatusCode.Conflict, "too short") // Password is not strong enough, minimal of 8 characters
-                return
-            }
+        if (!user.isPasswordSame) {
+            call.respond(HttpStatusCode.Conflict, ErrorCodes.ErrorRepeatPassword.asResponse) // repeatPassword is not the same
+            return
+        }
 
-            val saltedHash = hashingService.generateSaltedHash(user.password)
+        if (!user.isPwTooShort) {
+            call.respond(HttpStatusCode.Conflict, ErrorCodes.ErrorInvalidPassword.asResponse)
+            return
+        }
 
-            val newUser = userDao.insertUser(
-                user,
-                saltedHash
-            )
+        val saltedHash = hashingService.generateSaltedHash(user.password)
 
-            if (newUser != null) {
-                call.respond(HttpStatusCode.Created, newUser)
-            } else {
-                call.respondText("Not created", status = HttpStatusCode.InternalServerError)
-            }
-        } catch (e: Exception) {
-            call.respondText("Something went wrong: ${e.message}", status = HttpStatusCode.InternalServerError)
+        val newUser = userDao.insertUser(
+            user,
+            saltedHash
+        )
+
+        if (newUser != null) {
+            call.respond(HttpStatusCode.Created, newUser)
+        } else {
+            call.respondText("Not created", status = HttpStatusCode.InternalServerError)
         }
     }
 

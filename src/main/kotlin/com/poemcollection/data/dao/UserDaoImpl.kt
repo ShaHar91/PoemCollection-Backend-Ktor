@@ -1,6 +1,7 @@
 package com.poemcollection.data.dao
 
 import com.poemcollection.data.DatabaseFactory.dbQuery
+import com.poemcollection.data.UserRoles
 import com.poemcollection.data.Users
 import com.poemcollection.data.models.InsertNewUser
 import com.poemcollection.data.models.UpdateUser
@@ -60,5 +61,9 @@ class UserDaoImpl : IUserDao {
 
     override suspend fun userUnique(email: String): Boolean = dbQuery {
         Users.select { Users.email eq email }.empty()
+    }
+
+    override suspend fun isUserRoleAdmin(userId: Int): Boolean = dbQuery {
+        Users.select { Users.id eq userId }.first()[Users.role] == UserRoles.Admin
     }
 }

@@ -12,4 +12,5 @@ interface IPoemDao {
 
     suspend fun updatePoem(id: Int, updatePoem: UpdatePoem): Poem?
     suspend fun deletePoem(id: Int): Boolean
+    suspend fun isUserWriter(poemId: Int, userId: Int): Boolean
 }

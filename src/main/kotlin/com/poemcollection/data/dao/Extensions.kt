@@ -27,7 +27,8 @@ fun ResultRow.toUser() = User(
     password = this[Users.password],
     salt = this[Users.salt],
     createdAt = this[Users.createdAt],
-    updatedAt = this[Users.updatedAt]
+    updatedAt = this[Users.updatedAt],
+    role = this[Users.role]
 )
 
 fun ResultRow.toCategory() = Category(

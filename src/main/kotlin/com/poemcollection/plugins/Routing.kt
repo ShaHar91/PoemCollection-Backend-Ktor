@@ -13,17 +13,19 @@ fun Application.configureRouting() {
         val authRoutes by inject<IAuthRoutes>()
         authRouting(authRoutes)
 
-        val userRoutes by inject<IUserRoutes>()
-        userRouting(userRoutes)
+        route("api/v1/") {
+            val userRoutes by inject<IUserRoutes>()
+            userRouting(userRoutes)
 
-        val categoryRoutes by inject<ICategoryRoutes>()
-        categoryRouting(categoryRoutes)
+            val categoryRoutes by inject<ICategoryRoutes>()
+            categoryRouting(categoryRoutes)
 
-        val poemRoutes by inject<IPoemRoutes>()
-        poemRouting(poemRoutes)
+            val poemRoutes by inject<IPoemRoutes>()
+            poemRouting(poemRoutes)
 
-        val reviewRoutes by inject<IReviewRoutes>()
-        reviewRouting(reviewRoutes)
+            val reviewRoutes by inject<IReviewRoutes>()
+            reviewRouting(reviewRoutes)
+        }
     }
 }
 
@@ -50,6 +52,10 @@ fun Route.userRouting(
 
             delete("me") { userRoutes.deleteUserById(call) }
         }
+
+        authenticate("admin") {
+            //TODO: create getById, updateById, and deleteById call for admin only?
+        }
     }
 }
 
@@ -57,12 +63,12 @@ fun Route.categoryRouting(
     categoryRoutes: ICategoryRoutes
 ) {
 
-    route("/categories") {
+    route("categories") {
         get { categoryRoutes.getAllCategories(call) }
 
         get("{${ParamConstants.CATEGORY_ID_KEY}}") { categoryRoutes.getCategoryById(call) }
 
-        authenticate {
+        authenticate("admin") {
             post { categoryRoutes.postCategory(call) }
 
             put("{${ParamConstants.CATEGORY_ID_KEY}}") { categoryRoutes.updateCategoryById(call) }
@@ -78,6 +84,7 @@ fun Route.poemRouting(
 
     route("poems") {
         authenticate {
+            // Only a real user can create a poem
             post { poemRoutes.postPoem(call) }
         }
 
