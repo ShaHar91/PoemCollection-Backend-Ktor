@@ -1,10 +1,10 @@
 package com.poemcollection.routes
 
-import com.poemcollection.data.models.InsertPoem
-import com.poemcollection.data.models.UpdatePoem
 import com.poemcollection.domain.interfaces.IPoemDao
 import com.poemcollection.domain.interfaces.IReviewDao
 import com.poemcollection.domain.interfaces.IUserDao
+import com.poemcollection.domain.models.InsertPoem
+import com.poemcollection.domain.models.UpdatePoem
 import com.poemcollection.routes.ParamConstants.CATEGORY_ID_KEY
 import com.poemcollection.routes.ParamConstants.POEM_ID_KEY
 import com.poemcollection.routes.interfaces.IPoemRoutes

@@ -13,3 +13,8 @@ suspend fun ApplicationCall.getPoemId(handleNullable: suspend ApplicationCall.()
     handleNullable()
     -1
 }
+
+suspend fun ApplicationCall.getReviewId(handleNullable: suspend ApplicationCall.() -> Unit): Int = parameters[ParamConstants.REVIEW_ID_KEY]?.toIntOrNull() ?: kotlin.run {
+    handleNullable()
+    -1
+}

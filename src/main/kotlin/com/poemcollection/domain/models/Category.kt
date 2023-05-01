@@ -1,4 +1,4 @@
-package com.poemcollection.data.models
+package com.poemcollection.domain.models
 
 @kotlinx.serialization.Serializable
 data class Category(

@@ -3,10 +3,10 @@ package com.poemcollection.data.dao
 import com.poemcollection.data.DatabaseFactory.dbQuery
 import com.poemcollection.data.UserRoles
 import com.poemcollection.data.Users
-import com.poemcollection.data.models.InsertNewUser
-import com.poemcollection.data.models.UpdateUser
-import com.poemcollection.data.models.User
 import com.poemcollection.domain.interfaces.IUserDao
+import com.poemcollection.domain.models.InsertNewUser
+import com.poemcollection.domain.models.UpdateUser
+import com.poemcollection.domain.models.User
 import com.poemcollection.security.security.hashing.SaltedHash
 import com.poemcollection.utils.toDatabaseString
 import org.jetbrains.exposed.sql.*

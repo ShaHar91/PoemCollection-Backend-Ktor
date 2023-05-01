@@ -1,8 +1,8 @@
 package com.poemcollection.domain.interfaces
 
-import com.poemcollection.data.models.InsertNewUser
-import com.poemcollection.data.models.UpdateUser
-import com.poemcollection.data.models.User
+import com.poemcollection.domain.models.InsertNewUser
+import com.poemcollection.domain.models.UpdateUser
+import com.poemcollection.domain.models.User
 import com.poemcollection.security.security.hashing.SaltedHash
 
 interface IUserDao {

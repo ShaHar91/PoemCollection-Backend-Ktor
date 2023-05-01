@@ -4,10 +4,10 @@ import com.poemcollection.data.DatabaseFactory.dbQuery
 import com.poemcollection.data.Poems
 import com.poemcollection.data.Reviews
 import com.poemcollection.data.Users
-import com.poemcollection.data.models.InsertOrUpdateReview
-import com.poemcollection.data.models.Ratings
-import com.poemcollection.data.models.Review
 import com.poemcollection.domain.interfaces.IReviewDao
+import com.poemcollection.domain.models.InsertOrUpdateReview
+import com.poemcollection.domain.models.Ratings
+import com.poemcollection.domain.models.Review
 import com.poemcollection.utils.toDatabaseString
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -29,9 +29,9 @@ class ReviewDaoImpl : IReviewDao {
         return reviewWithRelations.select { Reviews.id eq reviewId }.toReview()
     }
 
-    override suspend fun insertReview(pId: Int, insertReview: InsertOrUpdateReview): Review? = dbQuery {
+    override suspend fun insertReview(poemId: Int, insertReview: InsertOrUpdateReview): Review? = dbQuery {
 
-        val existsOp = exists(Poems.select { Poems.id eq pId })
+        val existsOp = exists(Poems.select { Poems.id eq poemId })
         val result = Table.Dual.slice(existsOp).selectAll().first()
         val existsResult = result[existsOp]
 
@@ -42,7 +42,7 @@ class ReviewDaoImpl : IReviewDao {
                 it[body] = insertReview.body
                 it[rating] = insertReview.rating
                 it[userId] = insertReview.userId
-                it[poemId] = pId
+                it[this.poemId] = poemId
                 it[createdAt] = LocalDateTime.now().toDatabaseString()
                 it[updatedAt] = LocalDateTime.now().toDatabaseString()
             }.value
@@ -79,5 +79,9 @@ class ReviewDaoImpl : IReviewDao {
         val average = grouped.map { it.key * it.value.size }.sum().toDouble().div(reviews.size)
 
         Ratings(reviews.size, grouped[5]?.size ?: 0, grouped[4]?.size ?: 0, grouped[3]?.size ?: 0, grouped[2]?.size ?: 0, grouped[1]?.size ?: 0, if (average.isFinite()) average else 0.0)
+    }
+
+    override suspend fun isUserWriter(reviewId: Int, userId: Int): Boolean = dbQuery {
+        Reviews.select { Reviews.id eq reviewId }.first()[Reviews.userId].value == userId
     }
 }

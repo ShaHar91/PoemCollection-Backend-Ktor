@@ -2,10 +2,10 @@ package com.poemcollection.data.dao
 
 import com.poemcollection.data.*
 import com.poemcollection.data.DatabaseFactory.dbQuery
-import com.poemcollection.data.models.InsertPoem
-import com.poemcollection.data.models.Poem
-import com.poemcollection.data.models.UpdatePoem
 import com.poemcollection.domain.interfaces.IPoemDao
+import com.poemcollection.domain.models.InsertPoem
+import com.poemcollection.domain.models.Poem
+import com.poemcollection.domain.models.UpdatePoem
 import com.poemcollection.utils.toDatabaseString
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq

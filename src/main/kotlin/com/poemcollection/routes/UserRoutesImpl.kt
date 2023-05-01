@@ -1,9 +1,9 @@
 package com.poemcollection.routes
 
-import com.poemcollection.data.models.InsertNewUser
-import com.poemcollection.data.models.UpdateUser
 import com.poemcollection.data.responses.ErrorCodes
 import com.poemcollection.domain.interfaces.IUserDao
+import com.poemcollection.domain.models.InsertNewUser
+import com.poemcollection.domain.models.UpdateUser
 import com.poemcollection.routes.interfaces.IUserRoutes
 import com.poemcollection.security.security.hashing.HashingService
 import com.poemcollection.security.security.token.TokenClaim

@@ -4,10 +4,10 @@ import com.poemcollection.data.Categories
 import com.poemcollection.data.Poems
 import com.poemcollection.data.Reviews
 import com.poemcollection.data.Users
-import com.poemcollection.data.models.Category
-import com.poemcollection.data.models.Poem
-import com.poemcollection.data.models.Review
-import com.poemcollection.data.models.User
+import com.poemcollection.domain.models.Category
+import com.poemcollection.domain.models.Poem
+import com.poemcollection.domain.models.Review
+import com.poemcollection.domain.models.User
 import org.jetbrains.exposed.sql.ResultRow
 
 fun ResultRow.toPoemWithUser() = Poem(

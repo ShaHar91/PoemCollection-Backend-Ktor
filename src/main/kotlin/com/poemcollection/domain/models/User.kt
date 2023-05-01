@@ -1,4 +1,4 @@
-package com.poemcollection.data.models
+package com.poemcollection.domain.models
 
 import com.poemcollection.data.UserRoles
 import kotlinx.serialization.Serializable

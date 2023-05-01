@@ -2,9 +2,9 @@ package com.poemcollection.data.dao
 
 import com.poemcollection.data.Categories
 import com.poemcollection.data.DatabaseFactory.dbQuery
-import com.poemcollection.data.models.Category
-import com.poemcollection.data.models.InsertOrUpdateCategory
 import com.poemcollection.domain.interfaces.ICategoryDao
+import com.poemcollection.domain.models.Category
+import com.poemcollection.domain.models.InsertOrUpdateCategory
 import com.poemcollection.utils.toDatabaseString
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq

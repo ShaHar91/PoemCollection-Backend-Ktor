@@ -1,7 +1,7 @@
 package com.poemcollection.routes
 
-import com.poemcollection.data.models.InsertOrUpdateCategory
 import com.poemcollection.domain.interfaces.ICategoryDao
+import com.poemcollection.domain.models.InsertOrUpdateCategory
 import com.poemcollection.routes.ParamConstants.CATEGORY_ID_KEY
 import com.poemcollection.routes.interfaces.ICategoryRoutes
 import io.ktor.http.*

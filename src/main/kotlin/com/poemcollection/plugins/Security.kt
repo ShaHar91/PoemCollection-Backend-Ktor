@@ -2,7 +2,6 @@ package com.poemcollection.plugins
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
-import com.poemcollection.data.UserRoles
 import com.poemcollection.domain.interfaces.IUserDao
 import com.poemcollection.security.security.token.TokenClaim
 import com.poemcollection.security.security.token.TokenConfig
@@ -45,10 +44,9 @@ fun Application.configureSecurity() {
             )
 
             validate { credential ->
-                //TODO: the full user object is not needed, so create a new object that just contains the id + role, or solemnly the role!!
-                val user = credential.payload.claims["userId"]?.asInt()?.let { userDao.getUser(it) }
+                val isUserRoleAdmin = credential.payload.claims["userId"]?.asInt()?.let { userDao.isUserRoleAdmin(it) }
 
-                if (credential.payload.audience.contains(config.audience) && user != null && user.role == UserRoles.Admin) JWTPrincipal(credential.payload) else null
+                if (credential.payload.audience.contains(config.audience) && isUserRoleAdmin != null && isUserRoleAdmin) JWTPrincipal(credential.payload) else null
             }
         }
     }
