@@ -1,4 +1,4 @@
-package com.poemcollection.data.dao
+package com.poemcollection.data.local.dao
 
 import com.poemcollection.data.DatabaseFactory.dbQuery
 import com.poemcollection.data.UserRoles

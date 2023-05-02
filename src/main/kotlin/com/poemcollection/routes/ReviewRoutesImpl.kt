@@ -25,9 +25,7 @@ class ReviewRoutesImpl(
         val principal = call.principal<JWTPrincipal>()
         val userId = principal?.getClaim(TokenClaim.TOKEN_CLAIM_USER_ID_KEY, String::class)
 
-        val poemId = call.getPoemId {
-            return@getPoemId respondText("Missing id", status = HttpStatusCode.BadRequest)
-        }
+        val poemId = call.getPoemId() ?: return call.respondText("Missing id", status = HttpStatusCode.BadRequest)
 
         //TODO: have dto object for incoming requests without exposing the userId and have another model that has the userId which we will set ourselves
         val insertReview = call.receiveNullable<InsertOrUpdateReview>() ?: run {
@@ -52,9 +50,7 @@ class ReviewRoutesImpl(
     }
 
     override suspend fun getReviewById(call: ApplicationCall) {
-        val reviewId = call.getReviewId {
-            return@getReviewId respondText("Missing id", status = HttpStatusCode.BadRequest)
-        }
+        val reviewId = call.getReviewId() ?: return call.respondText("Missing id", status = HttpStatusCode.BadRequest)
 
         val review = reviewDao.getReview(reviewId)
 
@@ -66,9 +62,7 @@ class ReviewRoutesImpl(
     }
 
     override suspend fun updateReview(call: ApplicationCall) {
-        val reviewId = call.getReviewId {
-            return@getReviewId respondText("Missing id", status = HttpStatusCode.BadRequest)
-        }
+        val reviewId = call.getReviewId() ?: return call.respondText("Missing id", status = HttpStatusCode.BadRequest)
 
         // TODO: should return a better error!!
         val userId = call.getUserId() ?: return call.respondText("Missing id", status = HttpStatusCode.BadRequest)
@@ -90,9 +84,7 @@ class ReviewRoutesImpl(
     }
 
     override suspend fun deleteReview(call: ApplicationCall) {
-        val reviewId = call.getReviewId {
-            return@getReviewId respondText("Missing id", status = HttpStatusCode.BadRequest)
-        }
+        val reviewId = call.getReviewId() ?: return call.respondText("Missing id", status = HttpStatusCode.BadRequest)
 
         // TODO: should return a better error!!
         val userId = call.getUserId() ?: return call.respondText("Missing id", status = HttpStatusCode.BadRequest)

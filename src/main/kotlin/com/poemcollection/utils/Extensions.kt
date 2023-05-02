@@ -8,13 +8,6 @@ import io.ktor.server.auth.jwt.*
 
 fun ApplicationCall.getUserId(): Int? = principal<JWTPrincipal>()?.getClaim(TokenClaim.TOKEN_CLAIM_USER_ID_KEY, String::class)?.toIntOrNull()
 
-//TODO: not sure about this one yet!!!
-suspend fun ApplicationCall.getPoemId(handleNullable: suspend ApplicationCall.() -> Unit): Int = parameters[ParamConstants.POEM_ID_KEY]?.toIntOrNull() ?: kotlin.run {
-    handleNullable()
-    -1
-}
+fun ApplicationCall.getPoemId(): Int? = parameters[ParamConstants.POEM_ID_KEY]?.toIntOrNull()
 
-suspend fun ApplicationCall.getReviewId(handleNullable: suspend ApplicationCall.() -> Unit): Int = parameters[ParamConstants.REVIEW_ID_KEY]?.toIntOrNull() ?: kotlin.run {
-    handleNullable()
-    -1
-}
+fun ApplicationCall.getReviewId(): Int? = parameters[ParamConstants.REVIEW_ID_KEY]?.toIntOrNull()

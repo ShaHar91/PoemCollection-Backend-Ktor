@@ -23,7 +23,7 @@ class PoemRoutesImpl(
     private val reviewDao: IReviewDao
 ) : IPoemRoutes {
     override suspend fun postPoem(call: ApplicationCall) {
-        val userId = call.getUserId()
+        val userId = call.getUserId() ?: return call.respondText("Missing id", status = HttpStatusCode.BadRequest)
 
         val insertPoem = call.receiveNullable<InsertPoem>() ?: run {
             call.respond(HttpStatusCode.BadRequest)
@@ -36,8 +36,7 @@ class PoemRoutesImpl(
             return call.respondText("The following categories do not exist: ${nonExistingIds.joinToString { it.toString() }}")
         }
 
-        //TODO: It would be better to have 2 separate objects, one Dto that comes in, parsing the object to a proper data class and filling in the writerId
-        val newPoem = poemDao.insertPoem(insertPoem.copy(writerId = userId ?: -1))
+        val newPoem = poemDao.insertPoem(insertPoem, userId)
 
         if (newPoem != null) {
             call.respond(HttpStatusCode.Created, newPoem)
@@ -54,9 +53,7 @@ class PoemRoutesImpl(
     }
 
     override suspend fun getPoemById(call: ApplicationCall) {
-        val poemId = call.getPoemId {
-            return@getPoemId respondText("Missing id", status = HttpStatusCode.BadRequest)
-        }
+        val poemId = call.getPoemId() ?: return call.respondText("Missing id", status = HttpStatusCode.BadRequest)
 
         val poem = poemDao.getPoem(poemId)
 
@@ -72,11 +69,7 @@ class PoemRoutesImpl(
 
 
     override suspend fun updatePoemById(call: ApplicationCall) {
-        val poemId = call.getPoemId {
-            return@getPoemId respondText("Missing id", status = HttpStatusCode.BadRequest)
-        }
-
-        // TODO: should return a better error!!
+        val poemId = call.getPoemId() ?: return call.respondText("Missing id", status = HttpStatusCode.BadRequest)
         val userId = call.getUserId() ?: return call.respondText("Missing id", status = HttpStatusCode.BadRequest)
 
         val isUserAdmin = userDao.isUserRoleAdmin(userId)
@@ -102,11 +95,7 @@ class PoemRoutesImpl(
     }
 
     override suspend fun deletePoemById(call: ApplicationCall) {
-        val poemId = call.getPoemId {
-            return@getPoemId respondText("Missing id", status = HttpStatusCode.BadRequest)
-        }
-
-        // TODO: should return a better error!!
+        val poemId = call.getPoemId() ?: return call.respondText("Missing id", status = HttpStatusCode.BadRequest)
         val userId = call.getUserId() ?: return call.respondText("Missing id", status = HttpStatusCode.BadRequest)
 
         val isUserAdmin = userDao.isUserRoleAdmin(userId)

@@ -15,7 +15,6 @@ data class Poem(
 data class InsertPoem(
     val title: String = "",
     val body: String = "",
-    val writerId: Int = 0,
     val categoryIds: List<Int> = emptyList()
 )
 

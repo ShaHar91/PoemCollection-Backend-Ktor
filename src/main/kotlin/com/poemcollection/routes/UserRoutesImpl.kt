@@ -83,7 +83,7 @@ class UserRoutesImpl(
         }
     }
 
-    override suspend fun updateUserById(call: ApplicationCall) {
+    override suspend fun updateCurrentUser(call: ApplicationCall) {
         val principal = call.principal<JWTPrincipal>()
         val userId = principal?.getClaim(TokenClaim.TOKEN_CLAIM_USER_ID_KEY, String::class)
 
@@ -98,7 +98,7 @@ class UserRoutesImpl(
         }
     }
 
-    override suspend fun deleteUserById(call: ApplicationCall) {
+    override suspend fun deleteCurrentUser(call: ApplicationCall) {
         val principal = call.principal<JWTPrincipal>()
         val userId = principal?.getClaim(TokenClaim.TOKEN_CLAIM_USER_ID_KEY, String::class)
 

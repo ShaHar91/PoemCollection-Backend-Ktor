@@ -1,4 +1,4 @@
-package com.poemcollection.data.dao
+package com.poemcollection.data.local.dao
 
 import com.poemcollection.data.*
 import com.poemcollection.data.DatabaseFactory.dbQuery
@@ -53,12 +53,12 @@ class PoemDaoImpl : IPoemDao {
             .toPoems()
     }
 
-    override suspend fun insertPoem(insertPoem: InsertPoem): Poem? = dbQuery {
+    override suspend fun insertPoem(insertPoem: InsertPoem, writerId: Int): Poem? = dbQuery {
 
         val id = PoemsTable.insertAndGetId {
             it[title] = insertPoem.title
             it[body] = insertPoem.body
-            it[writerId] = insertPoem.writerId
+            it[this.writerId] = writerId
             it[createdAt] = LocalDateTime.now().toDatabaseString()
             it[updatedAt] = LocalDateTime.now().toDatabaseString()
         }.value

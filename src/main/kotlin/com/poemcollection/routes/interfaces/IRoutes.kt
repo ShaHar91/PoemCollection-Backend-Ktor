@@ -9,8 +9,8 @@ interface IAuthRoutes {
 interface IUserRoutes {
     suspend fun postUser(call: ApplicationCall)
     suspend fun getCurrentUser(call: ApplicationCall)
-    suspend fun updateUserById(call: ApplicationCall)
-    suspend fun deleteUserById(call: ApplicationCall)
+    suspend fun updateCurrentUser(call: ApplicationCall)
+    suspend fun deleteCurrentUser(call: ApplicationCall)
 }
 
 interface ICategoryRoutes {

@@ -48,9 +48,9 @@ fun Route.userRouting(
         authenticate {
             get("me") { userRoutes.getCurrentUser(call) }
 
-            put("me") { userRoutes.updateUserById(call) }
+            put("me") { userRoutes.updateCurrentUser(call) }
 
-            delete("me") { userRoutes.deleteUserById(call) }
+            delete("me") { userRoutes.deleteCurrentUser(call) }
         }
 
         authenticate("admin") {

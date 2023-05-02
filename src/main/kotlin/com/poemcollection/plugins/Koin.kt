@@ -1,9 +1,9 @@
 package com.poemcollection.plugins
 
-import com.poemcollection.data.dao.CategoryDaoImpl
-import com.poemcollection.data.dao.PoemDaoImpl
-import com.poemcollection.data.dao.ReviewDaoImpl
-import com.poemcollection.data.dao.UserDaoImpl
+import com.poemcollection.data.local.dao.CategoryDaoImpl
+import com.poemcollection.data.local.dao.PoemDaoImpl
+import com.poemcollection.data.local.dao.ReviewDaoImpl
+import com.poemcollection.data.local.dao.UserDaoImpl
 import com.poemcollection.domain.interfaces.ICategoryDao
 import com.poemcollection.domain.interfaces.IPoemDao
 import com.poemcollection.domain.interfaces.IReviewDao
@@ -19,6 +19,7 @@ import io.ktor.server.application.*
 import org.koin.dsl.module
 import org.koin.ktor.plugin.Koin
 import org.koin.logger.slf4jLogger
+import java.util.concurrent.TimeUnit
 
 fun Application.configureKoin(environment: ApplicationEnvironment) {
     install(Koin) {
@@ -35,7 +36,7 @@ fun securityModule(environment: ApplicationEnvironment) = module {
         TokenConfig(
             environment.config.property("jwt.issuer").getString(),
             environment.config.property("jwt.audience").getString(),
-            1000L * 60L * 60L, // Valid for 1 hour...
+            TimeUnit.HOURS.toMillis(1), // Valid for 1 hour...
             System.getenv("JWT_SECRET")
         )
     }
