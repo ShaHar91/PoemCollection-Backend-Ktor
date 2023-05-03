@@ -1,5 +1,6 @@
 package com.poemcollection.routes
 
+import com.poemcollection.data.responses.ErrorCodes
 import com.poemcollection.domain.interfaces.ICategoryDao
 import com.poemcollection.domain.interfaces.IPoemDao
 import com.poemcollection.domain.interfaces.IReviewDao
@@ -7,10 +8,10 @@ import com.poemcollection.domain.interfaces.IUserDao
 import com.poemcollection.domain.models.InsertPoem
 import com.poemcollection.domain.models.UpdatePoem
 import com.poemcollection.routes.ParamConstants.CATEGORY_ID_KEY
-import com.poemcollection.routes.ParamConstants.POEM_ID_KEY
 import com.poemcollection.routes.interfaces.IPoemRoutes
 import com.poemcollection.utils.getPoemId
 import com.poemcollection.utils.getUserId
+import com.poemcollection.utils.receiveOrRespondWithError
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -23,7 +24,7 @@ class PoemRoutesImpl(
     private val reviewDao: IReviewDao
 ) : IPoemRoutes {
     override suspend fun postPoem(call: ApplicationCall) {
-        val userId = call.getUserId() ?: return call.respondText("Missing id", status = HttpStatusCode.BadRequest)
+        val userId = call.getUserId() ?: return
 
         val insertPoem = call.receiveNullable<InsertPoem>() ?: run {
             call.respond(HttpStatusCode.BadRequest)
@@ -41,7 +42,7 @@ class PoemRoutesImpl(
         if (newPoem != null) {
             call.respond(HttpStatusCode.Created, newPoem)
         } else {
-            call.respondText("Not created", status = HttpStatusCode.InternalServerError)
+            call.respond(HttpStatusCode.NoContent, ErrorCodes.ErrorResourceNotFound.asResponse)
         }
     }
 
@@ -53,7 +54,7 @@ class PoemRoutesImpl(
     }
 
     override suspend fun getPoemById(call: ApplicationCall) {
-        val poemId = call.getPoemId() ?: return call.respondText("Missing id", status = HttpStatusCode.BadRequest)
+        val poemId = call.getPoemId() ?: return
 
         val poem = poemDao.getPoem(poemId)
 
@@ -63,21 +64,20 @@ class PoemRoutesImpl(
         if (poem != null) {
             call.respond(HttpStatusCode.OK, poem)
         } else {
-            call.respondText("Not found", status = HttpStatusCode.NotFound)
+            call.respond(HttpStatusCode.NotFound, ErrorCodes.ErrorResourceNotFound.asResponse)
         }
     }
 
-
     override suspend fun updatePoemById(call: ApplicationCall) {
-        val poemId = call.getPoemId() ?: return call.respondText("Missing id", status = HttpStatusCode.BadRequest)
-        val userId = call.getUserId() ?: return call.respondText("Missing id", status = HttpStatusCode.BadRequest)
+        val poemId = call.getPoemId() ?: return
+        val userId = call.getUserId() ?: return
 
         val isUserAdmin = userDao.isUserRoleAdmin(userId)
         val isUserWriter = poemDao.isUserWriter(poemId, userId)
 
-        if (!isUserWriter && !isUserAdmin) return call.respondText("You don't have the right permissions to update this poem.", status = HttpStatusCode.BadRequest)
+        if (!isUserWriter && !isUserAdmin) return call.respond(HttpStatusCode.BadRequest, ErrorCodes.ErrorInvalidPermissionsToUpdatePoem.asResponse)
 
-        val updatePoem = call.receive<UpdatePoem>()
+        val updatePoem = call.receiveOrRespondWithError<UpdatePoem>() ?: return
 
         val categoryIds = categoryDao.getListOfExistingCategoryIds(updatePoem.categoryIds)
         if (categoryIds.count() != updatePoem.categoryIds.count()) {
@@ -90,32 +90,32 @@ class PoemRoutesImpl(
         if (poem != null) {
             call.respond(HttpStatusCode.OK, poem)
         } else {
-            call.respondText("Not created", status = HttpStatusCode.InternalServerError)
+            call.respond(HttpStatusCode.NotFound, ErrorCodes.ErrorResourceNotFound.asResponse)
         }
     }
 
     override suspend fun deletePoemById(call: ApplicationCall) {
-        val poemId = call.getPoemId() ?: return call.respondText("Missing id", status = HttpStatusCode.BadRequest)
-        val userId = call.getUserId() ?: return call.respondText("Missing id", status = HttpStatusCode.BadRequest)
+        val poemId = call.getPoemId() ?: return
+        val userId = call.getUserId() ?: return
 
         val isUserAdmin = userDao.isUserRoleAdmin(userId)
         val isUserWriter = poemDao.isUserWriter(poemId, userId)
 
-        if (!isUserWriter && !isUserAdmin) return call.respondText("You don't have the right permissions to delete this poem.", status = HttpStatusCode.BadRequest)
+        if (!isUserWriter && !isUserAdmin) return call.respond(HttpStatusCode.BadRequest, ErrorCodes.ErrorInvalidPermissionsToDeletePoem.asResponse)
 
         val success = poemDao.deletePoem(poemId)
 
         if (success) {
             call.respond(HttpStatusCode.OK)
         } else {
-            call.respondText("Not found", status = HttpStatusCode.NotFound)
+            call.respond(HttpStatusCode.NotFound, ErrorCodes.ErrorResourceNotFound.asResponse)
         }
     }
 
     override suspend fun getRatingsForPoem(call: ApplicationCall) {
-        val id = call.parameters[POEM_ID_KEY]?.toIntOrNull() ?: return call.respondText("Missing id", status = HttpStatusCode.BadRequest)
+        val poemId = call.getPoemId() ?: return
 
-        val ratings = reviewDao.calculateRatings(id)
+        val ratings = reviewDao.calculateRatings(poemId)
 
         call.respond(HttpStatusCode.OK, ratings)
     }

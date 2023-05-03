@@ -1,31 +1,17 @@
 package com.poemcollection.routes
 
+import com.poemcollection.data.mapper.toUserDto
 import com.poemcollection.data.responses.ErrorCodes
 import com.poemcollection.domain.interfaces.IUserDao
 import com.poemcollection.domain.models.InsertNewUser
 import com.poemcollection.domain.models.UpdateUser
 import com.poemcollection.routes.interfaces.IUserRoutes
 import com.poemcollection.security.security.hashing.HashingService
-import com.poemcollection.security.security.token.TokenClaim
+import com.poemcollection.utils.getUserId
+import com.poemcollection.utils.receiveOrRespondWithError
 import io.ktor.http.*
 import io.ktor.server.application.*
-import io.ktor.server.auth.*
-import io.ktor.server.auth.jwt.*
-import io.ktor.server.request.*
 import io.ktor.server.response.*
-
-suspend inline fun <reified T> ApplicationCall.receiveOrRespondWithError(): T? {
-    return try {
-        receiveNullable<T>() ?: run {
-            respond(HttpStatusCode.BadRequest, ErrorCodes.ErrorInvalidParameters.asResponse)
-            null
-        }
-
-    } catch (e: Exception) {
-        respond(HttpStatusCode.InternalServerError, ErrorCodes.ErrorInvalidContentType.asResponse)
-        null
-    }
-}
 
 class UserRoutesImpl(
     private val userDao: IUserDao,
@@ -64,50 +50,52 @@ class UserRoutesImpl(
         )
 
         if (newUser != null) {
-            call.respond(HttpStatusCode.Created, newUser)
+            call.respond(HttpStatusCode.Created, newUser.toUserDto())
         } else {
-            call.respondText("Not created", status = HttpStatusCode.InternalServerError)
+            call.respond(HttpStatusCode.NoContent, ErrorCodes.ErrorResourceNotFound.asResponse)
         }
     }
 
     override suspend fun getCurrentUser(call: ApplicationCall) {
-        val principal = call.principal<JWTPrincipal>()
-        val userId = principal?.getClaim(TokenClaim.TOKEN_CLAIM_USER_ID_KEY, String::class)
+        val userId = call.getUserId() ?: return
 
-        val user = userDao.getUser(userId?.toIntOrNull() ?: -1)
+        val user = userDao.getUser(userId)
 
         if (user != null) {
-            call.respond(HttpStatusCode.OK, user)
+            call.respond(HttpStatusCode.OK, user.toUserDto())
         } else {
-            call.respondText("Not found", status = HttpStatusCode.NotFound)
+            call.respond(HttpStatusCode.NotFound, ErrorCodes.ErrorResourceNotFound.asResponse)
         }
     }
 
     override suspend fun updateCurrentUser(call: ApplicationCall) {
-        val principal = call.principal<JWTPrincipal>()
-        val userId = principal?.getClaim(TokenClaim.TOKEN_CLAIM_USER_ID_KEY, String::class)
+        val userId = call.getUserId() ?: return
 
-        val updateUser = call.receive<UpdateUser>()
+        val updateUser = call.receiveOrRespondWithError<UpdateUser>() ?: return
 
-        val user = userDao.updateUser(userId?.toIntOrNull() ?: -1, updateUser)
+        if (updateUser.firstName == null && updateUser.lastName == null) {
+            call.respond(HttpStatusCode.BadRequest, ErrorCodes.ErrorInvalidBody.asResponse)
+            return
+        }
+
+        val user = userDao.updateUser(userId, updateUser)
 
         if (user != null) {
-            call.respond(HttpStatusCode.OK, user)
+            call.respond(HttpStatusCode.OK, user.toUserDto())
         } else {
-            call.respondText("Not found", status = HttpStatusCode.NotFound)
+            call.respond(HttpStatusCode.NotFound, ErrorCodes.ErrorResourceNotFound.asResponse)
         }
     }
 
     override suspend fun deleteCurrentUser(call: ApplicationCall) {
-        val principal = call.principal<JWTPrincipal>()
-        val userId = principal?.getClaim(TokenClaim.TOKEN_CLAIM_USER_ID_KEY, String::class)
+        val userId = call.getUserId() ?: return
 
-        val success = userDao.deleteUser(userId?.toIntOrNull() ?: -1)
+        val success = userDao.deleteUser(userId)
 
         if (success) {
             call.respond(HttpStatusCode.OK)
         } else {
-            call.respondText("Not found", status = HttpStatusCode.NotFound)
+            call.respond(HttpStatusCode.NotFound, ErrorCodes.ErrorResourceNotFound.asResponse)
         }
     }
 }

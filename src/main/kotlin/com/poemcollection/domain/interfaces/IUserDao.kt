@@ -3,12 +3,13 @@ package com.poemcollection.domain.interfaces
 import com.poemcollection.domain.models.InsertNewUser
 import com.poemcollection.domain.models.UpdateUser
 import com.poemcollection.domain.models.User
+import com.poemcollection.domain.models.UserHashable
 import com.poemcollection.security.security.hashing.SaltedHash
 
 interface IUserDao {
 
     suspend fun getUser(id: Int): User?
-    suspend fun getUserByEmail(email: String): User?
+    suspend fun getUserHashableByEmail(email: String): UserHashable?
     suspend fun getUsers(): List<User>
     suspend fun insertUser(user: InsertNewUser, saltedHash: SaltedHash): User?
 

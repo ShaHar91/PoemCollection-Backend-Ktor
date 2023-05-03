@@ -4,14 +4,19 @@ import com.poemcollection.data.UserRoles
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 
+data class UserHashable(
+    val id: Int = 0,
+    val email: String = "",
+    @Transient val password: String = "",
+    @Transient val salt: String = ""
+)
+
 @Serializable
 data class User(
     val id: Int = 0,
     val firstName: String = "",
     val lastName: String = "",
     val email: String = "",
-    @Transient val password: String = "",
-    @Transient val salt: String = "",
     val createdAt: String = "",
     val updatedAt: String = "",
     val role: UserRoles = UserRoles.User
@@ -36,6 +41,6 @@ data class InsertNewUser(
 
 @Serializable
 data class UpdateUser(
-    val firstName: String = "",
-    val lastName: String = ""
+    val firstName: String? = null,
+    val lastName: String? = null
 )

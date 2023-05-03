@@ -1,9 +1,10 @@
 package com.poemcollection.routes
 
 import com.poemcollection.data.requests.InsertOrUpdateCategoryReq
+import com.poemcollection.data.responses.ErrorCodes
 import com.poemcollection.domain.interfaces.ICategoryDao
-import com.poemcollection.routes.ParamConstants.CATEGORY_ID_KEY
 import com.poemcollection.routes.interfaces.ICategoryRoutes
+import com.poemcollection.utils.getCategoryId
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -23,7 +24,7 @@ class CategoryRoutesImpl(
         if (newCategory != null) {
             call.respond(HttpStatusCode.Created, newCategory)
         } else {
-            call.respondText("Not created", status = HttpStatusCode.InternalServerError)
+            call.respond(HttpStatusCode.NoContent, ErrorCodes.ErrorResourceNotFound.asResponse)
         }
     }
 
@@ -34,40 +35,40 @@ class CategoryRoutesImpl(
     }
 
     override suspend fun getCategoryById(call: ApplicationCall) {
-        val id = call.parameters[CATEGORY_ID_KEY]?.toIntOrNull() ?: return call.respondText("Missing id", status = HttpStatusCode.BadRequest)
+        val categoryId = call.getCategoryId() ?: return
 
-        val category = categoryDao.getCategory(id)
+        val category = categoryDao.getCategory(categoryId)
 
         if (category != null) {
             call.respond(HttpStatusCode.OK, category)
         } else {
-            call.respondText("Not found", status = HttpStatusCode.NotFound)
+            call.respond(HttpStatusCode.NotFound, ErrorCodes.ErrorResourceNotFound.asResponse)
         }
     }
 
     override suspend fun updateCategoryById(call: ApplicationCall) {
-        val id = call.parameters[CATEGORY_ID_KEY]?.toIntOrNull() ?: return call.respondText("Missing id", status = HttpStatusCode.BadRequest)
+        val categoryId = call.getCategoryId() ?: return
 
         val updateCategory = call.receive<InsertOrUpdateCategoryReq>()
 
-        val category = categoryDao.updateCategory(id, updateCategory)
+        val category = categoryDao.updateCategory(categoryId, updateCategory)
 
         if (category != null) {
             call.respond(HttpStatusCode.OK, category)
         } else {
-            call.respondText("Not found", status = HttpStatusCode.NotFound)
+            call.respond(HttpStatusCode.NotFound, ErrorCodes.ErrorResourceNotFound.asResponse)
         }
     }
 
     override suspend fun deleteCategoryById(call: ApplicationCall) {
-        val id = call.parameters[CATEGORY_ID_KEY]?.toIntOrNull() ?: return call.respondText("Missing id", status = HttpStatusCode.BadRequest)
+        val categoryId = call.getCategoryId() ?: return
 
-        val success = categoryDao.deleteCategory(id)
+        val success = categoryDao.deleteCategory(categoryId)
 
         if (success) {
             call.respond(HttpStatusCode.OK)
         } else {
-            call.respondText("Not found", status = HttpStatusCode.NotFound)
+            call.respond(HttpStatusCode.NotFound, ErrorCodes.ErrorResourceNotFound.asResponse)
         }
     }
 }

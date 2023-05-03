@@ -4,10 +4,7 @@ import com.poemcollection.data.CategoriesTable
 import com.poemcollection.data.PoemsTable
 import com.poemcollection.data.ReviewsTable
 import com.poemcollection.data.UsersTable
-import com.poemcollection.domain.models.Category
-import com.poemcollection.domain.models.Poem
-import com.poemcollection.domain.models.Review
-import com.poemcollection.domain.models.User
+import com.poemcollection.domain.models.*
 import org.jetbrains.exposed.sql.ResultRow
 
 fun ResultRow.toPoemWithUser() = Poem(
@@ -24,8 +21,6 @@ fun ResultRow.toUser() = User(
     firstName = this[UsersTable.firstName],
     lastName = this[UsersTable.lastName],
     email = this[UsersTable.email],
-    password = this[UsersTable.password],
-    salt = this[UsersTable.salt],
     createdAt = this[UsersTable.createdAt],
     updatedAt = this[UsersTable.updatedAt],
     role = this[UsersTable.role]
@@ -47,12 +42,20 @@ fun ResultRow.toReviewWithUser() = Review(
     updatedAt = this[ReviewsTable.updatedAt]
 )
 
+fun ResultRow.toUserHashable() = UserHashable(
+    id = this[UsersTable.id].value,
+    email = this[UsersTable.email],
+    password = this[UsersTable.password],
+    salt = this[UsersTable.salt]
+)
+
 fun Iterable<ResultRow>.toCategories() = this.map { it.toCategory() }
-fun Iterable<ResultRow>.toCategory() = toCategories().singleOrNull()
+fun Iterable<ResultRow>.toCategory() = this.firstOrNull()?.toCategory()
 
 fun Iterable<ResultRow>.toUsers() = this.map { it.toUser() }
-fun Iterable<ResultRow>.toUser() = toUsers().singleOrNull()
+fun Iterable<ResultRow>.toUser() = this.firstOrNull()?.toUser()
+fun Iterable<ResultRow>.toUserHashable() = this.firstOrNull()?.toUserHashable()
 
 fun Iterable<ResultRow>.toReviews() = this.map { it.toReviewWithUser() }
-fun Iterable<ResultRow>.toReview() = toReviews().singleOrNull()
+fun Iterable<ResultRow>.toReview() = this.firstOrNull()?.toReviewWithUser()
 

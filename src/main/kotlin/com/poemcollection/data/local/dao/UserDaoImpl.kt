@@ -7,6 +7,7 @@ import com.poemcollection.domain.interfaces.IUserDao
 import com.poemcollection.domain.models.InsertNewUser
 import com.poemcollection.domain.models.UpdateUser
 import com.poemcollection.domain.models.User
+import com.poemcollection.domain.models.UserHashable
 import com.poemcollection.security.security.hashing.SaltedHash
 import com.poemcollection.utils.toDatabaseString
 import org.jetbrains.exposed.sql.*
@@ -19,8 +20,8 @@ class UserDaoImpl : IUserDao {
         UsersTable.select { UsersTable.id eq id }.toUser()
     }
 
-    override suspend fun getUserByEmail(email: String): User? = dbQuery {
-        UsersTable.select { UsersTable.email eq email }.toUser()
+    override suspend fun getUserHashableByEmail(email: String): UserHashable? = dbQuery {
+        UsersTable.select { UsersTable.email eq email }.toUserHashable()
     }
 
     override suspend fun getUsers(): List<User> = dbQuery {
@@ -41,8 +42,8 @@ class UserDaoImpl : IUserDao {
 
     override suspend fun updateUser(id: Int, user: UpdateUser): User? = dbQuery {
         val result = UsersTable.update({ UsersTable.id eq id }) {
-            it[firstName] = user.firstName
-            it[lastName] = user.lastName
+            user.firstName?.let { first -> it[firstName] = first }
+            user.lastName?.let { last -> it[lastName] = last }
             it[updatedAt] = LocalDateTime.now().toDatabaseString()
         }
 
