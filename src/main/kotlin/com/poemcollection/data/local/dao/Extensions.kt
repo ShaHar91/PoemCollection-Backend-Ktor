@@ -4,7 +4,11 @@ import com.poemcollection.data.CategoriesTable
 import com.poemcollection.data.PoemsTable
 import com.poemcollection.data.ReviewsTable
 import com.poemcollection.data.UsersTable
-import com.poemcollection.domain.models.*
+import com.poemcollection.domain.models.Category
+import com.poemcollection.domain.models.Poem
+import com.poemcollection.domain.models.Review
+import com.poemcollection.domain.models.user.User
+import com.poemcollection.domain.models.user.UserHashable
 import org.jetbrains.exposed.sql.ResultRow
 
 fun ResultRow.toPoemWithUser() = Poem(

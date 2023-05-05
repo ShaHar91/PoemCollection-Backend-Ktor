@@ -1,10 +1,11 @@
 package com.poemcollection.routes
 
+import com.poemcollection.data.mapper.toInsertNewUser
 import com.poemcollection.data.mapper.toUserDto
+import com.poemcollection.data.remote.incoming.user.InsertNewUserDto
 import com.poemcollection.data.responses.ErrorCodes
 import com.poemcollection.domain.interfaces.IUserDao
-import com.poemcollection.domain.models.InsertNewUser
-import com.poemcollection.domain.models.UpdateUser
+import com.poemcollection.domain.models.user.UpdateUser
 import com.poemcollection.routes.interfaces.IUserRoutes
 import com.poemcollection.security.security.hashing.HashingService
 import com.poemcollection.utils.getUserId
@@ -19,34 +20,33 @@ class UserRoutesImpl(
 ) : IUserRoutes {
 
     override suspend fun postUser(call: ApplicationCall) {
-        val user = call.receiveOrRespondWithError<InsertNewUser>() ?: return
+        val insertNewUser = call.receiveOrRespondWithError<InsertNewUserDto>() ?: return
 
-        if (!user.isValid) {
+        if (!insertNewUser.isValid) {
             call.respond(HttpStatusCode.BadRequest, ErrorCodes.ErrorInvalidParameters.asResponse)
             return
         }
 
-        val userUnique = userDao.userUnique(user.email)
-        if (!userUnique || !user.email.contains("@")) {
+        val userUnique = userDao.userUnique(insertNewUser.email)
+        if (!userUnique || !insertNewUser.email.contains("@")) {
             call.respond(HttpStatusCode.Conflict, ErrorCodes.ErrorInvalidEmail.asResponse) // Email already exists
             return
         }
 
-        if (!user.isPasswordSame) {
+        if (!insertNewUser.isPasswordSame) {
             call.respond(HttpStatusCode.Conflict, ErrorCodes.ErrorRepeatPassword.asResponse) // repeatPassword is not the same
             return
         }
 
-        if (!user.isPwTooShort) {
+        if (!insertNewUser.isPwTooShort) {
             call.respond(HttpStatusCode.Conflict, ErrorCodes.ErrorInvalidPassword.asResponse)
             return
         }
 
-        val saltedHash = hashingService.generateSaltedHash(user.password)
+        val saltedHash = hashingService.generateSaltedHash(insertNewUser.password)
 
         val newUser = userDao.insertUser(
-            user,
-            saltedHash
+            insertNewUser.toInsertNewUser(saltedHash)
         )
 
         if (newUser != null) {

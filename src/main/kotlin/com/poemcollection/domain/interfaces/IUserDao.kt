@@ -1,17 +1,16 @@
 package com.poemcollection.domain.interfaces
 
-import com.poemcollection.domain.models.InsertNewUser
-import com.poemcollection.domain.models.UpdateUser
-import com.poemcollection.domain.models.User
-import com.poemcollection.domain.models.UserHashable
-import com.poemcollection.security.security.hashing.SaltedHash
+import com.poemcollection.domain.models.user.InsertNewUser
+import com.poemcollection.domain.models.user.UpdateUser
+import com.poemcollection.domain.models.user.User
+import com.poemcollection.domain.models.user.UserHashable
 
 interface IUserDao {
 
     suspend fun getUser(id: Int): User?
     suspend fun getUserHashableByEmail(email: String): UserHashable?
     suspend fun getUsers(): List<User>
-    suspend fun insertUser(user: InsertNewUser, saltedHash: SaltedHash): User?
+    suspend fun insertUser(user: InsertNewUser): User?
 
     suspend fun updateUser(id: Int, user: UpdateUser): User?
     suspend fun deleteUser(id: Int): Boolean

@@ -4,11 +4,10 @@ import com.poemcollection.data.DatabaseFactory.dbQuery
 import com.poemcollection.data.UserRoles
 import com.poemcollection.data.UsersTable
 import com.poemcollection.domain.interfaces.IUserDao
-import com.poemcollection.domain.models.InsertNewUser
-import com.poemcollection.domain.models.UpdateUser
-import com.poemcollection.domain.models.User
-import com.poemcollection.domain.models.UserHashable
-import com.poemcollection.security.security.hashing.SaltedHash
+import com.poemcollection.domain.models.user.InsertNewUser
+import com.poemcollection.domain.models.user.UpdateUser
+import com.poemcollection.domain.models.user.User
+import com.poemcollection.domain.models.user.UserHashable
 import com.poemcollection.utils.toDatabaseString
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -28,13 +27,13 @@ class UserDaoImpl : IUserDao {
         UsersTable.selectAll().toUsers()
     }
 
-    override suspend fun insertUser(user: InsertNewUser, saltedHash: SaltedHash): User? = dbQuery {
+    override suspend fun insertUser(user: InsertNewUser): User? = dbQuery {
         UsersTable.insert {
             it[firstName] = user.firstName
             it[lastName] = user.lastName
             it[email] = user.email
-            it[password] = saltedHash.hash
-            it[salt] = saltedHash.salt
+            it[password] = user.saltedHash.hash
+            it[salt] = user.saltedHash.salt
             it[createdAt] = LocalDateTime.now().toDatabaseString()
             it[updatedAt] = LocalDateTime.now().toDatabaseString()
         }.resultedValues?.toUsers()?.singleOrNull()

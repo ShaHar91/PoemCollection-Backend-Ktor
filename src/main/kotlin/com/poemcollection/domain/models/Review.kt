@@ -1,5 +1,7 @@
 package com.poemcollection.domain.models
 
+import com.poemcollection.domain.models.user.User
+
 @kotlinx.serialization.Serializable
 data class Review(
     val id: Int = 0,

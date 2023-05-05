@@ -1,6 +1,6 @@
 package com.poemcollection.routes
 
-import com.poemcollection.data.remote.CreateTokenDto
+import com.poemcollection.data.remote.outgoing.TokenDto
 import com.poemcollection.data.requests.AuthRequest
 import com.poemcollection.data.responses.ErrorCodes
 import com.poemcollection.domain.interfaces.IUserDao
@@ -46,6 +46,6 @@ class AuthRoutesImpl(
             TokenClaim(TOKEN_CLAIM_USER_ID_KEY, userHashable.id)
         )
 
-        call.respond(HttpStatusCode.OK, CreateTokenDto(token, tokenConfig.expiresIn))
+        call.respond(HttpStatusCode.OK, TokenDto(token, tokenConfig.expiresIn))
     }
 }
