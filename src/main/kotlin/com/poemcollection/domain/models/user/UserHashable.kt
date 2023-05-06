@@ -1,5 +1,6 @@
 package com.poemcollection.domain.models.user
 
+import com.poemcollection.security.security.hashing.SaltedHash
 import kotlinx.serialization.Transient
 
 data class UserHashable(
@@ -9,4 +10,8 @@ data class UserHashable(
     // Just in case we set the password + salt as Transient, so they will never be handed along!
     @Transient val password: String = "",
     @Transient val salt: String = ""
+)
+
+fun UserHashable.toSaltedHash() = SaltedHash(
+    password, salt
 )

@@ -4,9 +4,9 @@ import com.poemcollection.data.remote.outgoing.TokenDto
 import com.poemcollection.data.requests.AuthRequest
 import com.poemcollection.data.responses.ErrorCodes
 import com.poemcollection.domain.interfaces.IUserDao
+import com.poemcollection.domain.models.user.toSaltedHash
 import com.poemcollection.routes.interfaces.IAuthRoutes
 import com.poemcollection.security.security.hashing.HashingService
-import com.poemcollection.security.security.hashing.SaltedHash
 import com.poemcollection.security.security.token.TokenClaim
 import com.poemcollection.security.security.token.TokenClaim.Companion.TOKEN_CLAIM_USER_ID_KEY
 import com.poemcollection.security.security.token.TokenConfig
@@ -34,7 +34,7 @@ class AuthRoutesImpl(
             return
         }
 
-        val isValidPassword = hashingService.verify(request.password, SaltedHash(userHashable.password, userHashable.salt))
+        val isValidPassword = hashingService.verify(request.password, userHashable.toSaltedHash())
 
         if (!isValidPassword) {
             call.respond(HttpStatusCode.Conflict, ErrorCodes.ErrorInvalidCredentials.asResponse)

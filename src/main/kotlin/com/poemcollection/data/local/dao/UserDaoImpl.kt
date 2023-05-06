@@ -8,6 +8,7 @@ import com.poemcollection.domain.models.user.InsertNewUser
 import com.poemcollection.domain.models.user.UpdateUser
 import com.poemcollection.domain.models.user.User
 import com.poemcollection.domain.models.user.UserHashable
+import com.poemcollection.security.security.hashing.SaltedHash
 import com.poemcollection.utils.toDatabaseString
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -17,6 +18,10 @@ class UserDaoImpl : IUserDao {
 
     override suspend fun getUser(id: Int): User? = dbQuery {
         UsersTable.select { UsersTable.id eq id }.toUser()
+    }
+
+    override suspend fun getUserHashableById(id: Int): UserHashable? = dbQuery {
+        UsersTable.select { UsersTable.id eq id }.toUserHashable()
     }
 
     override suspend fun getUserHashableByEmail(email: String): UserHashable? = dbQuery {
@@ -65,5 +70,19 @@ class UserDaoImpl : IUserDao {
 
     override suspend fun isUserRoleAdmin(userId: Int): Boolean = dbQuery {
         UsersTable.select { UsersTable.id eq userId }.first()[UsersTable.role] == UserRoles.Admin
+    }
+
+    override suspend fun updateUserPassword(userId: Int, saltedHash: SaltedHash): User? = dbQuery {
+        val result = UsersTable.update({ UsersTable.id eq userId }) {
+            it[password] = saltedHash.hash
+            it[salt] = saltedHash.salt
+            it[updatedAt] = LocalDateTime.now().toDatabaseString()
+        }
+
+        if (result == 1) {
+            UsersTable.select { UsersTable.id eq userId }.toUser()
+        } else {
+            null
+        }
     }
 }

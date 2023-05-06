@@ -50,6 +50,8 @@ fun Route.userRouting(
 
             put("me") { userRoutes.updateCurrentUser(call) }
 
+            put("me/password") { userRoutes.updateCurrentUserPassword(call) }
+
             delete("me") { userRoutes.deleteCurrentUser(call) }
         }
 

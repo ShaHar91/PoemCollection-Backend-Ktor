@@ -15,7 +15,6 @@ import com.poemcollection.utils.getUserId
 import com.poemcollection.utils.receiveOrRespondWithError
 import io.ktor.http.*
 import io.ktor.server.application.*
-import io.ktor.server.request.*
 import io.ktor.server.response.*
 
 class PoemRoutesImpl(
@@ -27,10 +26,7 @@ class PoemRoutesImpl(
     override suspend fun postPoem(call: ApplicationCall) {
         val userId = call.getUserId() ?: return
 
-        val insertPoem = call.receiveNullable<InsertOrUpdatePoemDto>() ?: run {
-            call.respond(HttpStatusCode.BadRequest)
-            return
-        }
+        val insertPoem = call.receiveOrRespondWithError<InsertOrUpdatePoemDto>() ?: return
 
         val categoryIds = categoryDao.getListOfExistingCategoryIds(insertPoem.categoryIds)
         if (categoryIds.count() != insertPoem.categoryIds.count()) {
