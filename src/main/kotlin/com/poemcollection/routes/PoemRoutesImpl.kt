@@ -1,12 +1,13 @@
 package com.poemcollection.routes
 
+import com.poemcollection.data.mapper.toInsertOrUpdatePoem
+import com.poemcollection.data.mapper.toPoemDto
+import com.poemcollection.data.remote.incoming.poem.InsertOrUpdatePoemDto
 import com.poemcollection.data.responses.ErrorCodes
 import com.poemcollection.domain.interfaces.ICategoryDao
 import com.poemcollection.domain.interfaces.IPoemDao
 import com.poemcollection.domain.interfaces.IReviewDao
 import com.poemcollection.domain.interfaces.IUserDao
-import com.poemcollection.domain.models.InsertPoem
-import com.poemcollection.domain.models.UpdatePoem
 import com.poemcollection.routes.ParamConstants.CATEGORY_ID_KEY
 import com.poemcollection.routes.interfaces.IPoemRoutes
 import com.poemcollection.utils.getPoemId
@@ -26,7 +27,7 @@ class PoemRoutesImpl(
     override suspend fun postPoem(call: ApplicationCall) {
         val userId = call.getUserId() ?: return
 
-        val insertPoem = call.receiveNullable<InsertPoem>() ?: run {
+        val insertPoem = call.receiveNullable<InsertOrUpdatePoemDto>() ?: run {
             call.respond(HttpStatusCode.BadRequest)
             return
         }
@@ -37,7 +38,7 @@ class PoemRoutesImpl(
             return call.respondText("The following categories do not exist: ${nonExistingIds.joinToString { it.toString() }}")
         }
 
-        val newPoem = poemDao.insertPoem(insertPoem, userId)
+        val newPoem = poemDao.insertPoem(insertPoem.toInsertOrUpdatePoem(), userId)?.toPoemDto()
 
         if (newPoem != null) {
             call.respond(HttpStatusCode.Created, newPoem)
@@ -49,14 +50,14 @@ class PoemRoutesImpl(
     override suspend fun getAllPoems(call: ApplicationCall) {
         val categoryId = call.request.queryParameters[CATEGORY_ID_KEY]?.toIntOrNull()
 
-        val poems = poemDao.getPoems(categoryId)
+        val poems = poemDao.getPoems(categoryId).map { it.toPoemDto() }
         call.respond(HttpStatusCode.OK, poems)
     }
 
     override suspend fun getPoemById(call: ApplicationCall) {
         val poemId = call.getPoemId() ?: return
 
-        val poem = poemDao.getPoem(poemId)
+        val poem = poemDao.getPoem(poemId)?.toPoemDto()
 
         //TODO: maybe get a couple of things in a collection so the app doesn't have to do 3 seperate calls?
         // e.g. { "poem": {}, "ratings" : {}, "ownReview": {}, "reviews": {}} ----> where reviews are limited to 3 or 5 reviews...
@@ -77,7 +78,7 @@ class PoemRoutesImpl(
 
         if (!isUserWriter && !isUserAdmin) return call.respond(HttpStatusCode.BadRequest, ErrorCodes.ErrorInvalidPermissionsToUpdatePoem.asResponse)
 
-        val updatePoem = call.receiveOrRespondWithError<UpdatePoem>() ?: return
+        val updatePoem = call.receiveOrRespondWithError<InsertOrUpdatePoemDto>() ?: return
 
         val categoryIds = categoryDao.getListOfExistingCategoryIds(updatePoem.categoryIds)
         if (categoryIds.count() != updatePoem.categoryIds.count()) {
@@ -85,7 +86,7 @@ class PoemRoutesImpl(
             return call.respondText("The following categories do not exist: ${nonExistingIds.joinToString { it.toString() }}")
         }
 
-        val poem = poemDao.updatePoem(poemId, updatePoem)
+        val poem = poemDao.updatePoem(poemId, updatePoem.toInsertOrUpdatePoem())?.toPoemDto()
 
         if (poem != null) {
             call.respond(HttpStatusCode.OK, poem)

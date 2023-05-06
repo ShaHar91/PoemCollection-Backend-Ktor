@@ -4,5 +4,4 @@ interface DateAble {
 
     val createdAt: String
     val updatedAt: String
-
 }

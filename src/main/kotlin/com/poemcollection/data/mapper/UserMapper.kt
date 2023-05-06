@@ -1,8 +1,10 @@
 package com.poemcollection.data.mapper
 
 import com.poemcollection.data.remote.incoming.user.InsertNewUserDto
+import com.poemcollection.data.remote.incoming.user.UpdateUserDto
 import com.poemcollection.data.remote.outgoing.UserDto
 import com.poemcollection.domain.models.user.InsertNewUser
+import com.poemcollection.domain.models.user.UpdateUser
 import com.poemcollection.domain.models.user.User
 import com.poemcollection.security.security.hashing.SaltedHash
 
@@ -29,4 +31,9 @@ fun InsertNewUserDto.toInsertNewUser(saltedHash: SaltedHash) = InsertNewUser(
     lastName,
     email,
     saltedHash
+)
+
+fun UpdateUserDto.toUpdateUser() = UpdateUser(
+    firstName,
+    lastName
 )

@@ -4,8 +4,8 @@ import com.poemcollection.data.CategoriesTable
 import com.poemcollection.data.PoemsTable
 import com.poemcollection.data.ReviewsTable
 import com.poemcollection.data.UsersTable
-import com.poemcollection.domain.models.Category
-import com.poemcollection.domain.models.Poem
+import com.poemcollection.domain.models.category.Category
+import com.poemcollection.domain.models.poem.Poem
 import com.poemcollection.domain.models.review.Review
 import com.poemcollection.domain.models.user.User
 import com.poemcollection.domain.models.user.UserHashable

@@ -1,6 +1,8 @@
 package com.poemcollection.routes
 
-import com.poemcollection.data.requests.InsertOrUpdateCategoryReq
+import com.poemcollection.data.mapper.toCategoryDto
+import com.poemcollection.data.mapper.toInsertOrUpdateCategory
+import com.poemcollection.data.remote.incoming.InsertOrUpdateCategoryDto
 import com.poemcollection.data.responses.ErrorCodes
 import com.poemcollection.domain.interfaces.ICategoryDao
 import com.poemcollection.routes.interfaces.ICategoryRoutes
@@ -14,12 +16,12 @@ class CategoryRoutesImpl(
     private val categoryDao: ICategoryDao
 ) : ICategoryRoutes {
     override suspend fun postCategory(call: ApplicationCall) {
-        val insertCategory = call.receiveNullable<InsertOrUpdateCategoryReq>() ?: run {
+        val insertCategory = call.receiveNullable<InsertOrUpdateCategoryDto>() ?: run {
             call.respond(HttpStatusCode.BadRequest)
             return
         }
 
-        val newCategory = categoryDao.insertCategory(insertCategory)
+        val newCategory = categoryDao.insertCategory(insertCategory.toInsertOrUpdateCategory())?.toCategoryDto()
 
         if (newCategory != null) {
             call.respond(HttpStatusCode.Created, newCategory)
@@ -29,7 +31,7 @@ class CategoryRoutesImpl(
     }
 
     override suspend fun getAllCategories(call: ApplicationCall) {
-        val categories = categoryDao.getCategories()
+        val categories = categoryDao.getCategories().map { it.toCategoryDto() }
 
         call.respond(HttpStatusCode.OK, categories)
     }
@@ -37,7 +39,7 @@ class CategoryRoutesImpl(
     override suspend fun getCategoryById(call: ApplicationCall) {
         val categoryId = call.getCategoryId() ?: return
 
-        val category = categoryDao.getCategory(categoryId)
+        val category = categoryDao.getCategory(categoryId)?.toCategoryDto()
 
         if (category != null) {
             call.respond(HttpStatusCode.OK, category)
@@ -49,9 +51,9 @@ class CategoryRoutesImpl(
     override suspend fun updateCategoryById(call: ApplicationCall) {
         val categoryId = call.getCategoryId() ?: return
 
-        val updateCategory = call.receive<InsertOrUpdateCategoryReq>()
+        val updateCategory = call.receive<InsertOrUpdateCategoryDto>()
 
-        val category = categoryDao.updateCategory(categoryId, updateCategory)
+        val category = categoryDao.updateCategory(categoryId, updateCategory.toInsertOrUpdateCategory())?.toCategoryDto()
 
         if (category != null) {
             call.respond(HttpStatusCode.OK, category)

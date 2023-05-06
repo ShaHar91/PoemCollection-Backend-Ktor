@@ -1,11 +1,12 @@
 package com.poemcollection.routes
 
 import com.poemcollection.data.mapper.toInsertNewUser
+import com.poemcollection.data.mapper.toUpdateUser
 import com.poemcollection.data.mapper.toUserDto
 import com.poemcollection.data.remote.incoming.user.InsertNewUserDto
+import com.poemcollection.data.remote.incoming.user.UpdateUserDto
 import com.poemcollection.data.responses.ErrorCodes
 import com.poemcollection.domain.interfaces.IUserDao
-import com.poemcollection.domain.models.user.UpdateUser
 import com.poemcollection.routes.interfaces.IUserRoutes
 import com.poemcollection.security.security.hashing.HashingService
 import com.poemcollection.utils.getUserId
@@ -71,14 +72,14 @@ class UserRoutesImpl(
     override suspend fun updateCurrentUser(call: ApplicationCall) {
         val userId = call.getUserId() ?: return
 
-        val updateUser = call.receiveOrRespondWithError<UpdateUser>() ?: return
+        val updateUser = call.receiveOrRespondWithError<UpdateUserDto>() ?: return
 
         if (updateUser.firstName == null && updateUser.lastName == null) {
             call.respond(HttpStatusCode.BadRequest, ErrorCodes.ErrorInvalidBody.asResponse)
             return
         }
 
-        val user = userDao.updateUser(userId, updateUser)
+        val user = userDao.updateUser(userId, updateUser.toUpdateUser())
 
         if (user != null) {
             call.respond(HttpStatusCode.OK, user.toUserDto())

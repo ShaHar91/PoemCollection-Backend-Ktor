@@ -3,9 +3,8 @@ package com.poemcollection.data.local.dao
 import com.poemcollection.data.*
 import com.poemcollection.data.DatabaseFactory.dbQuery
 import com.poemcollection.domain.interfaces.IPoemDao
-import com.poemcollection.domain.models.InsertPoem
-import com.poemcollection.domain.models.Poem
-import com.poemcollection.domain.models.UpdatePoem
+import com.poemcollection.domain.models.poem.InsertOrUpdatePoem
+import com.poemcollection.domain.models.poem.Poem
 import com.poemcollection.utils.toDatabaseString
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -53,7 +52,7 @@ class PoemDaoImpl : IPoemDao {
             .toPoems()
     }
 
-    override suspend fun insertPoem(insertPoem: InsertPoem, writerId: Int): Poem? = dbQuery {
+    override suspend fun insertPoem(insertPoem: InsertOrUpdatePoem, writerId: Int): Poem? = dbQuery {
 
         val id = PoemsTable.insertAndGetId {
             it[title] = insertPoem.title
@@ -73,7 +72,7 @@ class PoemDaoImpl : IPoemDao {
         findPoemById(id)
     }
 
-    override suspend fun updatePoem(id: Int, updatePoem: UpdatePoem): Poem? {
+    override suspend fun updatePoem(id: Int, updatePoem: InsertOrUpdatePoem): Poem? {
         val result = dbQuery {
             val res = PoemsTable.update({ PoemsTable.id eq id }) {
                 it[title] = updatePoem.title

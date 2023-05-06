@@ -1,16 +1,15 @@
 package com.poemcollection.domain.interfaces
 
-import com.poemcollection.domain.models.InsertPoem
-import com.poemcollection.domain.models.Poem
-import com.poemcollection.domain.models.UpdatePoem
+import com.poemcollection.domain.models.poem.InsertOrUpdatePoem
+import com.poemcollection.domain.models.poem.Poem
 
 interface IPoemDao {
 
     suspend fun getPoem(id: Int): Poem?
     suspend fun getPoems(categoryId: Int?): List<Poem>
-    suspend fun insertPoem(insertPoem: InsertPoem, writerId: Int): Poem?
+    suspend fun insertPoem(insertPoem: InsertOrUpdatePoem, writerId: Int): Poem?
 
-    suspend fun updatePoem(id: Int, updatePoem: UpdatePoem): Poem?
+    suspend fun updatePoem(id: Int, updatePoem: InsertOrUpdatePoem): Poem?
     suspend fun deletePoem(id: Int): Boolean
     suspend fun isUserWriter(poemId: Int, userId: Int): Boolean
 }
