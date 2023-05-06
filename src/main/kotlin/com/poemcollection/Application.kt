@@ -24,5 +24,5 @@ fun Application.module() {
 }
 
 
-// TODO: can maybe be used for a couple of translations??   --->    https://github.com/aymanizz/ktor-i18n
-// TODO: what does this do??    ---->    https://github.com/myndocs/kotlin-oauth2-server
+// can maybe be used for a couple of translations??   --->    https://github.com/aymanizz/ktor-i18n
+// what does this do??    ---->    https://github.com/myndocs/kotlin-oauth2-server

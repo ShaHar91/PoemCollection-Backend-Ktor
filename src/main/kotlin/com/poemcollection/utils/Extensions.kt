@@ -12,7 +12,7 @@ import io.ktor.server.response.*
 
 suspend inline fun <reified T> ApplicationCall.receiveOrRespondWithError(): T? {
     return try {
-        receiveNullable<T>() ?: run {
+        runCatching { receiveNullable<T>() }.getOrNull() ?: run { // TODO: not very sure about this, but it will do for now
             respond(HttpStatusCode.BadRequest, ErrorCodes.ErrorInvalidParameters.asResponse)
             null
         }

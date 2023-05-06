@@ -5,9 +5,9 @@ import com.poemcollection.data.PoemsTable
 import com.poemcollection.data.ReviewsTable
 import com.poemcollection.data.UsersTable
 import com.poemcollection.domain.interfaces.IReviewDao
-import com.poemcollection.domain.models.InsertOrUpdateReview
 import com.poemcollection.domain.models.Ratings
-import com.poemcollection.domain.models.Review
+import com.poemcollection.domain.models.review.InsertOrUpdateReview
+import com.poemcollection.domain.models.review.Review
 import com.poemcollection.utils.toDatabaseString
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq

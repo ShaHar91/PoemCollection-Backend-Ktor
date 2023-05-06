@@ -4,5 +4,5 @@ package com.poemcollection.data.remote.outgoing
 data class TokenDto(
     val access_token: String,
     val expires_in: Long,
-    val token_type: String = "Bearer"
+    val token_type: String = "Bearer "
 )

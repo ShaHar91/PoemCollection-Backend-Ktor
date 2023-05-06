@@ -1,5 +1,6 @@
 package com.poemcollection.domain.models
 
+import com.poemcollection.domain.models.interfaces.DateAble
 import com.poemcollection.domain.models.user.User
 
 @kotlinx.serialization.Serializable
@@ -9,9 +10,9 @@ data class Poem(
     val body: String = "",
     val writer: User = User(),
     val categories: List<Category> = emptyList(),
-    val createdAt: String = "",
-    val updatedAt: String = ""
-)
+    override val createdAt: String = "",
+    override val updatedAt: String = ""
+) : DateAble
 
 @kotlinx.serialization.Serializable
 data class InsertPoem(

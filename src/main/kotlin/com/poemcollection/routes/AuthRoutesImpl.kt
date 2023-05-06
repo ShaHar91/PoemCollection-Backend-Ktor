@@ -11,9 +11,9 @@ import com.poemcollection.security.security.token.TokenClaim
 import com.poemcollection.security.security.token.TokenClaim.Companion.TOKEN_CLAIM_USER_ID_KEY
 import com.poemcollection.security.security.token.TokenConfig
 import com.poemcollection.security.security.token.TokenService
+import com.poemcollection.utils.receiveOrRespondWithError
 import io.ktor.http.*
 import io.ktor.server.application.*
-import io.ktor.server.request.*
 import io.ktor.server.response.*
 
 class AuthRoutesImpl(
@@ -23,7 +23,7 @@ class AuthRoutesImpl(
     private val tokenConfig: TokenConfig
 ) : IAuthRoutes {
     override suspend fun authorizeUser(call: ApplicationCall) {
-        val request = call.receiveNullable<AuthRequest>() ?: run {
+        val request = call.receiveOrRespondWithError<AuthRequest>() ?: run {
             call.respond(HttpStatusCode.BadRequest, ErrorCodes.ErrorInvalidGrant.asResponse)
             return
         }

@@ -1,8 +1,8 @@
 package com.poemcollection.domain.interfaces
 
-import com.poemcollection.domain.models.InsertOrUpdateReview
 import com.poemcollection.domain.models.Ratings
-import com.poemcollection.domain.models.Review
+import com.poemcollection.domain.models.review.InsertOrUpdateReview
+import com.poemcollection.domain.models.review.Review
 
 interface IReviewDao {
 

@@ -1,6 +1,7 @@
 package com.poemcollection.domain.models.user
 
 import com.poemcollection.data.UserRoles
+import com.poemcollection.domain.models.interfaces.DateAble
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 
@@ -19,10 +20,10 @@ data class User(
     val firstName: String = "",
     val lastName: String = "",
     val email: String = "",
-    val createdAt: String = "",
-    val updatedAt: String = "",
+    override val createdAt: String = "",
+    override val updatedAt: String = "",
     val role: UserRoles = UserRoles.User
-)
+) : DateAble
 
 @Serializable
 data class UpdateUser(

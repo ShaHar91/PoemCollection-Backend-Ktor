@@ -4,13 +4,11 @@ import com.poemcollection.domain.models.interfaces.DateAble
 import kotlinx.serialization.SerialName
 
 @kotlinx.serialization.Serializable
-data class UserDto(
+data class ReviewDto(
     val id: Int = 0,
-    @SerialName("first_name")
-    val firstName: String = "",
-    @SerialName("last_name")
-    val lastName: String = "",
-    val email: String = "",
+    val body: String = "",
+    val rating: Int = 0,
+    val user: UserDto = UserDto(),
     @SerialName("created_at")
     override val createdAt: String = "",
     @SerialName("updated_at")

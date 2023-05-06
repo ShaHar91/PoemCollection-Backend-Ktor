@@ -1,9 +1,12 @@
 package com.poemcollection.routes
 
+import com.poemcollection.data.mapper.toInsertOrUpdateReview
+import com.poemcollection.data.mapper.toReviewDto
+import com.poemcollection.data.remote.incoming.review.InsertOrUpdateReviewDto
 import com.poemcollection.data.responses.ErrorCodes
 import com.poemcollection.domain.interfaces.IReviewDao
 import com.poemcollection.domain.interfaces.IUserDao
-import com.poemcollection.domain.models.InsertOrUpdateReview
+import com.poemcollection.domain.models.review.InsertOrUpdateReview
 import com.poemcollection.routes.interfaces.IReviewRoutes
 import com.poemcollection.utils.getPoemId
 import com.poemcollection.utils.getUserId
@@ -23,9 +26,9 @@ class ReviewRoutesImpl(
         val poemId = call.getPoemId() ?: return
 
         //TODO: have dto object for incoming requests without exposing the userId and have another model that has the userId which we will set ourselves
-        val insertReview = call.receiveOrRespondWithError<InsertOrUpdateReview>() ?: return
+        val insertReview = call.receiveOrRespondWithError<InsertOrUpdateReviewDto>() ?: return
 
-        val newReview = reviewDao.insertReview(poemId, insertReview.copy(userId = userId))
+        val newReview = reviewDao.insertReview(poemId, insertReview.toInsertOrUpdateReview(userId))?.toReviewDto()
 
         if (newReview != null) {
             call.respond(HttpStatusCode.Created, newReview)
@@ -37,14 +40,14 @@ class ReviewRoutesImpl(
     override suspend fun getAllReviews(call: ApplicationCall) {
         val id = call.getPoemId() ?: return
 
-        val reviews = reviewDao.getReviews(id)
+        val reviews = reviewDao.getReviews(id).map { it.toReviewDto() }
         call.respond(HttpStatusCode.OK, reviews)
     }
 
     override suspend fun getReviewById(call: ApplicationCall) {
         val reviewId = call.reviewId() ?: return
 
-        val review = reviewDao.getReview(reviewId)
+        val review = reviewDao.getReview(reviewId)?.toReviewDto()
 
         if (review != null) {
             call.respond(HttpStatusCode.OK, review)
@@ -64,7 +67,7 @@ class ReviewRoutesImpl(
 
         val updateReview = call.receiveOrRespondWithError<InsertOrUpdateReview>() ?: return
 
-        val review = reviewDao.updateReview(reviewId, updateReview)
+        val review = reviewDao.updateReview(reviewId, updateReview)?.toReviewDto()
 
         if (review != null) {
             call.respond(HttpStatusCode.OK, review)
