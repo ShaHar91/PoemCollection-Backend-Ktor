@@ -1,7 +1,7 @@
 package com.poemcollection.routes
 
+import com.poemcollection.data.remote.incoming.CreateTokenDto
 import com.poemcollection.data.remote.outgoing.TokenDto
-import com.poemcollection.data.requests.AuthRequest
 import com.poemcollection.data.responses.ErrorCodes
 import com.poemcollection.domain.interfaces.IUserDao
 import com.poemcollection.domain.models.user.toSaltedHash
@@ -23,7 +23,7 @@ class AuthRoutesImpl(
     private val tokenConfig: TokenConfig
 ) : IAuthRoutes {
     override suspend fun authorizeUser(call: ApplicationCall) {
-        val request = call.receiveOrRespondWithError<AuthRequest>() ?: run {
+        val request = call.receiveOrRespondWithError<CreateTokenDto>() ?: run {
             return call.respond(HttpStatusCode.BadRequest, ErrorCodes.ErrorInvalidGrant.asResponse)
         }
 

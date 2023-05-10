@@ -1,8 +1,8 @@
 package com.poemcollection.data.local.dao
 
-import com.poemcollection.data.DatabaseFactory.dbQuery
-import com.poemcollection.data.UserRoles
-import com.poemcollection.data.UsersTable
+import com.poemcollection.data.local.DatabaseFactory.dbQuery
+import com.poemcollection.data.local.UserRoles
+import com.poemcollection.data.local.UsersTable
 import com.poemcollection.domain.interfaces.IUserDao
 import com.poemcollection.domain.models.user.InsertNewUser
 import com.poemcollection.domain.models.user.UpdateUser

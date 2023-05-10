@@ -1,7 +1,7 @@
 package com.poemcollection.data.local.dao
 
-import com.poemcollection.data.CategoriesTable
-import com.poemcollection.data.DatabaseFactory.dbQuery
+import com.poemcollection.data.local.CategoriesTable
+import com.poemcollection.data.local.DatabaseFactory.dbQuery
 import com.poemcollection.domain.interfaces.ICategoryDao
 import com.poemcollection.domain.models.category.Category
 import com.poemcollection.domain.models.category.InsertOrUpdateCategory

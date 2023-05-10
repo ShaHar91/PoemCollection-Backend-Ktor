@@ -1,4 +1,4 @@
-package com.poemcollection.data
+package com.poemcollection.data.local
 
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.sql.Database

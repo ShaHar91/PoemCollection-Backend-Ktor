@@ -1,20 +1,29 @@
 package com.poemcollection.data.local.dao
 
-import com.poemcollection.data.CategoriesTable
-import com.poemcollection.data.PoemsTable
-import com.poemcollection.data.ReviewsTable
-import com.poemcollection.data.UsersTable
+import com.poemcollection.data.local.CategoriesTable
+import com.poemcollection.data.local.PoemsTable
+import com.poemcollection.data.local.ReviewsTable
+import com.poemcollection.data.local.UsersTable
 import com.poemcollection.domain.models.category.Category
 import com.poemcollection.domain.models.poem.Poem
+import com.poemcollection.domain.models.poem.PoemDetail
 import com.poemcollection.domain.models.review.Review
 import com.poemcollection.domain.models.user.User
 import com.poemcollection.domain.models.user.UserHashable
 import org.jetbrains.exposed.sql.ResultRow
 
-fun ResultRow.toPoemWithUser() = Poem(
+fun ResultRow.toPoemDetail() = PoemDetail(
     id = this[PoemsTable.id].value,
     title = this[PoemsTable.title],
     body = this[PoemsTable.body],
+    writer = this.toUser(),
+    createdAt = this[PoemsTable.createdAt],
+    updatedAt = this[PoemsTable.updatedAt]
+)
+
+fun ResultRow.toPoemWithUser() = Poem(
+    id = this[PoemsTable.id].value,
+    title = this[PoemsTable.title],
     writer = this.toUser(),
     createdAt = this[PoemsTable.createdAt],
     updatedAt = this[PoemsTable.updatedAt]
@@ -59,6 +68,9 @@ fun Iterable<ResultRow>.toCategory() = this.firstOrNull()?.toCategory()
 fun Iterable<ResultRow>.toUsers() = this.map { it.toUser() }
 fun Iterable<ResultRow>.toUser() = this.firstOrNull()?.toUser()
 fun Iterable<ResultRow>.toUserHashable() = this.firstOrNull()?.toUserHashable()
+
+fun Iterable<ResultRow>.toPoems() = this.map { it.toPoemWithUser() }
+fun Iterable<ResultRow>.toPoem() = this.firstOrNull()?.toPoemWithUser()
 
 fun Iterable<ResultRow>.toReviews() = this.map { it.toReviewWithUser() }
 fun Iterable<ResultRow>.toReview() = this.firstOrNull()?.toReviewWithUser()

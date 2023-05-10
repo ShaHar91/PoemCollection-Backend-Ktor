@@ -1,9 +1,9 @@
 package com.poemcollection.data.local.dao
 
-import com.poemcollection.data.DatabaseFactory.dbQuery
-import com.poemcollection.data.PoemsTable
-import com.poemcollection.data.ReviewsTable
-import com.poemcollection.data.UsersTable
+import com.poemcollection.data.local.DatabaseFactory.dbQuery
+import com.poemcollection.data.local.PoemsTable
+import com.poemcollection.data.local.ReviewsTable
+import com.poemcollection.data.local.UsersTable
 import com.poemcollection.domain.interfaces.IReviewDao
 import com.poemcollection.domain.models.Ratings
 import com.poemcollection.domain.models.review.InsertOrUpdateReview

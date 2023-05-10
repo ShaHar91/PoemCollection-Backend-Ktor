@@ -1,6 +1,7 @@
 package com.poemcollection.routes
 
 import com.poemcollection.data.mapper.toInsertOrUpdatePoem
+import com.poemcollection.data.mapper.toPoemDetailDto
 import com.poemcollection.data.mapper.toPoemDto
 import com.poemcollection.data.remote.incoming.poem.InsertOrUpdatePoemDto
 import com.poemcollection.data.responses.ErrorCodes
@@ -34,7 +35,7 @@ class PoemRoutesImpl(
             return call.respondText("The following categories do not exist: ${nonExistingIds.joinToString { it.toString() }}")
         }
 
-        val newPoem = poemDao.insertPoem(insertPoem.toInsertOrUpdatePoem(), userId)?.toPoemDto()
+        val newPoem = poemDao.insertPoem(insertPoem.toInsertOrUpdatePoem(), userId)?.toPoemDetailDto()
 
         return if (newPoem != null) {
             call.respond(HttpStatusCode.Created, newPoem)
@@ -53,7 +54,7 @@ class PoemRoutesImpl(
     override suspend fun getPoemById(call: ApplicationCall) {
         val poemId = call.getPoemId() ?: return
 
-        val poem = poemDao.getPoem(poemId)?.toPoemDto()
+        val poem = poemDao.getPoem(poemId)?.toPoemDetailDto()
 
         //TODO: maybe get a couple of things in a collection so the app doesn't have to do 3 seperate calls?
         // e.g. { "poem": {}, "ratings" : {}, "ownReview": {}, "reviews": {}} ----> where reviews are limited to 3 or 5 reviews...
@@ -82,7 +83,7 @@ class PoemRoutesImpl(
             return call.respondText("The following categories do not exist: ${nonExistingIds.joinToString { it.toString() }}")
         }
 
-        val poem = poemDao.updatePoem(poemId, updatePoem.toInsertOrUpdatePoem())?.toPoemDto()
+        val poem = poemDao.updatePoem(poemId, updatePoem.toInsertOrUpdatePoem())?.toPoemDetailDto()
 
         return if (poem != null) {
             call.respond(HttpStatusCode.OK, poem)

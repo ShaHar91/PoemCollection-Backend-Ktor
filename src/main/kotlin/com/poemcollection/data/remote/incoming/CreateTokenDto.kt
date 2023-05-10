@@ -1,7 +1,7 @@
-package com.poemcollection.data.requests
+package com.poemcollection.data.remote.incoming
 
 @kotlinx.serialization.Serializable
-data class AuthRequest(
+data class CreateTokenDto(
     val email: String,
     val password: String
 )

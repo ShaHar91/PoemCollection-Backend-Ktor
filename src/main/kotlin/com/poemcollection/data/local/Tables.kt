@@ -1,4 +1,4 @@
-package com.poemcollection.data
+package com.poemcollection.data.local
 
 import com.poemcollection.utils.toDatabaseString
 import org.jetbrains.exposed.dao.id.IntIdTable

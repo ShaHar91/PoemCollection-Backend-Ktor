@@ -1,10 +1,11 @@
 package com.poemcollection.data.local.dao
 
-import com.poemcollection.data.*
-import com.poemcollection.data.DatabaseFactory.dbQuery
+import com.poemcollection.data.local.*
+import com.poemcollection.data.local.DatabaseFactory.dbQuery
 import com.poemcollection.domain.interfaces.IPoemDao
 import com.poemcollection.domain.models.poem.InsertOrUpdatePoem
 import com.poemcollection.domain.models.poem.Poem
+import com.poemcollection.domain.models.poem.PoemDetail
 import com.poemcollection.utils.toDatabaseString
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -15,9 +16,9 @@ class PoemDaoImpl : IPoemDao {
 
     // Used this as a guide... not sure of it's correct or anything
     // https://medium.com/@pjagielski/how-we-use-kotlin-with-exposed-at-touk-eacaae4565b5
-    private fun Iterable<ResultRow>.toPoems(): List<Poem> {
-        return (fold(mutableMapOf<Int, Poem>()) { map, resultRow ->
-            val poem = resultRow.toPoemWithUser()
+    private fun Iterable<ResultRow>.toPoem(): List<PoemDetail> {
+        return (fold(mutableMapOf<Int, PoemDetail>()) { map, resultRow ->
+            val poem = resultRow.toPoemDetail()
             val categoryId = resultRow.getOrNull(PoemCategoryJunctionTable.categoryId)
             val category = categoryId?.let { resultRow.toCategory() }
             val current = map.getOrDefault(poem.id, poem)
@@ -26,33 +27,24 @@ class PoemDaoImpl : IPoemDao {
         }).values.toList()
     }
 
-    private fun findPoemById(id: Int): Poem? {
+    private fun findPoemById(id: Int): PoemDetail? {
         val poemsWithAllRelations = PoemsTable innerJoin UsersTable innerJoin PoemCategoryJunctionTable innerJoin CategoriesTable
         return poemsWithAllRelations
             .select { PoemsTable.id eq id }
-            .toPoems()
+            .toPoem()
             .singleOrNull()
     }
 
-    override suspend fun getPoem(id: Int): Poem? = dbQuery {
+    override suspend fun getPoem(id: Int): PoemDetail? = dbQuery {
         findPoemById(id)
     }
 
     override suspend fun getPoems(categoryId: Int?): List<Poem> = dbQuery {
-        val poemsWithAllRelations = PoemsTable innerJoin UsersTable innerJoin PoemCategoryJunctionTable innerJoin CategoriesTable
-        poemsWithAllRelations
-//            .select { categoryId?.let { PoemCategoryJunction.categoryId eq categoryId } ?: Op.TRUE }
-            .let {
-                if (categoryId == null) {
-                    it.selectAll()
-                } else {
-                    it.select { PoemCategoryJunctionTable.categoryId eq categoryId }
-                }
-            }
-            .toPoems()
+        val poemsWithAllRelations = PoemsTable innerJoin UsersTable
+        poemsWithAllRelations.selectAll().toPoems()
     }
 
-    override suspend fun insertPoem(insertPoem: InsertOrUpdatePoem, writerId: Int): Poem? = dbQuery {
+    override suspend fun insertPoem(insertPoem: InsertOrUpdatePoem, writerId: Int): PoemDetail? = dbQuery {
 
         val id = PoemsTable.insertAndGetId {
             it[title] = insertPoem.title
@@ -72,7 +64,7 @@ class PoemDaoImpl : IPoemDao {
         findPoemById(id)
     }
 
-    override suspend fun updatePoem(id: Int, updatePoem: InsertOrUpdatePoem): Poem? {
+    override suspend fun updatePoem(id: Int, updatePoem: InsertOrUpdatePoem): PoemDetail? {
         val result = dbQuery {
             val res = PoemsTable.update({ PoemsTable.id eq id }) {
                 it[title] = updatePoem.title

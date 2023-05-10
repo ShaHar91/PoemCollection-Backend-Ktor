@@ -1,6 +1,6 @@
 package com.poemcollection
 
-import com.poemcollection.data.DatabaseFactory
+import com.poemcollection.data.local.DatabaseFactory
 import com.poemcollection.plugins.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.cors.routing.*
