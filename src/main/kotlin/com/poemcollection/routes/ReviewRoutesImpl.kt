@@ -38,8 +38,9 @@ class ReviewRoutesImpl(
 
     override suspend fun getAllReviews(call: ApplicationCall) {
         val id = call.getPoemId() ?: return
+        val limit = call.request.queryParameters[ParamConstants.LIMIT_KEY]?.toIntOrNull() // null is allowed!
 
-        val reviews = reviewDao.getReviews(id).map { it.toReviewDto() }
+        val reviews = reviewDao.getReviews(id, limit).map { it.toReviewDto() }
         return call.respond(HttpStatusCode.OK, reviews)
     }
 

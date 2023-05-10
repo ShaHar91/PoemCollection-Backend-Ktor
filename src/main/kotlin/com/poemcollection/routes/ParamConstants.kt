@@ -6,4 +6,6 @@ object ParamConstants {
     const val REVIEW_ID_KEY = "review_id"
     const val POEM_ID_KEY = "poem_id"
     const val CATEGORY_ID_KEY = "category_id"
+
+    const val LIMIT_KEY = "limit"
 }

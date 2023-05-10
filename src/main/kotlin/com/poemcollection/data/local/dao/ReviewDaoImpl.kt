@@ -19,9 +19,12 @@ class ReviewDaoImpl : IReviewDao {
         findReviewById(id)
     }
 
-    override suspend fun getReviews(poemId: Int?): List<Review> = dbQuery {
+    override suspend fun getReviews(poemId: Int?, limit: Int?): List<Review> = dbQuery {
         val reviewWithRelations = ReviewsTable innerJoin UsersTable
-        reviewWithRelations.select { ReviewsTable.poemId eq poemId }.toReviews()
+        reviewWithRelations.select { ReviewsTable.poemId eq poemId }.also {
+            limit ?: return@also
+            it.limit(limit)
+        }.toReviews()
     }
 
     private fun findReviewById(reviewId: Int): Review? {
