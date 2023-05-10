@@ -25,12 +25,11 @@ class ReviewRoutesImpl(
         val userId = call.getUserId() ?: return
         val poemId = call.getPoemId() ?: return
 
-        //TODO: have dto object for incoming requests without exposing the userId and have another model that has the userId which we will set ourselves
         val insertReview = call.receiveOrRespondWithError<InsertOrUpdateReviewDto>() ?: return
 
         val newReview = reviewDao.insertReview(poemId, insertReview.toInsertOrUpdateReview(userId))?.toReviewDto()
 
-        if (newReview != null) {
+        return if (newReview != null) {
             call.respond(HttpStatusCode.Created, newReview)
         } else {
             call.respond(HttpStatusCode.NoContent, ErrorCodes.ErrorResourceNotFound.asResponse)
@@ -41,7 +40,7 @@ class ReviewRoutesImpl(
         val id = call.getPoemId() ?: return
 
         val reviews = reviewDao.getReviews(id).map { it.toReviewDto() }
-        call.respond(HttpStatusCode.OK, reviews)
+        return call.respond(HttpStatusCode.OK, reviews)
     }
 
     override suspend fun getReviewById(call: ApplicationCall) {
@@ -49,7 +48,7 @@ class ReviewRoutesImpl(
 
         val review = reviewDao.getReview(reviewId)?.toReviewDto()
 
-        if (review != null) {
+        return if (review != null) {
             call.respond(HttpStatusCode.OK, review)
         } else {
             call.respond(HttpStatusCode.NotFound, ErrorCodes.ErrorResourceNotFound.asResponse)
@@ -69,7 +68,7 @@ class ReviewRoutesImpl(
 
         val review = reviewDao.updateReview(reviewId, updateReview)?.toReviewDto()
 
-        if (review != null) {
+        return if (review != null) {
             call.respond(HttpStatusCode.OK, review)
         } else {
             call.respond(HttpStatusCode.NotFound, ErrorCodes.ErrorResourceNotFound.asResponse)
@@ -87,7 +86,7 @@ class ReviewRoutesImpl(
 
         val success = reviewDao.deleteReview(reviewId)
 
-        if (success) {
+        return if (success) {
             call.respond(HttpStatusCode.OK)
         } else {
             call.respond(HttpStatusCode.NotFound, ErrorCodes.ErrorResourceNotFound.asResponse)

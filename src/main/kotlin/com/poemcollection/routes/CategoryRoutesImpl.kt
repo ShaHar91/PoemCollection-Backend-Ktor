@@ -16,14 +16,12 @@ class CategoryRoutesImpl(
     private val categoryDao: ICategoryDao
 ) : ICategoryRoutes {
     override suspend fun postCategory(call: ApplicationCall) {
-        val insertCategory = call.receiveNullable<InsertOrUpdateCategoryDto>() ?: run {
-            call.respond(HttpStatusCode.BadRequest)
-            return
-        }
+        val insertCategory = call.receiveNullable<InsertOrUpdateCategoryDto>()
+            ?: return call.respond(HttpStatusCode.BadRequest)
 
         val newCategory = categoryDao.insertCategory(insertCategory.toInsertOrUpdateCategory())?.toCategoryDto()
 
-        if (newCategory != null) {
+        return if (newCategory != null) {
             call.respond(HttpStatusCode.Created, newCategory)
         } else {
             call.respond(HttpStatusCode.NoContent, ErrorCodes.ErrorResourceNotFound.asResponse)
@@ -33,7 +31,7 @@ class CategoryRoutesImpl(
     override suspend fun getAllCategories(call: ApplicationCall) {
         val categories = categoryDao.getCategories().map { it.toCategoryDto() }
 
-        call.respond(HttpStatusCode.OK, categories)
+        return call.respond(HttpStatusCode.OK, categories)
     }
 
     override suspend fun getCategoryById(call: ApplicationCall) {
@@ -41,7 +39,7 @@ class CategoryRoutesImpl(
 
         val category = categoryDao.getCategory(categoryId)?.toCategoryDto()
 
-        if (category != null) {
+        return if (category != null) {
             call.respond(HttpStatusCode.OK, category)
         } else {
             call.respond(HttpStatusCode.NotFound, ErrorCodes.ErrorResourceNotFound.asResponse)
@@ -51,11 +49,11 @@ class CategoryRoutesImpl(
     override suspend fun updateCategoryById(call: ApplicationCall) {
         val categoryId = call.getCategoryId() ?: return
 
-        val updateCategory = call.receive<InsertOrUpdateCategoryDto>()
+        val updateCategory = call.receiveNullable<InsertOrUpdateCategoryDto>() ?: return
 
         val category = categoryDao.updateCategory(categoryId, updateCategory.toInsertOrUpdateCategory())?.toCategoryDto()
 
-        if (category != null) {
+        return if (category != null) {
             call.respond(HttpStatusCode.OK, category)
         } else {
             call.respond(HttpStatusCode.NotFound, ErrorCodes.ErrorResourceNotFound.asResponse)
@@ -67,7 +65,7 @@ class CategoryRoutesImpl(
 
         val success = categoryDao.deleteCategory(categoryId)
 
-        if (success) {
+        return if (success) {
             call.respond(HttpStatusCode.OK)
         } else {
             call.respond(HttpStatusCode.NotFound, ErrorCodes.ErrorResourceNotFound.asResponse)

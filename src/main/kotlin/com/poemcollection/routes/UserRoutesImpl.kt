@@ -25,27 +25,18 @@ class UserRoutesImpl(
     override suspend fun postUser(call: ApplicationCall) {
         val insertNewUser = call.receiveOrRespondWithError<InsertNewUserDto>() ?: return
 
-        //TODO: cleanup the return statements?
-        if (!insertNewUser.isValid) {
-            call.respond(HttpStatusCode.BadRequest, ErrorCodes.ErrorInvalidParameters.asResponse)
-            return
-        }
+        if (!insertNewUser.isValid)
+            return call.respond(HttpStatusCode.BadRequest, ErrorCodes.ErrorInvalidParameters.asResponse)
 
         val userUnique = userDao.userUnique(insertNewUser.email)
-        if (!userUnique || !insertNewUser.email.contains("@")) {
-            call.respond(HttpStatusCode.Conflict, ErrorCodes.ErrorInvalidEmail.asResponse) // Email already exists
-            return
-        }
+        if (!userUnique || !insertNewUser.email.contains("@"))
+            return call.respond(HttpStatusCode.Conflict, ErrorCodes.ErrorInvalidEmail.asResponse)
 
-        if (!insertNewUser.isPasswordSame) {
-            call.respond(HttpStatusCode.Conflict, ErrorCodes.ErrorRepeatPassword.asResponse) // repeatPassword is not the same
-            return
-        }
+        if (!insertNewUser.isPasswordSame)
+            return call.respond(HttpStatusCode.Conflict, ErrorCodes.ErrorRepeatPassword.asResponse)
 
-        if (!insertNewUser.isPwTooShort) {
-            call.respond(HttpStatusCode.Conflict, ErrorCodes.ErrorInvalidPassword.asResponse)
-            return
-        }
+        if (!insertNewUser.isPwTooShort)
+            return call.respond(HttpStatusCode.Conflict, ErrorCodes.ErrorInvalidPassword.asResponse)
 
         val saltedHash = hashingService.generateSaltedHash(insertNewUser.password)
 
@@ -53,7 +44,7 @@ class UserRoutesImpl(
             insertNewUser.toInsertNewUser(saltedHash)
         )
 
-        if (newUser != null) {
+        return if (newUser != null) {
             call.respond(HttpStatusCode.Created, newUser.toUserDto())
         } else {
             call.respond(HttpStatusCode.NoContent, ErrorCodes.ErrorResourceNotFound.asResponse)
@@ -65,7 +56,7 @@ class UserRoutesImpl(
 
         val user = userDao.getUser(userId)
 
-        if (user != null) {
+        return if (user != null) {
             call.respond(HttpStatusCode.OK, user.toUserDto())
         } else {
             call.respond(HttpStatusCode.NotFound, ErrorCodes.ErrorResourceNotFound.asResponse)
@@ -77,14 +68,12 @@ class UserRoutesImpl(
 
         val updateUser = call.receiveOrRespondWithError<UpdateUserDto>() ?: return
 
-        if (updateUser.firstName == null && updateUser.lastName == null) {
-            call.respond(HttpStatusCode.BadRequest, ErrorCodes.ErrorInvalidBody.asResponse)
-            return
-        }
+        if (updateUser.firstName == null && updateUser.lastName == null)
+            return call.respond(HttpStatusCode.BadRequest, ErrorCodes.ErrorInvalidBody.asResponse)
 
         val user = userDao.updateUser(userId, updateUser.toUpdateUser())
 
-        if (user != null) {
+        return if (user != null) {
             call.respond(HttpStatusCode.OK, user.toUserDto())
         } else {
             call.respond(HttpStatusCode.NotFound, ErrorCodes.ErrorResourceNotFound.asResponse)
@@ -97,32 +86,24 @@ class UserRoutesImpl(
         val updateUserPassword = call.receiveOrRespondWithError<UpdatePasswordDto>() ?: return
         val userHashable = userDao.getUserHashableById(userId) ?: return //TODO: return a decent error stating that the user does not exist
 
-        if (listOf(updateUserPassword.password, updateUserPassword.repeatPassword).any { it == updateUserPassword.oldPassword }) {
-            call.respond(HttpStatusCode.Conflict, ErrorCodes.ErrorInvalidNewPassword.asResponse)
-            return
-        }
+        if (listOf(updateUserPassword.password, updateUserPassword.repeatPassword).any { it == updateUserPassword.oldPassword })
+            return call.respond(HttpStatusCode.Conflict, ErrorCodes.ErrorInvalidNewPassword.asResponse)
 
         val isValidPassword = hashingService.verify(updateUserPassword.oldPassword, userHashable.toSaltedHash())
-        if (!isValidPassword) {
-            call.respond(HttpStatusCode.Conflict, ErrorCodes.ErrorIncorrectPassword.asResponse)
-            return
-        }
+        if (!isValidPassword)
+            return call.respond(HttpStatusCode.Conflict, ErrorCodes.ErrorIncorrectPassword.asResponse)
 
-        if (!updateUserPassword.isPasswordSame) {
-            call.respond(HttpStatusCode.Conflict, ErrorCodes.ErrorRepeatPassword.asResponse)
-            return
-        }
+        if (!updateUserPassword.isPasswordSame)
+            return call.respond(HttpStatusCode.Conflict, ErrorCodes.ErrorRepeatPassword.asResponse)
 
-        if (!updateUserPassword.isPwTooShort) {
-            call.respond(HttpStatusCode.Conflict, ErrorCodes.ErrorInvalidPassword.asResponse)
-            return
-        }
+        if (!updateUserPassword.isPwTooShort)
+            return call.respond(HttpStatusCode.Conflict, ErrorCodes.ErrorInvalidPassword.asResponse)
 
         val saltedHash = hashingService.generateSaltedHash(updateUserPassword.password)
 
         val updatedUser = userDao.updateUserPassword(userId, saltedHash)
 
-        if (updatedUser != null) {
+        return if (updatedUser != null) {
             call.respond(HttpStatusCode.OK, updatedUser.toUserDto())
         } else {
             call.respond(HttpStatusCode.NoContent, ErrorCodes.ErrorResourceNotFound.asResponse)
@@ -134,7 +115,7 @@ class UserRoutesImpl(
 
         val success = userDao.deleteUser(userId)
 
-        if (success) {
+        return if (success) {
             call.respond(HttpStatusCode.OK)
         } else {
             call.respond(HttpStatusCode.NotFound, ErrorCodes.ErrorResourceNotFound.asResponse)

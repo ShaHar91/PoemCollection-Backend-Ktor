@@ -36,7 +36,7 @@ class PoemRoutesImpl(
 
         val newPoem = poemDao.insertPoem(insertPoem.toInsertOrUpdatePoem(), userId)?.toPoemDto()
 
-        if (newPoem != null) {
+        return if (newPoem != null) {
             call.respond(HttpStatusCode.Created, newPoem)
         } else {
             call.respond(HttpStatusCode.NoContent, ErrorCodes.ErrorResourceNotFound.asResponse)
@@ -44,10 +44,10 @@ class PoemRoutesImpl(
     }
 
     override suspend fun getAllPoems(call: ApplicationCall) {
-        val categoryId = call.request.queryParameters[CATEGORY_ID_KEY]?.toIntOrNull()
+        val categoryId = call.request.queryParameters[CATEGORY_ID_KEY]?.toIntOrNull() // null is allowed!
 
         val poems = poemDao.getPoems(categoryId).map { it.toPoemDto() }
-        call.respond(HttpStatusCode.OK, poems)
+        return call.respond(HttpStatusCode.OK, poems)
     }
 
     override suspend fun getPoemById(call: ApplicationCall) {
@@ -58,7 +58,7 @@ class PoemRoutesImpl(
         //TODO: maybe get a couple of things in a collection so the app doesn't have to do 3 seperate calls?
         // e.g. { "poem": {}, "ratings" : {}, "ownReview": {}, "reviews": {}} ----> where reviews are limited to 3 or 5 reviews...
 
-        if (poem != null) {
+        return if (poem != null) {
             call.respond(HttpStatusCode.OK, poem)
         } else {
             call.respond(HttpStatusCode.NotFound, ErrorCodes.ErrorResourceNotFound.asResponse)
@@ -84,7 +84,7 @@ class PoemRoutesImpl(
 
         val poem = poemDao.updatePoem(poemId, updatePoem.toInsertOrUpdatePoem())?.toPoemDto()
 
-        if (poem != null) {
+        return if (poem != null) {
             call.respond(HttpStatusCode.OK, poem)
         } else {
             call.respond(HttpStatusCode.NotFound, ErrorCodes.ErrorResourceNotFound.asResponse)
@@ -102,7 +102,7 @@ class PoemRoutesImpl(
 
         val success = poemDao.deletePoem(poemId)
 
-        if (success) {
+        return if (success) {
             call.respond(HttpStatusCode.OK)
         } else {
             call.respond(HttpStatusCode.NotFound, ErrorCodes.ErrorResourceNotFound.asResponse)
@@ -114,6 +114,6 @@ class PoemRoutesImpl(
 
         val ratings = reviewDao.calculateRatings(poemId)
 
-        call.respond(HttpStatusCode.OK, ratings)
+        return call.respond(HttpStatusCode.OK, ratings)
     }
 }

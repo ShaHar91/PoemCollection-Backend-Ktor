@@ -24,28 +24,23 @@ class AuthRoutesImpl(
 ) : IAuthRoutes {
     override suspend fun authorizeUser(call: ApplicationCall) {
         val request = call.receiveOrRespondWithError<AuthRequest>() ?: run {
-            call.respond(HttpStatusCode.BadRequest, ErrorCodes.ErrorInvalidGrant.asResponse)
-            return
+            return call.respond(HttpStatusCode.BadRequest, ErrorCodes.ErrorInvalidGrant.asResponse)
         }
 
         val userHashable = userDao.getUserHashableByEmail(request.email)
-        if (userHashable == null || !userHashable.email.contains("@")) {
-            call.respond(HttpStatusCode.Conflict, ErrorCodes.ErrorInvalidCredentials.asResponse)
-            return
-        }
+        if (userHashable == null || !userHashable.email.contains("@"))
+            return call.respond(HttpStatusCode.Conflict, ErrorCodes.ErrorInvalidCredentials.asResponse)
 
         val isValidPassword = hashingService.verify(request.password, userHashable.toSaltedHash())
 
-        if (!isValidPassword) {
-            call.respond(HttpStatusCode.Conflict, ErrorCodes.ErrorInvalidCredentials.asResponse)
-            return
-        }
+        if (!isValidPassword)
+            return call.respond(HttpStatusCode.Conflict, ErrorCodes.ErrorInvalidCredentials.asResponse)
 
         val token = tokenService.generate(
             tokenConfig,
             TokenClaim(TOKEN_CLAIM_USER_ID_KEY, userHashable.id)
         )
 
-        call.respond(HttpStatusCode.OK, TokenDto(token, tokenConfig.expiresIn))
+        return call.respond(HttpStatusCode.OK, TokenDto(token, tokenConfig.expiresIn))
     }
 }
