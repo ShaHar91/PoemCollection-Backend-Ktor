@@ -16,6 +16,10 @@ import com.poemcollection.security.security.token.JwtTokenService
 import com.poemcollection.security.security.token.TokenConfig
 import com.poemcollection.security.security.token.TokenService
 import io.ktor.server.application.*
+import io.ktor.server.config.*
+import org.koin.core.module.dsl.bind
+import org.koin.core.module.dsl.singleOf
+import org.koin.dsl.bind
 import org.koin.dsl.module
 import org.koin.ktor.plugin.Koin
 import org.koin.logger.slf4jLogger
@@ -25,36 +29,51 @@ fun Application.configureKoin(environment: ApplicationEnvironment) {
     install(Koin) {
         slf4jLogger()
 
-        modules(securityModule(environment))
+        modules(module {
+            single { environment.config }
+        })
+        modules(securityModule())
         modules(daoModule())
         modules(routeModule())
     }
 }
 
-fun securityModule(environment: ApplicationEnvironment) = module {
+fun securityModule() = module {
     single {
+        val config = get<ApplicationConfig>()
         TokenConfig(
-            environment.config.property("jwt.issuer").getString(),
-            environment.config.property("jwt.audience").getString(),
+            config.property("jwt.issuer").getString(),
+            config.property("jwt.audience").getString(),
             TimeUnit.HOURS.toMillis(1), // Valid for 1 hour...
             System.getenv("JWT_SECRET")
         )
     }
-    single<HashingService> { SHA256HashingService() }
-    single<TokenService> { JwtTokenService() }
+
+    // Both options are valid an represent the same
+    singleOf(::SHA256HashingService) bind HashingService::class
+    singleOf(::JwtTokenService) {
+        bind<TokenService>()
+
+//        --- Other options ---
+//        named("a_qualifier") - give a String qualifier to the definition
+//        named<MyType>() - give a Type qualifier to the definition
+//        bind<MyInterface>() - add type to bind for given bean definition
+//        binds(arrayOf(...)) - add types array for given bean definition
+//        createdAtStart() - create single instance at Koin start
+    }
 }
 
 fun routeModule() = module {
-    single<IUserRoutes> { UserRoutesImpl(get(), get()) }
-    single<IAuthRoutes> { AuthRoutesImpl(get(), get(), get(), get()) }
-    single<ICategoryRoutes> { CategoryRoutesImpl(get()) }
-    single<IPoemRoutes> { PoemRoutesImpl(get(), get(), get(), get()) }
-    single<IReviewRoutes> { ReviewRoutesImpl(get(), get()) }
+    singleOf(::UserRoutesImpl) { bind<IUserRoutes>() }
+    singleOf(::AuthRoutesImpl) { bind<IAuthRoutes>() }
+    singleOf(::CategoryRoutesImpl) { bind<ICategoryRoutes>() }
+    singleOf(::PoemRoutesImpl) { bind<IPoemRoutes>() }
+    singleOf(::ReviewRoutesImpl) { bind<IReviewRoutes>() }
 }
 
 fun daoModule() = module {
-    single<IUserDao> { UserDaoImpl() }
-    single<ICategoryDao> { CategoryDaoImpl() }
-    single<IPoemDao> { PoemDaoImpl() }
-    single<IReviewDao> { ReviewDaoImpl() }
+    singleOf(::UserDaoImpl) { bind<IUserDao>() }
+    singleOf(::CategoryDaoImpl) { bind<ICategoryDao>() }
+    singleOf(::PoemDaoImpl) { bind<IPoemDao>() }
+    singleOf(::ReviewDaoImpl) { bind<IReviewDao>() }
 }

@@ -57,7 +57,7 @@ class PoemRoutesImpl(
         val poem = poemDao.getPoem(poemId)?.toPoemDetailDto()
 
         //TODO: maybe get a couple of things in a collection so the app doesn't have to do 3 seperate calls?
-        // e.g. { "poem": {}, "ratings" : {}, "ownReview": {}, "reviews": {}} ----> where reviews are limited to 3 or 5 reviews...
+        // e.g. { "poem": {}, "ratings" : {}, "ownReview": {}, "reviews": {}} ----> where reviews are limited to 3 or 5 reviews... and should not contain the review of the current user!
 
         return if (poem != null) {
             call.respond(HttpStatusCode.OK, poem)
