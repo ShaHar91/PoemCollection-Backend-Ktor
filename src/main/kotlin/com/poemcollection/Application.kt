@@ -2,6 +2,14 @@ package com.poemcollection
 
 import com.poemcollection.data.database.DatabaseProvider
 import com.poemcollection.data.database.DatabaseProviderContract
+import com.poemcollection.data.database.dao.CategoryDaoImpl
+import com.poemcollection.data.database.dao.PoemDaoImpl
+import com.poemcollection.data.database.dao.ReviewDaoImpl
+import com.poemcollection.data.database.dao.UserDaoImpl
+import com.poemcollection.domain.interfaces.ICategoryDao
+import com.poemcollection.domain.interfaces.IPoemDao
+import com.poemcollection.domain.interfaces.IReviewDao
+import com.poemcollection.domain.interfaces.IUserDao
 import com.poemcollection.modules.auth.AuthController
 import com.poemcollection.modules.auth.AuthControllerImpl
 import com.poemcollection.modules.categories.CategoryController
@@ -45,7 +53,8 @@ fun Application.configureKoin() {
                     single { environment.config }
                     singleOf(::DatabaseProvider) { bind<DatabaseProviderContract>() }
                 },
-                routeModule()
+                routeModule(),
+                daoModule()
             )
         }
     }
@@ -54,4 +63,11 @@ fun Application.configureKoin() {
 fun routeModule() = module {
     singleOf(::AuthControllerImpl) { bind<AuthController>() }
     singleOf(::CategoryControllerImpl) { bind<CategoryController>() }
+}
+
+fun daoModule() = module {
+    singleOf(::UserDaoImpl) { bind<IUserDao>() }
+    singleOf(::CategoryDaoImpl) { bind<ICategoryDao>() }
+    singleOf(::PoemDaoImpl) { bind<IPoemDao>() }
+    singleOf(::ReviewDaoImpl) { bind<IReviewDao>() }
 }
