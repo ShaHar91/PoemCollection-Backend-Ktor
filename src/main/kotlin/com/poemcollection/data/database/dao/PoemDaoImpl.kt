@@ -1,6 +1,6 @@
 package com.poemcollection.data.database.dao
 
-import com.poemcollection.data.database.*
+import com.poemcollection.data.database.tables.*
 import com.poemcollection.domain.interfaces.IPoemDao
 import com.poemcollection.domain.models.poem.InsertOrUpdatePoem
 import com.poemcollection.domain.models.poem.Poem

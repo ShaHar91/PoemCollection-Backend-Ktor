@@ -1,8 +1,6 @@
 package com.poemcollection.data.database.dao
 
-import com.poemcollection.data.database.PoemsTable
-import com.poemcollection.data.database.ReviewsTable
-import com.poemcollection.data.database.UsersTable
+import com.poemcollection.data.database.tables.*
 import com.poemcollection.domain.interfaces.IReviewDao
 import com.poemcollection.domain.models.Ratings
 import com.poemcollection.domain.models.review.InsertOrUpdateReview

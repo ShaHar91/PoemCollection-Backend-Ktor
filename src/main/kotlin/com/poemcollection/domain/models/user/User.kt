@@ -1,6 +1,6 @@
 package com.poemcollection.domain.models.user
 
-import com.poemcollection.data.local.UserRoles
+import com.poemcollection.data.database.tables.UserRoles
 import com.poemcollection.domain.models.interfaces.DateAble
 
 data class User(

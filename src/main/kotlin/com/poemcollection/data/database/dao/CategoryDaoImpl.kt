@@ -1,6 +1,8 @@
 package com.poemcollection.data.database.dao
 
-import com.poemcollection.data.database.CategoriesTable
+import com.poemcollection.data.database.tables.CategoriesTable
+import com.poemcollection.data.database.tables.toCategories
+import com.poemcollection.data.database.tables.toCategory
 import com.poemcollection.domain.interfaces.ICategoryDao
 import com.poemcollection.domain.models.category.Category
 import com.poemcollection.domain.models.category.InsertOrUpdateCategory
@@ -12,7 +14,7 @@ import java.time.LocalDateTime
 class CategoryDaoImpl : ICategoryDao {
 
     override suspend fun getCategory(id: Int): Category? =
-        CategoriesTable.select { CategoriesTable.id eq id }.toCategory()
+        CategoriesTable.select { (CategoriesTable.id eq id) }.toCategory()
 
     override suspend fun getCategories(): List<Category> =
         CategoriesTable.selectAll().toCategories()
@@ -22,7 +24,7 @@ class CategoryDaoImpl : ICategoryDao {
             it[name] = category.name
             it[createdAt] = LocalDateTime.now().toDatabaseString()
             it[updatedAt] = LocalDateTime.now().toDatabaseString()
-        }.resultedValues?.toCategories()?.singleOrNull()
+        }.resultedValues?.toCategory()
     }
 
     override suspend fun updateCategory(id: Int, category: InsertOrUpdateCategory): Category? {
@@ -31,7 +33,7 @@ class CategoryDaoImpl : ICategoryDao {
             it[updatedAt] = LocalDateTime.now().toDatabaseString()
         }
 
-        return CategoriesTable.select { CategoriesTable.id eq id }.toCategory()
+        return getCategory(id)
     }
 
     override suspend fun deleteCategory(id: Int): Boolean =

@@ -1,7 +1,6 @@
 package com.poemcollection.data.database.dao
 
-import com.poemcollection.data.database.UserRoles
-import com.poemcollection.data.database.UsersTable
+import com.poemcollection.data.database.tables.*
 import com.poemcollection.domain.interfaces.IUserDao
 import com.poemcollection.domain.models.SaltedHash
 import com.poemcollection.domain.models.user.InsertNewUser
