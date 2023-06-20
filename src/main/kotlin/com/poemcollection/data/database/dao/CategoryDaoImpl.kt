@@ -21,9 +21,11 @@ class CategoryDaoImpl : ICategoryDao {
 
     override suspend fun insertCategory(category: InsertOrUpdateCategory): Category? {
         return CategoriesTable.insert {
+            val time = LocalDateTime.now().toDatabaseString()
+
             it[name] = category.name
-            it[createdAt] = LocalDateTime.now().toDatabaseString()
-            it[updatedAt] = LocalDateTime.now().toDatabaseString()
+            it[createdAt] = time
+            it[updatedAt] = time
         }.resultedValues?.toCategory()
     }
 

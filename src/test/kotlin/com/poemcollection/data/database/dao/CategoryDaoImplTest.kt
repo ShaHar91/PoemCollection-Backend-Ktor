@@ -3,6 +3,7 @@ package com.poemcollection.data.database.dao
 import com.poemcollection.data.database.instrumentation.CategoryInstrumentation.givenAValidInsertCategoryBody
 import com.poemcollection.data.database.instrumentation.CategoryInstrumentation.givenAValidUpdateCategoryBody
 import com.poemcollection.data.database.tables.CategoriesTable
+import kotlinx.coroutines.delay
 import org.assertj.core.api.Assertions.assertThat
 import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.junit.jupiter.api.Test
@@ -42,7 +43,9 @@ class CategoryDaoImplTest : BaseDaoTest() {
             val validCategory = givenAValidInsertCategoryBody()
             val category = dao.insertCategory(validCategory)
             assertThat(category).matches {
-                it?.name == "Love" && it.id == 1
+                it?.name == "Love" &&
+                        it.id == 1 &&
+                        it.createdAt == it.updatedAt
             }
         }
     }
@@ -64,11 +67,17 @@ class CategoryDaoImplTest : BaseDaoTest() {
         withTables(CategoriesTable) {
             val validCategory = givenAValidInsertCategoryBody()
             val categoryId = dao.insertCategory(validCategory)?.id
+
+            // adding a delay so there is a clear difference between `updatedAt` and `createdAt`
+            delay(1000)
+
             val validUpdateCategory = givenAValidUpdateCategoryBody()
             val category = dao.updateCategory(categoryId!!, validUpdateCategory)
 
             assertThat(category).matches {
-                it?.name == "Family" && it.id == 1
+                it?.name == "Family" &&
+                        it.id == 1 &&
+                        it.updatedAt != it.createdAt
             }
         }
     }
@@ -114,6 +123,24 @@ class CategoryDaoImplTest : BaseDaoTest() {
         withTables(CategoriesTable) {
             val deleted = dao.deleteCategory(839)
             assertFalse(deleted)
+        }
+    }
+
+    @Test
+    fun `getListOfExistingCategoryIds where ids do not exist`() {
+        withTables(CategoriesTable) {
+            val list = dao.getListOfExistingCategoryIds(listOf(2, 9))
+            assertThat(list).isEmpty()
+        }
+    }
+
+    @Test
+    fun `getListOfExistingCategoryIds where some ids exist`() {
+        withTables(CategoriesTable) {
+            dao.insertCategory(givenAValidInsertCategoryBody())
+            val list = dao.getListOfExistingCategoryIds(listOf(1))
+            assertThat(list).hasSize(1)
+            assertThat(list).contains(1)
         }
     }
 }

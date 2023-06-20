@@ -44,11 +44,13 @@ class PoemDaoImpl : IPoemDao {
     override suspend fun insertPoem(insertPoem: InsertOrUpdatePoem, writerId: Int): PoemDetail? {
 
         val id = PoemsTable.insertAndGetId {
+            val time = LocalDateTime.now().toDatabaseString()
+
             it[title] = insertPoem.title
             it[body] = insertPoem.body
             it[this.writerId] = writerId
-            it[createdAt] = LocalDateTime.now().toDatabaseString()
-            it[updatedAt] = LocalDateTime.now().toDatabaseString()
+            it[createdAt] = time
+            it[updatedAt] = time
         }.value
 
         insertPoem.categoryIds.forEach { catId ->

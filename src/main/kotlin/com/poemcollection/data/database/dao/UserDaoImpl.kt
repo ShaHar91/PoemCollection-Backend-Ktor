@@ -3,10 +3,7 @@ package com.poemcollection.data.database.dao
 import com.poemcollection.data.database.tables.*
 import com.poemcollection.domain.interfaces.IUserDao
 import com.poemcollection.domain.models.SaltedHash
-import com.poemcollection.domain.models.user.InsertNewUser
-import com.poemcollection.domain.models.user.UpdateUser
-import com.poemcollection.domain.models.user.User
-import com.poemcollection.domain.models.user.UserHashable
+import com.poemcollection.domain.models.user.*
 import com.poemcollection.utils.toDatabaseString
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -28,23 +25,29 @@ class UserDaoImpl : IUserDao {
 
     override suspend fun insertUser(user: InsertNewUser): User? =
         UsersTable.insert {
+            val time = LocalDateTime.now().toDatabaseString()
+
             it[firstName] = user.firstName
             it[lastName] = user.lastName
             it[email] = user.email
             it[password] = user.saltedHash.hash
             it[salt] = user.saltedHash.salt
-            it[createdAt] = LocalDateTime.now().toDatabaseString()
-            it[updatedAt] = LocalDateTime.now().toDatabaseString()
+            it[createdAt] = time
+            it[updatedAt] = time
         }.resultedValues?.toUsers()?.singleOrNull()
 
     override suspend fun updateUser(id: Int, user: UpdateUser): User? {
-        UsersTable.update({ UsersTable.id eq id }) {
-            user.firstName?.let { first -> it[firstName] = first }
-            user.lastName?.let { last -> it[lastName] = last }
-            it[updatedAt] = LocalDateTime.now().toDatabaseString()
+        if (user.hasData()) {
+            UsersTable.update({ UsersTable.id eq id }) {
+                user.firstName?.let { first -> it[firstName] = first }
+                user.lastName?.let { last -> it[lastName] = last }
+                user.email?.let { mail -> it[email] = mail }
+
+                it[updatedAt] = LocalDateTime.now().toDatabaseString()
+            }
         }
 
-        return UsersTable.select { UsersTable.id eq id }.toUser()
+        return getUser(id)
     }
 
     override suspend fun deleteUser(id: Int): Boolean =
@@ -54,7 +57,7 @@ class UserDaoImpl : IUserDao {
         UsersTable.select { UsersTable.email eq email }.empty()
 
     override suspend fun isUserRoleAdmin(userId: Int): Boolean =
-        UsersTable.select { UsersTable.id eq userId }.first()[UsersTable.role] == UserRoles.Admin
+        UsersTable.select { UsersTable.id eq userId }.firstOrNull()?.get(UsersTable.role) == UserRoles.Admin
 
     override suspend fun updateUserPassword(userId: Int, saltedHash: SaltedHash): User? {
         UsersTable.update({ UsersTable.id eq userId }) {
@@ -63,6 +66,6 @@ class UserDaoImpl : IUserDao {
             it[updatedAt] = LocalDateTime.now().toDatabaseString()
         }
 
-        return UsersTable.select { UsersTable.id eq userId }.toUser()
+        return getUser(userId)
     }
 }

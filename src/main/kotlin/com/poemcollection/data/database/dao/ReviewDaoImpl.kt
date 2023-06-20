@@ -36,12 +36,14 @@ class ReviewDaoImpl : IReviewDao {
 
         if (existsResult) {
             val id = ReviewsTable.insertAndGetId {
+                val time = LocalDateTime.now().toDatabaseString()
+
                 it[body] = insertReview.body
                 it[rating] = insertReview.rating
                 it[userId] = insertReview.userId
                 it[this.poemId] = poemId
-                it[createdAt] = LocalDateTime.now().toDatabaseString()
-                it[updatedAt] = LocalDateTime.now().toDatabaseString()
+                it[createdAt] = time
+                it[updatedAt] = time
             }.value
 
             // Need to use this function to get the review with every relation added to it!
