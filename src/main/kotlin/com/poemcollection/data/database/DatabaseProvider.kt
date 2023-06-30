@@ -1,9 +1,6 @@
 package com.poemcollection.data.database
 
-import com.poemcollection.data.database.tables.CategoriesTable
-import com.poemcollection.data.database.tables.PoemsTable
-import com.poemcollection.data.database.tables.ReviewsTable
-import com.poemcollection.data.database.tables.UsersTable
+import com.poemcollection.data.database.tables.*
 import io.ktor.server.config.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -26,7 +23,7 @@ class DatabaseProvider : DatabaseProviderContract, KoinComponent {
         val name = config.property("ktor.deployment.databaseName").getString()
         Database.connect("jdbc:sqlite:./$name")
         transaction {
-            SchemaUtils.create(UsersTable, CategoriesTable, PoemsTable, ReviewsTable)
+            SchemaUtils.create(UsersTable, CategoriesTable, PoemsTable, ReviewsTable, PoemCategoryJunctionTable)
         }
     }
 

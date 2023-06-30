@@ -1,13 +1,19 @@
 package com.poemcollection.data.database.dao
 
-import com.poemcollection.data.database.tables.*
+import com.poemcollection.data.database.tables.ReviewsTable
+import com.poemcollection.data.database.tables.UsersTable
+import com.poemcollection.data.database.tables.toReview
+import com.poemcollection.data.database.tables.toReviews
 import com.poemcollection.domain.interfaces.IReviewDao
 import com.poemcollection.domain.models.Ratings
 import com.poemcollection.domain.models.review.InsertOrUpdateReview
 import com.poemcollection.domain.models.review.Review
 import com.poemcollection.utils.toDatabaseString
-import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.deleteWhere
+import org.jetbrains.exposed.sql.insertAndGetId
+import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.update
 import java.time.LocalDateTime
 
 class ReviewDaoImpl : IReviewDao {
@@ -15,6 +21,7 @@ class ReviewDaoImpl : IReviewDao {
     override suspend fun getReview(id: Int): Review? =
         findReviewById(id)
 
+    // TODO: maybe use something like `excludedUserId`?? 😅
     override suspend fun getReviews(poemId: Int?, limit: Int?): List<Review> =
         (ReviewsTable innerJoin UsersTable)
             .select { ReviewsTable.poemId eq poemId }.also {
@@ -27,36 +34,26 @@ class ReviewDaoImpl : IReviewDao {
             .select { ReviewsTable.id eq reviewId }.toReview()
 
     override suspend fun insertReview(poemId: Int, insertReview: InsertOrUpdateReview): Review? = run {
+        val id = ReviewsTable.insertAndGetId {
+            val time = LocalDateTime.now().toDatabaseString()
 
-        val existsOp = exists(PoemsTable.select { PoemsTable.id eq poemId })
-        val result = Table.Dual.slice(existsOp).selectAll().first()
-        val existsResult = result[existsOp]
+            it[body] = insertReview.body
+            it[rating] = insertReview.rating
+            it[userId] = insertReview.userId
+            it[this.poemId] = poemId
+            it[createdAt] = time
+            it[updatedAt] = time
+        }.value
 
-        //TODO: user can only create 1 review per poem!!
-
-        if (existsResult) {
-            val id = ReviewsTable.insertAndGetId {
-                val time = LocalDateTime.now().toDatabaseString()
-
-                it[body] = insertReview.body
-                it[rating] = insertReview.rating
-                it[userId] = insertReview.userId
-                it[this.poemId] = poemId
-                it[createdAt] = time
-                it[updatedAt] = time
-            }.value
-
-            // Need to use this function to get the review with every relation added to it!
-            findReviewById(id)
-        } else {
-            null
-        }
+        // Need to use this function to get the review with every relation added to it!
+        findReviewById(id)
     }
 
     override suspend fun updateReview(id: Int, updateReview: InsertOrUpdateReview): Review? {
         ReviewsTable.update({ ReviewsTable.id eq id }) {
             it[body] = updateReview.body
             it[rating] = updateReview.rating
+            it[updatedAt] = LocalDateTime.now().toDatabaseString()
         }
 
         return findReviewById(id)
@@ -65,9 +62,9 @@ class ReviewDaoImpl : IReviewDao {
     override suspend fun deleteReview(id: Int): Boolean =
         ReviewsTable.deleteWhere { ReviewsTable.id eq id } > 0
 
-    override suspend fun calculateRatings(id: Int): Ratings {
+    override suspend fun calculateRatings(poemId: Int): Ratings {
         val reviewWithRelations = ReviewsTable innerJoin UsersTable
-        val reviews = reviewWithRelations.select { ReviewsTable.poemId eq id }.toReviews()
+        val reviews = reviewWithRelations.select { ReviewsTable.poemId eq poemId }.toReviews()
 
         val grouped = reviews.groupBy { it.rating }
         val average = grouped.map { it.key * it.value.size }.sum().toDouble().div(reviews.size)

@@ -23,7 +23,9 @@ class CategoryDaoImplTest : BaseDaoTest() {
             val category = dao.getCategory(categoryId!!)
 
             assertThat(category).matches {
-                it?.name == "Love" && it.id == 1
+                it?.name == "Love" &&
+                        it.id == 1 &&
+                        it.createdAt == it.updatedAt
             }
         }
     }

@@ -27,7 +27,8 @@ class PoemDaoImpl : IPoemDao {
     }
 
     private fun findPoemById(id: Int): PoemDetail? {
-        val poemsWithAllRelations = PoemsTable innerJoin UsersTable innerJoin PoemCategoryJunctionTable innerJoin CategoriesTable
+        // Using "leftJoin UsersTable" because we want to find poems even though the user has been removed...
+        val poemsWithAllRelations = PoemsTable leftJoin UsersTable innerJoin PoemCategoryJunctionTable innerJoin CategoriesTable
         return poemsWithAllRelations
             .select { PoemsTable.id eq id }
             .toPoem()
@@ -38,7 +39,8 @@ class PoemDaoImpl : IPoemDao {
         findPoemById(id)
 
     override suspend fun getPoems(categoryId: Int?): List<Poem> =
-        (PoemsTable innerJoin UsersTable)
+        // Using "leftJoin UsersTable" because we want to find poems even though the user has been removed...
+        (PoemsTable leftJoin UsersTable)
             .selectAll().toPoems()
 
     override suspend fun insertPoem(insertPoem: InsertOrUpdatePoem, writerId: Int): PoemDetail? {
@@ -68,6 +70,7 @@ class PoemDaoImpl : IPoemDao {
         PoemsTable.update({ PoemsTable.id eq id }) {
             it[title] = updatePoem.title
             it[body] = updatePoem.body
+            it[updatedAt] = LocalDateTime.now().toDatabaseString()
         }
 
         // Delete the pivot rows for the categories that are not returned anymore

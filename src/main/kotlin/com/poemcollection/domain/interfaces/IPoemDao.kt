@@ -7,7 +7,7 @@ import com.poemcollection.domain.models.poem.PoemDetail
 interface IPoemDao {
 
     suspend fun getPoem(id: Int): PoemDetail?
-    suspend fun getPoems(categoryId: Int?): List<Poem>
+    suspend fun getPoems(categoryId: Int? = null): List<Poem>
     suspend fun insertPoem(insertPoem: InsertOrUpdatePoem, writerId: Int): PoemDetail?
 
     suspend fun updatePoem(id: Int, updatePoem: InsertOrUpdatePoem): PoemDetail?

@@ -9,6 +9,8 @@ object UserInstrumentation {
 
     fun givenAValidInsertUserBody() = InsertNewUser("christiano", "bolla", "christiano@example", SaltedHash("hash", "salt"))
 
+    fun givenASecondValidInsertUserBody() = InsertNewUser("Jane", "Ode", "jane@example", SaltedHash("hash", "salt"))
+
     fun givenAValidUpdateUserBody() = UpdateUser("John", "Doe", "john.dao@example.be")
 
     fun givenAnEmptyUpdateUserBody() = UpdateUser()

@@ -8,7 +8,7 @@ data class PoemDetail(
     val id: Int = 0,
     val title: String = "",
     val body: String = "",
-    val writer: User = User(),
+    val writer: User? = User(),
     val categories: List<Category> = emptyList(),
     override val createdAt: String = "",
     override val updatedAt: String = ""

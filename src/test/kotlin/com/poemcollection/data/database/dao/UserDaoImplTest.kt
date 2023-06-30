@@ -27,7 +27,10 @@ internal class UserDaoImplTest : BaseDaoTest() {
             val user = dao.getUser(userId!!)
 
             assertThat(user).matches {
-                it?.email == validUser.email && it.firstName == validUser.firstName && it.lastName == validUser.lastName && it.role == UserRoles.User
+                it?.email == validUser.email &&
+                        it.firstName == validUser.firstName &&
+                        it.lastName == validUser.lastName &&
+                        it.role == UserRoles.User
             }
         }
     }

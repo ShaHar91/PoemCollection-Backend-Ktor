@@ -19,7 +19,8 @@ fun ResultRow.toPoemDetail() = PoemDetail(
     id = this[PoemsTable.id].value,
     title = this[PoemsTable.title],
     body = this[PoemsTable.body],
-    writer = this.toUser(),
+    // This nullable check IS correct, when user has been deleted this check will return NULL
+    writer = if (this[UsersTable.id] != null) this.toUser() else null,
     createdAt = this[PoemsTable.createdAt],
     updatedAt = this[PoemsTable.updatedAt]
 )

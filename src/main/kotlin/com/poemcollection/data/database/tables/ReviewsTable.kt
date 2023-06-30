@@ -14,6 +14,11 @@ object ReviewsTable : IntIdTable() {
     val poemId = reference("poemId", PoemsTable, onDelete = ReferenceOption.CASCADE) // As long as this foreign key references the primary key of the Poems table this is enough.
     val createdAt = varchar("createdAt", 255).default(LocalDateTime.now().toDatabaseString())
     val updatedAt = varchar("updatedAt", 255).default(LocalDateTime.now().toDatabaseString())
+
+    init {
+        // Only a single pair can exist, duplicates are not allowed/necessary
+        uniqueIndex(userId, poemId)
+    }
 }
 
 fun ResultRow.toReviewWithUser() = Review(
