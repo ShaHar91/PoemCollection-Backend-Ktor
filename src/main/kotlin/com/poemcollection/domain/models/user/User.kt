@@ -11,6 +11,7 @@ data class User(
     val email: String = "",
     override val createdAt: String = "",
     override val updatedAt: String = "",
-    val role: UserRoles = UserRoles.User
+    val role: UserRoles = UserRoles.User,
+    @Transient val password: String? = null,
 ) : DateAble, Principal
 

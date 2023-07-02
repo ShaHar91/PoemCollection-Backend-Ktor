@@ -10,27 +10,27 @@ import org.koin.core.component.inject
 
 class CategoryControllerImpl : BaseController(), CategoryController, KoinComponent {
 
-    private val categoryApi by inject<ICategoryDao>()
+    private val categoryDao by inject<ICategoryDao>()
 
     override suspend fun postCategory(insertCategory: InsertOrUpdateCategory): Category = dbQuery {
-        categoryApi.insertCategory(insertCategory) ?: throw TBDException
+        categoryDao.insertCategory(insertCategory) ?: throw TBDException
     }
 
     override suspend fun getAllCategories(): List<Category> = dbQuery {
-        categoryApi.getCategories()
+        categoryDao.getCategories()
     }
 
     override suspend fun getCategoryById(categoryId: Int): Category = dbQuery {
-        categoryApi.getCategory(categoryId) ?: throw TBDException
+        categoryDao.getCategory(categoryId) ?: throw TBDException
     }
 
     override suspend fun updateCategoryById(categoryId: Int, updateCategory: InsertOrUpdateCategory): Category = dbQuery {
-        categoryApi.updateCategory(categoryId, updateCategory) ?: throw TBDException
+        categoryDao.updateCategory(categoryId, updateCategory) ?: throw TBDException
     }
 
     override suspend fun deleteCategoryById(categoryId: Int) {
         dbQuery {
-            categoryApi.deleteCategory(categoryId)
+            categoryDao.deleteCategory(categoryId)
         }
     }
 }

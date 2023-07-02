@@ -1,6 +1,5 @@
 package com.poemcollection.data.database.instrumentation
 
-import com.poemcollection.domain.models.SaltedHash
 import com.poemcollection.domain.models.category.InsertOrUpdateCategory
 import com.poemcollection.domain.models.poem.InsertOrUpdatePoem
 import com.poemcollection.domain.models.user.InsertNewUser
@@ -11,7 +10,7 @@ object PoemInstrumentation {
 
     fun givenASecondValidInsertCategoryBody() = InsertOrUpdateCategory("Hate")
 
-    fun givenAValidInsertWriterBody() = InsertNewUser("christiano", "bolla", "christiano@example", SaltedHash("hash", "salt"))
+    fun givenAValidInsertWriterBody() = InsertNewUser("christiano", "bolla", "christiano@example", "hashedPassword", null)
 
     fun givenAValidInsertPoemBody() = InsertOrUpdatePoem("This is title", "This is body", listOf(1))
 

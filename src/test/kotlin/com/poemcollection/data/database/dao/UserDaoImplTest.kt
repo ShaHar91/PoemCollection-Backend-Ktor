@@ -146,8 +146,7 @@ internal class UserDaoImplTest : BaseDaoTest() {
             assertThat(user).matches { it?.createdAt != it?.updatedAt }
             assertThat(hashedUser).matches {
                 it?.email == validUser.email &&
-                        it.password == validUpdateUserPassword.saltedHash.hash &&
-                        it.salt == validUpdateUserPassword.saltedHash.salt
+                        it.password == validUpdateUserPassword.saltedHash
             }
         }
     }
@@ -237,8 +236,7 @@ internal class UserDaoImplTest : BaseDaoTest() {
 
             assertThat(userHashable).matches {
                 it?.email == validInsertUser.email &&
-                        it.salt == userHashable?.salt &&
-                        it.password == userHashable.password
+                        it.password == userHashable?.password
             }
         }
     }

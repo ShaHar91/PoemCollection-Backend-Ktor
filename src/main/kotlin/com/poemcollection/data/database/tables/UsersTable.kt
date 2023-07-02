@@ -1,7 +1,6 @@
 package com.poemcollection.data.database.tables
 
 import com.poemcollection.domain.models.user.User
-import com.poemcollection.domain.models.user.UserHashable
 import com.poemcollection.utils.toDatabaseString
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.ResultRow
@@ -12,7 +11,6 @@ object UsersTable : IntIdTable() {
     val lastName = varchar("lastName", 255).default("")
     val email = varchar("email", 255).uniqueIndex()
     val password = varchar("password", 255)
-    val salt = varchar("salt", 255)
     val createdAt = varchar("createdAt", 255).default(LocalDateTime.now().toDatabaseString())
     val updatedAt = varchar("updatedAt", 255).default(LocalDateTime.now().toDatabaseString())
     val role = enumeration<UserRoles>("role").default(UserRoles.User)
@@ -33,13 +31,7 @@ fun ResultRow.toUser() = User(
     role = this[UsersTable.role]
 )
 
-fun ResultRow.toUserHashable() = UserHashable(
-    id = this[UsersTable.id].value,
-    email = this[UsersTable.email],
-    password = this[UsersTable.password],
-    salt = this[UsersTable.salt]
-)
-
+fun ResultRow.toUserHashable() = this.toUser().copy(password = this[UsersTable.password])
 
 fun Iterable<ResultRow>.toUserHashable() = this.firstOrNull()?.toUserHashable()
 

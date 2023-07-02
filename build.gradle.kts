@@ -47,6 +47,8 @@ dependencies {
 
     implementation("commons-codec:commons-codec:$commons_codec_version")
 
+    implementation("org.mindrot:jbcrypt:0.4")
+    
     // Koin for Ktor; make sure you go to File...Project Structure
     // and switch to Java 11
     implementation("io.insert-koin:koin-ktor:$koin_version")

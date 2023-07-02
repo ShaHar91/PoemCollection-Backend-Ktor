@@ -17,6 +17,10 @@ import com.poemcollection.modules.auth.JwtConfig
 import com.poemcollection.modules.auth.TokenProvider
 import com.poemcollection.modules.categories.CategoryController
 import com.poemcollection.modules.categories.CategoryControllerImpl
+import com.poemcollection.modules.users.UserController
+import com.poemcollection.modules.users.UserControllerImpl
+import com.poemcollection.utils.PasswordManager
+import com.poemcollection.utils.PasswordManagerContract
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.config.*
@@ -48,6 +52,7 @@ fun Application.configureKoin() {
                 module {
                     single { environment.config }
                     singleOf(::DatabaseProvider) { bind<DatabaseProviderContract>() }
+                    single<PasswordManagerContract> { PasswordManager }
 
                     single<TokenProvider> {
                         val config = get<ApplicationConfig>()
@@ -71,6 +76,7 @@ fun Application.main() {
 
 fun routeModule() = module {
     singleOf(::AuthControllerImpl) { bind<AuthController>() }
+    singleOf(::UserControllerImpl) { bind<UserController>() }
     singleOf(::CategoryControllerImpl) { bind<CategoryController>() }
 }
 

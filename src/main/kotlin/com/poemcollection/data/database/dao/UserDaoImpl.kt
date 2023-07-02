@@ -2,8 +2,10 @@ package com.poemcollection.data.database.dao
 
 import com.poemcollection.data.database.tables.*
 import com.poemcollection.domain.interfaces.IUserDao
-import com.poemcollection.domain.models.SaltedHash
-import com.poemcollection.domain.models.user.*
+import com.poemcollection.domain.models.user.InsertNewUser
+import com.poemcollection.domain.models.user.UpdateUser
+import com.poemcollection.domain.models.user.User
+import com.poemcollection.domain.models.user.hasData
 import com.poemcollection.utils.toDatabaseString
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -14,10 +16,10 @@ class UserDaoImpl : IUserDao {
     override fun getUser(id: Int): User? =
         UsersTable.select { UsersTable.id eq id }.toUser()
 
-    override fun getUserHashableById(id: Int): UserHashable? =
+    override fun getUserHashableById(id: Int): User? =
         UsersTable.select { UsersTable.id eq id }.toUserHashable()
 
-    override fun getUserHashableByEmail(email: String): UserHashable? =
+    override fun getUserHashableByEmail(email: String): User? =
         UsersTable.select { UsersTable.email eq email }.toUserHashable()
 
     override fun getUsers(): List<User> =
@@ -30,8 +32,7 @@ class UserDaoImpl : IUserDao {
             it[firstName] = user.firstName
             it[lastName] = user.lastName
             it[email] = user.email
-            it[password] = user.saltedHash.hash
-            it[salt] = user.saltedHash.salt
+            it[password] = user.password
             it[createdAt] = time
             it[updatedAt] = time
         }.resultedValues?.toUsers()?.singleOrNull()
@@ -59,10 +60,9 @@ class UserDaoImpl : IUserDao {
     override fun isUserRoleAdmin(userId: Int): Boolean =
         UsersTable.select { UsersTable.id eq userId }.firstOrNull()?.get(UsersTable.role) == UserRoles.Admin
 
-    override fun updateUserPassword(userId: Int, saltedHash: SaltedHash): User? {
+    override fun updateUserPassword(userId: Int, updatePassword: String): User? {
         UsersTable.update({ UsersTable.id eq userId }) {
-            it[password] = saltedHash.hash
-            it[salt] = saltedHash.salt
+            it[password] = updatePassword
             it[updatedAt] = LocalDateTime.now().toDatabaseString()
         }
 

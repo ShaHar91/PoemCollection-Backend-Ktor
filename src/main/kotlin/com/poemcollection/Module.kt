@@ -8,6 +8,7 @@ import com.poemcollection.modules.auth.setupAuthentication
 import com.poemcollection.modules.auth.validateUser
 import com.poemcollection.modules.auth.validateUserIsAdmin
 import com.poemcollection.modules.categories.categoryRouting
+import com.poemcollection.modules.users.userRouting
 import io.ktor.serialization.gson.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -53,6 +54,7 @@ fun Application.module() {
     install(Routing) {
         authRouting()
         route("api/v1/") {
+            userRouting()
             categoryRouting()
         }
     }
