@@ -1,7 +1,11 @@
 package com.poemcollection.domain.models.user
 
-//import com.poemcollection.domain.models.SaltedHash
+import com.google.gson.annotations.SerializedName
 
 data class UpdatePassword(
-    val saltedHash: String
-)
+    @SerializedName("old_password")
+    val oldPassword: String,
+    override val password: String,
+    @SerializedName("repeat_password")
+    override val repeatPassword: String?
+) : PasswordAble
