@@ -2,7 +2,6 @@ package com.poemcollection.data.database.dao
 
 import com.poemcollection.data.database.instrumentation.UserInstrumentation.givenAValidInsertUserBody
 import com.poemcollection.data.database.instrumentation.UserInstrumentation.givenAValidUpdateUserBody
-import com.poemcollection.data.database.instrumentation.UserInstrumentation.givenAValidUpdateUserPasswordBody
 import com.poemcollection.data.database.instrumentation.UserInstrumentation.givenAnEmptyUpdateUserBody
 import com.poemcollection.data.database.tables.UserRoles
 import com.poemcollection.data.database.tables.UsersTable
@@ -138,15 +137,15 @@ internal class UserDaoImplTest : BaseDaoTest() {
             // adding a delay so there is a clear difference between `updatedAt` and `createdAt`
             delay(1000)
 
-            val validUpdateUserPassword = givenAValidUpdateUserPasswordBody()
-            val user = dao.updateUserPassword(userId!!, validUpdateUserPassword.saltedHash)
+            val validUpdateUserPassword = "new-hash"
+            val user = dao.updateUserPassword(userId!!, validUpdateUserPassword)
 
             val hashedUser = dao.getUserHashableById(userId)
 
             assertThat(user).matches { it?.createdAt != it?.updatedAt }
             assertThat(hashedUser).matches {
                 it?.email == validUser.email &&
-                        it.password == validUpdateUserPassword.saltedHash
+                        it.password == validUpdateUserPassword
             }
         }
     }
