@@ -3,10 +3,12 @@ package com.poemcollection
 import com.auth0.jwt.interfaces.JWTVerifier
 import com.poemcollection.data.database.DatabaseProviderContract
 import com.poemcollection.domain.interfaces.IUserDao
+import com.poemcollection.modules.auth.authRouting
 import com.poemcollection.modules.auth.setupAuthentication
 import com.poemcollection.modules.auth.validateUser
 import com.poemcollection.modules.auth.validateUserIsAdmin
-import io.ktor.serialization.kotlinx.json.*
+import com.poemcollection.modules.categories.categoryRouting
+import io.ktor.serialization.gson.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
@@ -14,7 +16,7 @@ import io.ktor.server.config.*
 import io.ktor.server.plugins.callloging.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.statuspages.*
-import kotlinx.serialization.json.Json
+import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
 import org.slf4j.event.Level
 
@@ -30,14 +32,7 @@ fun Application.module() {
     install(CallLogging) {
         level = Level.DEBUG
     }
-    install(ContentNegotiation) {
-        json(Json {
-            encodeDefaults = true // Will make sure that every field will be returned (as long as it has a default value)
-            ignoreUnknownKeys = true // Will make sure that unsupported field that are in a request will not trigger an error and will just be ignored
-        })
-
-//        register(FormUrlEncoded, CustomFormUrlEncodedConverter)
-    }
+    install(ContentNegotiation) { gson() }
     install(StatusPages) {
         //TODO: still TBD what to use and how!
     }
@@ -52,6 +47,13 @@ fun Application.module() {
             setupAuthentication(config, jwtVerifier) {
                 it.validateUserIsAdmin(databaseProvider, userDao)
             }
+        }
+    }
+
+    install(Routing) {
+        authRouting()
+        route("api/v1/") {
+            categoryRouting()
         }
     }
 }

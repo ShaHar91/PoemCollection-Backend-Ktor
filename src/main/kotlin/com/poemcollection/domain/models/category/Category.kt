@@ -8,3 +8,19 @@ data class Category(
     override val createdAt: String = "",
     override val updatedAt: String = ""
 ) : DateAble
+
+data class CategoryDto(
+    val id: Int = 0,
+    val name: String = "",
+    override val createdAt: String = "",
+    override val updatedAt: String = ""
+) : DateAble
+
+fun Category.toDto() = CategoryDto(
+    this.id,
+    this.name,
+    this.createdAt,
+    this.updatedAt
+)
+
+fun List<Category>.toDto() = this.map { it.toDto() }
