@@ -1,5 +1,6 @@
 package com.poemcollection
 
+import com.auth0.jwt.interfaces.JWTVerifier
 import com.poemcollection.data.database.DatabaseProvider
 import com.poemcollection.data.database.DatabaseProviderContract
 import com.poemcollection.data.database.dao.CategoryDaoImpl
@@ -12,17 +13,17 @@ import com.poemcollection.domain.interfaces.IReviewDao
 import com.poemcollection.domain.interfaces.IUserDao
 import com.poemcollection.modules.auth.AuthController
 import com.poemcollection.modules.auth.AuthControllerImpl
+import com.poemcollection.modules.auth.JwtConfig
+import com.poemcollection.modules.auth.TokenProvider
 import com.poemcollection.modules.categories.CategoryController
 import com.poemcollection.modules.categories.CategoryControllerImpl
-import com.poemcollection.plugin.configureCallLogging
-import com.poemcollection.plugin.configureSerialization
 import io.ktor.http.*
 import io.ktor.server.application.*
+import io.ktor.server.config.*
 import io.ktor.server.plugins.cors.routing.*
 import org.koin.core.module.dsl.bind
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
-import org.koin.ktor.ext.inject
 import org.koin.ktor.plugin.Koin
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
@@ -33,12 +34,7 @@ fun Application.start() {
         anyHost()
     }
     configureKoin()
-    configureSerialization()
-    configureCallLogging()
-
-    val databaseProvider by inject<DatabaseProviderContract>()
-    // Init database here
-    databaseProvider.init()
+    main()
 }
 
 
@@ -52,12 +48,25 @@ fun Application.configureKoin() {
                 module {
                     single { environment.config }
                     singleOf(::DatabaseProvider) { bind<DatabaseProviderContract>() }
+
+                    single<TokenProvider> {
+                        val config = get<ApplicationConfig>()
+                        JwtConfig(config)
+                    }
+                    single<JWTVerifier> {
+                        val tokenProvider = get<TokenProvider>()
+                        tokenProvider.verifier
+                    }
                 },
                 routeModule(),
                 daoModule()
             )
         }
     }
+}
+
+fun Application.main() {
+    module()
 }
 
 fun routeModule() = module {

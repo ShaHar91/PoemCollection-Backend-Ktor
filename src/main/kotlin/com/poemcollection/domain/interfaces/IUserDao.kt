@@ -8,15 +8,15 @@ import com.poemcollection.domain.models.user.UserHashable
 
 interface IUserDao {
 
-    suspend fun getUser(id: Int): User?
-    suspend fun getUserHashableById(id: Int): UserHashable?
-    suspend fun getUserHashableByEmail(email: String): UserHashable?
-    suspend fun getUsers(): List<User>
-    suspend fun insertUser(user: InsertNewUser): User?
+    fun getUser(id: Int): User?
+    fun getUserHashableById(id: Int): UserHashable?
+    fun getUserHashableByEmail(email: String): UserHashable?
+    fun getUsers(): List<User>
+    fun insertUser(user: InsertNewUser): User?
 
-    suspend fun updateUser(id: Int, user: UpdateUser): User?
-    suspend fun deleteUser(id: Int): Boolean
-    suspend fun userUnique(email: String): Boolean
-    suspend fun isUserRoleAdmin(userId: Int): Boolean
-    suspend fun updateUserPassword(userId: Int, saltedHash: SaltedHash): User?
+    fun updateUser(id: Int, user: UpdateUser): User?
+    fun deleteUser(id: Int): Boolean
+    fun userUnique(email: String): Boolean
+    fun isUserRoleAdmin(userId: Int): Boolean
+    fun updateUserPassword(userId: Int, saltedHash: SaltedHash): User?
 }

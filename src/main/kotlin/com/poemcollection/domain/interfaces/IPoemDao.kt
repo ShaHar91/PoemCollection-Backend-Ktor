@@ -6,11 +6,11 @@ import com.poemcollection.domain.models.poem.PoemDetail
 
 interface IPoemDao {
 
-    suspend fun getPoem(id: Int): PoemDetail?
-    suspend fun getPoems(categoryId: Int? = null): List<Poem>
-    suspend fun insertPoem(insertPoem: InsertOrUpdatePoem, writerId: Int): PoemDetail?
+    fun getPoem(id: Int): PoemDetail?
+    fun getPoems(categoryId: Int? = null): List<Poem>
+    fun insertPoem(insertPoem: InsertOrUpdatePoem, writerId: Int): PoemDetail?
 
-    suspend fun updatePoem(id: Int, updatePoem: InsertOrUpdatePoem): PoemDetail?
-    suspend fun deletePoem(id: Int): Boolean
-    suspend fun isUserWriter(poemId: Int, userId: Int): Boolean
+    fun updatePoem(id: Int, updatePoem: InsertOrUpdatePoem): PoemDetail?
+    fun deletePoem(id: Int): Boolean
+    fun isUserWriter(poemId: Int, userId: Int): Boolean
 }

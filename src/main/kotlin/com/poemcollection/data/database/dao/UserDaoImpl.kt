@@ -11,19 +11,19 @@ import java.time.LocalDateTime
 
 class UserDaoImpl : IUserDao {
 
-    override suspend fun getUser(id: Int): User? =
+    override fun getUser(id: Int): User? =
         UsersTable.select { UsersTable.id eq id }.toUser()
 
-    override suspend fun getUserHashableById(id: Int): UserHashable? =
+    override fun getUserHashableById(id: Int): UserHashable? =
         UsersTable.select { UsersTable.id eq id }.toUserHashable()
 
-    override suspend fun getUserHashableByEmail(email: String): UserHashable? =
+    override fun getUserHashableByEmail(email: String): UserHashable? =
         UsersTable.select { UsersTable.email eq email }.toUserHashable()
 
-    override suspend fun getUsers(): List<User> =
+    override fun getUsers(): List<User> =
         UsersTable.selectAll().toUsers()
 
-    override suspend fun insertUser(user: InsertNewUser): User? =
+    override fun insertUser(user: InsertNewUser): User? =
         UsersTable.insert {
             val time = LocalDateTime.now().toDatabaseString()
 
@@ -36,7 +36,7 @@ class UserDaoImpl : IUserDao {
             it[updatedAt] = time
         }.resultedValues?.toUsers()?.singleOrNull()
 
-    override suspend fun updateUser(id: Int, user: UpdateUser): User? {
+    override fun updateUser(id: Int, user: UpdateUser): User? {
         if (user.hasData()) {
             UsersTable.update({ UsersTable.id eq id }) {
                 user.firstName?.let { first -> it[firstName] = first }
@@ -50,16 +50,16 @@ class UserDaoImpl : IUserDao {
         return getUser(id)
     }
 
-    override suspend fun deleteUser(id: Int): Boolean =
+    override fun deleteUser(id: Int): Boolean =
         UsersTable.deleteWhere { UsersTable.id eq id } > 0
 
-    override suspend fun userUnique(email: String): Boolean =
+    override fun userUnique(email: String): Boolean =
         UsersTable.select { UsersTable.email eq email }.empty()
 
-    override suspend fun isUserRoleAdmin(userId: Int): Boolean =
+    override fun isUserRoleAdmin(userId: Int): Boolean =
         UsersTable.select { UsersTable.id eq userId }.firstOrNull()?.get(UsersTable.role) == UserRoles.Admin
 
-    override suspend fun updateUserPassword(userId: Int, saltedHash: SaltedHash): User? {
+    override fun updateUserPassword(userId: Int, saltedHash: SaltedHash): User? {
         UsersTable.update({ UsersTable.id eq userId }) {
             it[password] = saltedHash.hash
             it[salt] = saltedHash.salt

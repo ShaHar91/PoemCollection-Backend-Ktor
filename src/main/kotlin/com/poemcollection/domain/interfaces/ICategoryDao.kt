@@ -5,11 +5,11 @@ import com.poemcollection.domain.models.category.InsertOrUpdateCategory
 
 interface ICategoryDao {
 
-    suspend fun getCategory(id: Int): Category?
-    suspend fun getCategories(): List<Category>
-    suspend fun insertCategory(category: InsertOrUpdateCategory): Category?
+    fun getCategory(id: Int): Category?
+    fun getCategories(): List<Category>
+    fun insertCategory(category: InsertOrUpdateCategory): Category?
 
-    suspend fun updateCategory(id: Int, category: InsertOrUpdateCategory): Category?
-    suspend fun deleteCategory(id: Int): Boolean
-    suspend fun getListOfExistingCategoryIds(categoryIds: List<Int>): List<Int>
+    fun updateCategory(id: Int, category: InsertOrUpdateCategory): Category?
+    fun deleteCategory(id: Int): Boolean
+    fun getListOfExistingCategoryIds(categoryIds: List<Int>): List<Int>
 }

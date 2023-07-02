@@ -35,15 +35,15 @@ class PoemDaoImpl : IPoemDao {
             .singleOrNull()
     }
 
-    override suspend fun getPoem(id: Int): PoemDetail? =
+    override fun getPoem(id: Int): PoemDetail? =
         findPoemById(id)
 
-    override suspend fun getPoems(categoryId: Int?): List<Poem> =
+    override fun getPoems(categoryId: Int?): List<Poem> =
         // Using "leftJoin UsersTable" because we want to find poems even though the user has been removed...
         (PoemsTable leftJoin UsersTable)
             .selectAll().toPoems()
 
-    override suspend fun insertPoem(insertPoem: InsertOrUpdatePoem, writerId: Int): PoemDetail? {
+    override fun insertPoem(insertPoem: InsertOrUpdatePoem, writerId: Int): PoemDetail? {
 
         val id = PoemsTable.insertAndGetId {
             val time = LocalDateTime.now().toDatabaseString()
@@ -66,7 +66,7 @@ class PoemDaoImpl : IPoemDao {
         return findPoemById(id)
     }
 
-    override suspend fun updatePoem(id: Int, updatePoem: InsertOrUpdatePoem): PoemDetail? {
+    override fun updatePoem(id: Int, updatePoem: InsertOrUpdatePoem): PoemDetail? {
         PoemsTable.update({ PoemsTable.id eq id }) {
             it[title] = updatePoem.title
             it[body] = updatePoem.body
@@ -86,7 +86,7 @@ class PoemDaoImpl : IPoemDao {
         return findPoemById(id)
     }
 
-    override suspend fun deletePoem(id: Int): Boolean = run {
+    override fun deletePoem(id: Int): Boolean = run {
         //TODO: check if the cascade deletion can be used instead of this!!!
         val result = PoemsTable.deleteWhere { PoemsTable.id eq id }
         val result2 = PoemCategoryJunctionTable.deleteWhere { poemId eq id }
@@ -94,6 +94,6 @@ class PoemDaoImpl : IPoemDao {
         result > 0 && result2 > 0
     }
 
-    override suspend fun isUserWriter(poemId: Int, userId: Int): Boolean =
+    override fun isUserWriter(poemId: Int, userId: Int): Boolean =
         PoemsTable.select { PoemsTable.id eq poemId }.first()[PoemsTable.writerId].value == userId
 }

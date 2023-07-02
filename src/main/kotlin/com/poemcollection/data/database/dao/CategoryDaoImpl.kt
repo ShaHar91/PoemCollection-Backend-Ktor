@@ -13,13 +13,13 @@ import java.time.LocalDateTime
 
 class CategoryDaoImpl : ICategoryDao {
 
-    override suspend fun getCategory(id: Int): Category? =
+    override fun getCategory(id: Int): Category? =
         CategoriesTable.select { (CategoriesTable.id eq id) }.toCategory()
 
-    override suspend fun getCategories(): List<Category> =
+    override fun getCategories(): List<Category> =
         CategoriesTable.selectAll().toCategories()
 
-    override suspend fun insertCategory(category: InsertOrUpdateCategory): Category? {
+    override fun insertCategory(category: InsertOrUpdateCategory): Category? {
         return CategoriesTable.insert {
             val time = LocalDateTime.now().toDatabaseString()
 
@@ -29,7 +29,7 @@ class CategoryDaoImpl : ICategoryDao {
         }.resultedValues?.toCategory()
     }
 
-    override suspend fun updateCategory(id: Int, category: InsertOrUpdateCategory): Category? {
+    override fun updateCategory(id: Int, category: InsertOrUpdateCategory): Category? {
         CategoriesTable.update({ CategoriesTable.id eq id }) {
             it[name] = category.name
             it[updatedAt] = LocalDateTime.now().toDatabaseString()
@@ -38,9 +38,9 @@ class CategoryDaoImpl : ICategoryDao {
         return getCategory(id)
     }
 
-    override suspend fun deleteCategory(id: Int): Boolean =
+    override fun deleteCategory(id: Int): Boolean =
         CategoriesTable.deleteWhere { CategoriesTable.id eq id } > 0
 
-    override suspend fun getListOfExistingCategoryIds(categoryIds: List<Int>): List<Int> =
+    override fun getListOfExistingCategoryIds(categoryIds: List<Int>): List<Int> =
         CategoriesTable.select { CategoriesTable.id inList categoryIds }.map { it[CategoriesTable.id].value }
 }

@@ -18,11 +18,11 @@ import java.time.LocalDateTime
 
 class ReviewDaoImpl : IReviewDao {
 
-    override suspend fun getReview(id: Int): Review? =
+    override fun getReview(id: Int): Review? =
         findReviewById(id)
 
     // TODO: maybe use something like `excludedUserId`?? 😅
-    override suspend fun getReviews(poemId: Int?, limit: Int?): List<Review> =
+    override fun getReviews(poemId: Int?, limit: Int?): List<Review> =
         (ReviewsTable innerJoin UsersTable)
             .select { ReviewsTable.poemId eq poemId }.also {
                 limit ?: return@also
@@ -33,7 +33,7 @@ class ReviewDaoImpl : IReviewDao {
         (ReviewsTable innerJoin UsersTable)
             .select { ReviewsTable.id eq reviewId }.toReview()
 
-    override suspend fun insertReview(poemId: Int, insertReview: InsertOrUpdateReview): Review? = run {
+    override fun insertReview(poemId: Int, insertReview: InsertOrUpdateReview): Review? = run {
         val id = ReviewsTable.insertAndGetId {
             val time = LocalDateTime.now().toDatabaseString()
 
@@ -49,7 +49,7 @@ class ReviewDaoImpl : IReviewDao {
         findReviewById(id)
     }
 
-    override suspend fun updateReview(id: Int, updateReview: InsertOrUpdateReview): Review? {
+    override fun updateReview(id: Int, updateReview: InsertOrUpdateReview): Review? {
         ReviewsTable.update({ ReviewsTable.id eq id }) {
             it[body] = updateReview.body
             it[rating] = updateReview.rating
@@ -59,10 +59,10 @@ class ReviewDaoImpl : IReviewDao {
         return findReviewById(id)
     }
 
-    override suspend fun deleteReview(id: Int): Boolean =
+    override fun deleteReview(id: Int): Boolean =
         ReviewsTable.deleteWhere { ReviewsTable.id eq id } > 0
 
-    override suspend fun calculateRatings(poemId: Int): Ratings {
+    override fun calculateRatings(poemId: Int): Ratings {
         val reviewWithRelations = ReviewsTable innerJoin UsersTable
         val reviews = reviewWithRelations.select { ReviewsTable.poemId eq poemId }.toReviews()
 
@@ -80,6 +80,6 @@ class ReviewDaoImpl : IReviewDao {
         )
     }
 
-    override suspend fun isUserWriter(reviewId: Int, userId: Int): Boolean =
+    override fun isUserWriter(reviewId: Int, userId: Int): Boolean =
         ReviewsTable.select { ReviewsTable.id eq reviewId }.first()[ReviewsTable.userId].value == userId
 }
