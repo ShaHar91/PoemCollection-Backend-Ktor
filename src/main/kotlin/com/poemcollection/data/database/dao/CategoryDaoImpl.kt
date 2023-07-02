@@ -5,7 +5,7 @@ import com.poemcollection.data.database.tables.toCategories
 import com.poemcollection.data.database.tables.toCategory
 import com.poemcollection.domain.interfaces.ICategoryDao
 import com.poemcollection.domain.models.category.Category
-import com.poemcollection.domain.models.category.InsertOrUpdateCategory
+import com.poemcollection.data.dto.requests.category.InsertOrUpdateCategory
 import com.poemcollection.utils.toDatabaseString
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq

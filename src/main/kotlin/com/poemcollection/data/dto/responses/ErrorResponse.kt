@@ -1,4 +1,4 @@
-package com.poemcollection.data.responses
+package com.poemcollection.data.dto.responses
 
 //@kotlinx.serialization.Serializable
 //sealed interface ErrorResponse {

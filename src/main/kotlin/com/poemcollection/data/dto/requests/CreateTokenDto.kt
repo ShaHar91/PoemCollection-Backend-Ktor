@@ -1,4 +1,4 @@
-package com.poemcollection.data.dto.incoming
+package com.poemcollection.data.dto.requests
 
 data class CreateTokenDto(
     val email: String,

@@ -1,9 +1,10 @@
 package com.poemcollection.modules.users
 
 import com.poemcollection.ParamConstants
-import com.poemcollection.domain.models.user.InsertNewUser
-import com.poemcollection.domain.models.user.UpdatePassword
-import com.poemcollection.domain.models.user.UpdateUser
+import com.poemcollection.data.dto.requests.user.InsertNewUser
+import com.poemcollection.data.dto.requests.user.UpdatePassword
+import com.poemcollection.data.dto.requests.user.UpdateUser
+import com.poemcollection.domain.models.user.toDto
 import com.poemcollection.utils.getUserId
 import com.poemcollection.utils.receiveOrRespondWithError
 import com.poemcollection.utils.sendOk
@@ -23,24 +24,24 @@ fun Route.userRouting() {
         post("register") {
             val insertNewUser = call.receiveOrRespondWithError<InsertNewUser>()
             val user = userController.postUser(insertNewUser)
-            call.respond(user)
+            call.respond(user.toDto())
         }
 
         authenticate {
             get("me") {
-                call.respond(call.user)
+                call.respond(call.user.toDto())
             }
 
             put("me") {
                 val updateUser = call.receiveOrRespondWithError<UpdateUser>()
                 val user = userController.deleteUserById(call.user.id, updateUser)
-                call.respond(user)
+                call.respond(user.toDto())
             }
 
             put("me/password") {
                 val updatePassword = call.receiveOrRespondWithError<UpdatePassword>()
                 val user = userController.updateUserPasswordById(call.user.id, updatePassword)
-                call.respond(user)
+                call.respond(user.toDto())
             }
 
             delete("me") {
@@ -53,21 +54,21 @@ fun Route.userRouting() {
             get("{${ParamConstants.USER_ID_KEY}}") {
                 val userId = call.getUserId()
                 val user = userController.getUserById(userId)
-                call.respond(user)
+                call.respond(user.toDto())
             }
 
             put("{${ParamConstants.USER_ID_KEY}}") {
                 val userId = call.getUserId()
                 val updateUser = call.receiveOrRespondWithError<UpdateUser>()
                 val user = userController.deleteUserById(userId, updateUser)
-                call.respond(user)
+                call.respond(user.toDto())
             }
 
             put("{${ParamConstants.USER_ID_KEY}}/password") {
                 val userId = call.getUserId()
                 val updatePassword = call.receiveOrRespondWithError<UpdatePassword>()
                 val user = userController.updateUserPasswordById(userId, updatePassword)
-                call.respond(user)
+                call.respond(user.toDto())
             }
 
             delete("{${ParamConstants.USER_ID_KEY}}") {

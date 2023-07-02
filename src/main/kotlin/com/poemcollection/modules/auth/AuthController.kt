@@ -1,6 +1,6 @@
 package com.poemcollection.modules.auth
 
-import com.poemcollection.data.dto.incoming.CreateTokenDto
+import com.poemcollection.data.dto.requests.CreateTokenDto
 import com.poemcollection.domain.interfaces.IUserDao
 import com.poemcollection.model.CredentialsResponse
 import com.poemcollection.modules.BaseController

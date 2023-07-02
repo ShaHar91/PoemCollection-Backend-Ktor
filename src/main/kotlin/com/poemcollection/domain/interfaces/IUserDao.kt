@@ -1,7 +1,7 @@
 package com.poemcollection.domain.interfaces
 
-import com.poemcollection.domain.models.user.InsertNewUser
-import com.poemcollection.domain.models.user.UpdateUser
+import com.poemcollection.data.dto.requests.user.InsertNewUser
+import com.poemcollection.data.dto.requests.user.UpdateUser
 import com.poemcollection.domain.models.user.User
 
 interface IUserDao {

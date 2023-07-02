@@ -1,6 +1,6 @@
 package com.poemcollection.data.database.instrumentation
 
-import com.poemcollection.domain.models.category.InsertOrUpdateCategory
+import com.poemcollection.data.dto.requests.category.InsertOrUpdateCategory
 
 object CategoryInstrumentation {
 

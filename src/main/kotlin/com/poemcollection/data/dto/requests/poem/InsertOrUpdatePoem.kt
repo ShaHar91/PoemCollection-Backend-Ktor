@@ -1,4 +1,4 @@
-package com.poemcollection.domain.models.poem
+package com.poemcollection.data.dto.requests.poem
 
 data class InsertOrUpdatePoem(
     val title: String = "",

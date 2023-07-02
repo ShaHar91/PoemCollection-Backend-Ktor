@@ -1,6 +1,6 @@
 package com.poemcollection.domain.interfaces
 
-import com.poemcollection.domain.models.poem.InsertOrUpdatePoem
+import com.poemcollection.data.dto.requests.poem.InsertOrUpdatePoem
 import com.poemcollection.domain.models.poem.Poem
 import com.poemcollection.domain.models.poem.PoemDetail
 

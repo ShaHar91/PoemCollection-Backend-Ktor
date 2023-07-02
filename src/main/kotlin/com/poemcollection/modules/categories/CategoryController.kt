@@ -2,7 +2,7 @@ package com.poemcollection.modules.categories
 
 import com.poemcollection.domain.interfaces.ICategoryDao
 import com.poemcollection.domain.models.category.Category
-import com.poemcollection.domain.models.category.InsertOrUpdateCategory
+import com.poemcollection.data.dto.requests.category.InsertOrUpdateCategory
 import com.poemcollection.modules.BaseController
 import com.poemcollection.utils.TBDException
 import org.koin.core.component.KoinComponent

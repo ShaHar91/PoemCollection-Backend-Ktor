@@ -1,12 +1,11 @@
 package com.poemcollection.modules.users
 
 import com.poemcollection.domain.interfaces.IUserDao
-import com.poemcollection.domain.models.user.InsertNewUser
-import com.poemcollection.domain.models.user.UpdatePassword
-import com.poemcollection.domain.models.user.UpdateUser
+import com.poemcollection.data.dto.requests.user.InsertNewUser
+import com.poemcollection.data.dto.requests.user.UpdatePassword
+import com.poemcollection.data.dto.requests.user.UpdateUser
 import com.poemcollection.domain.models.user.User
 import com.poemcollection.modules.BaseController
-import com.poemcollection.modules.auth.TokenProvider
 import com.poemcollection.utils.PasswordManagerContract
 import com.poemcollection.utils.TBDException
 import org.koin.core.component.KoinComponent
@@ -16,7 +15,6 @@ class UserControllerImpl : BaseController(), UserController, KoinComponent {
 
     private val userDao by inject<IUserDao>()
     private val passwordEncryption by inject<PasswordManagerContract>()
-    private val tokenProvider by inject<TokenProvider>()
 
     override suspend fun postUser(insertNewUser: InsertNewUser): User = dbQuery {
         if (!insertNewUser.isValid) throw TBDException

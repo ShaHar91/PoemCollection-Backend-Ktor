@@ -1,4 +1,4 @@
-package com.poemcollection.domain.models.category
+package com.poemcollection.data.dto.requests.category
 
 data class InsertOrUpdateCategory(
     val name: String = ""

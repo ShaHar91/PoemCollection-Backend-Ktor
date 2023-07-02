@@ -1,6 +1,6 @@
 package com.poemcollection.modules.auth
 
-import com.poemcollection.data.dto.incoming.CreateTokenDto
+import com.poemcollection.data.dto.requests.CreateTokenDto
 import com.poemcollection.utils.receiveOrRespondWithError
 import io.ktor.server.application.*
 import io.ktor.server.response.*

@@ -2,10 +2,10 @@ package com.poemcollection.data.database.dao
 
 import com.poemcollection.data.database.tables.*
 import com.poemcollection.domain.interfaces.IUserDao
-import com.poemcollection.domain.models.user.InsertNewUser
-import com.poemcollection.domain.models.user.UpdateUser
+import com.poemcollection.data.dto.requests.user.InsertNewUser
+import com.poemcollection.data.dto.requests.user.UpdateUser
 import com.poemcollection.domain.models.user.User
-import com.poemcollection.domain.models.user.hasData
+import com.poemcollection.data.dto.requests.user.hasData
 import com.poemcollection.utils.toDatabaseString
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq

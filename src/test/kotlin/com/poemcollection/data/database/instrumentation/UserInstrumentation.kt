@@ -1,7 +1,7 @@
 package com.poemcollection.data.database.instrumentation
 
-import com.poemcollection.domain.models.user.InsertNewUser
-import com.poemcollection.domain.models.user.UpdateUser
+import com.poemcollection.data.dto.requests.user.InsertNewUser
+import com.poemcollection.data.dto.requests.user.UpdateUser
 
 object UserInstrumentation {
 

@@ -1,7 +1,7 @@
 package com.poemcollection.domain.interfaces
 
 import com.poemcollection.domain.models.category.Category
-import com.poemcollection.domain.models.category.InsertOrUpdateCategory
+import com.poemcollection.data.dto.requests.category.InsertOrUpdateCategory
 
 interface ICategoryDao {
 

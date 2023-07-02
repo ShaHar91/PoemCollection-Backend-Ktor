@@ -1,6 +1,5 @@
 package com.poemcollection.domain.models
 
-@kotlinx.serialization.Serializable
 data class Ratings(
     val total: Int = 0,
     val five_star: Int = 0,

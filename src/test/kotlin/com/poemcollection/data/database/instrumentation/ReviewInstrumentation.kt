@@ -1,6 +1,6 @@
 package com.poemcollection.data.database.instrumentation
 
-import com.poemcollection.domain.models.review.InsertOrUpdateReview
+import com.poemcollection.data.dto.requests.review.InsertOrUpdateReview
 
 object ReviewInstrumentation {
 

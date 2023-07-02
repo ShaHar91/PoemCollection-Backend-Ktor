@@ -1,4 +1,4 @@
-package com.poemcollection.domain.models.user
+package com.poemcollection.data.dto.requests.user
 
 import com.google.gson.annotations.SerializedName
 
