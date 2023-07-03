@@ -17,6 +17,8 @@ import com.poemcollection.modules.auth.JwtConfig
 import com.poemcollection.modules.auth.TokenProvider
 import com.poemcollection.modules.categories.CategoryController
 import com.poemcollection.modules.categories.CategoryControllerImpl
+import com.poemcollection.modules.poems.PoemController
+import com.poemcollection.modules.poems.PoemControllerImpl
 import com.poemcollection.modules.users.UserController
 import com.poemcollection.modules.users.UserControllerImpl
 import com.poemcollection.utils.PasswordManager
@@ -78,6 +80,7 @@ fun routeModule() = module {
     singleOf(::AuthControllerImpl) { bind<AuthController>() }
     singleOf(::UserControllerImpl) { bind<UserController>() }
     singleOf(::CategoryControllerImpl) { bind<CategoryController>() }
+    singleOf(::PoemControllerImpl) { bind<PoemController>() }
 }
 
 fun daoModule() = module {

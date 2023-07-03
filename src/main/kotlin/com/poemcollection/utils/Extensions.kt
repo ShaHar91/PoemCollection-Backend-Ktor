@@ -29,7 +29,9 @@ suspend inline fun <reified T> ApplicationCall.receiveOrRespondWithError(): T {
 //}
 
 fun ApplicationCall.getUserId(): Int = parameters[ParamConstants.USER_ID_KEY]?.toIntOrNull() ?: throw TBDException
-fun ApplicationCall.getCategoryId(): Int = parameters[ParamConstants.CATEGORY_ID_KEY]?.toIntOrNull() ?: throw TBDException
+fun ApplicationCall.getCategoryIdNullable(): Int? = parameters[ParamConstants.CATEGORY_ID_KEY]?.toIntOrNull()
+fun ApplicationCall.getCategoryId(): Int = getCategoryIdNullable() ?: throw TBDException
+fun ApplicationCall.getPoemId(): Int = parameters[ParamConstants.POEM_ID_KEY]?.toIntOrNull() ?: throw TBDException
 
 //suspend fun ApplicationCall.getPoemId(): Int? = parameters[ParamConstants.POEM_ID_KEY]?.toIntOrNull() ?: run {
 //    respond(HttpStatusCode.BadRequest, ErrorCodes.ErrorInvalidParameters.asResponse)

@@ -1,8 +1,8 @@
 package com.poemcollection.data.database.dao
 
 import com.poemcollection.data.database.tables.*
-import com.poemcollection.domain.interfaces.IPoemDao
 import com.poemcollection.data.dto.requests.poem.InsertOrUpdatePoem
+import com.poemcollection.domain.interfaces.IPoemDao
 import com.poemcollection.domain.models.poem.Poem
 import com.poemcollection.domain.models.poem.PoemDetail
 import com.poemcollection.utils.toDatabaseString
@@ -39,7 +39,8 @@ class PoemDaoImpl : IPoemDao {
         findPoemById(id)
 
     override fun getPoems(categoryId: Int?): List<Poem> =
-        // Using "leftJoin UsersTable" because we want to find poems even though the user has been removed...
+    // Using "leftJoin UsersTable" because we want to find poems even though the user has been removed...
+        //TODO: use the "categoryId" to fetch the list of poems for a specific category!
         (PoemsTable leftJoin UsersTable)
             .selectAll().toPoems()
 
