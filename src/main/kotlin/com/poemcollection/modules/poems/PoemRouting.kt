@@ -18,7 +18,7 @@ fun Route.poemRouting() {
             // Only a real user can create a poem
             post {
                 val insertPoem = call.receiveOrRespondWithError<InsertOrUpdatePoem>()
-                val userId = call.user.id
+                val userId = call.authenticatedUser.id
                 val poem = poemController.postPoem(userId, insertPoem)
                 call.respond(poem)
             }
@@ -42,14 +42,14 @@ fun Route.poemRouting() {
                 put {
                     val poemId = call.getPoemId()
                     val updatePoem = call.receiveOrRespondWithError<InsertOrUpdatePoem>()
-                    val user = call.user
-                    val poemDetail = poemController.updatePoemById(user.id, poemId, updatePoem)
+                    val userId = call.authenticatedUser.id
+                    val poemDetail = poemController.updatePoemById(userId, poemId, updatePoem)
                     call.respond(poemDetail)
                 }
 
                 delete {
                     val poemId = call.getPoemId()
-                    val userId = call.user.id
+                    val userId = call.authenticatedUser.id
                     poemController.deletePoemById(userId, poemId)
                     sendOk()
                 }

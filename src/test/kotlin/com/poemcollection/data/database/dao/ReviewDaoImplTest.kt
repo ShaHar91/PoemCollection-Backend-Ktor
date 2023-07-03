@@ -25,15 +25,15 @@ internal class ReviewDaoImplTest : BaseDaoTest() {
     fun `getReview where item exists, return correct review`() {
         withTables(UsersTable, ReviewsTable, PoemsTable) {
             val validReviewBody = givenAValidInsertReviewBody()
-            userDao.insertUser(givenAValidInsertUserBody())
-            val reviewId = reviewDao.insertReview(1, validReviewBody)?.id
+            val userId = userDao.insertUser(givenAValidInsertUserBody())?.id
+            val reviewId = reviewDao.insertReview(1, userId!!, validReviewBody)?.id
 
             val review = reviewDao.getReview(reviewId!!)
 
             assertThat(review).matches {
                 it?.body == validReviewBody.body &&
                         it.rating == validReviewBody.rating &&
-                        it.user.id == validReviewBody.userId &&
+                        it.user.id == userId &&
                         it.createdAt == it.updatedAt
             }
         }
@@ -52,10 +52,10 @@ internal class ReviewDaoImplTest : BaseDaoTest() {
     fun `getReviews return the list for specific poemId`() {
         withTables(UsersTable, ReviewsTable, PoemsTable) {
             val validReviewBody = givenAValidInsertReviewBody()
-            userDao.insertUser(givenAValidInsertUserBody())
+            val userId = userDao.insertUser(givenAValidInsertUserBody())?.id!!
 
-            reviewDao.insertReview(1, validReviewBody)
-            reviewDao.insertReview(2, validReviewBody)
+            reviewDao.insertReview(1, userId, validReviewBody)
+            reviewDao.insertReview(2, userId, validReviewBody)
 
             val list = reviewDao.getReviews(1)
 
@@ -67,10 +67,10 @@ internal class ReviewDaoImplTest : BaseDaoTest() {
     fun `getReviews return the list for specific poemId with limit to 1`() {
         withTables(UsersTable, ReviewsTable, PoemsTable) {
             val validReviewBody = givenAValidInsertReviewBody()
-            userDao.insertUser(givenAValidInsertUserBody())
+            val userId = userDao.insertUser(givenAValidInsertUserBody())?.id!!
 
-            reviewDao.insertReview(1, validReviewBody)
-            reviewDao.insertReview(1, validReviewBody.copy(userId = 2))
+            reviewDao.insertReview(1, userId, validReviewBody)
+            reviewDao.insertReview(1, 2, validReviewBody)
 
             val list = reviewDao.getReviews(1, 1)
 
@@ -82,12 +82,12 @@ internal class ReviewDaoImplTest : BaseDaoTest() {
     fun `insertReview twice with same poemId and userId, return constraint crash`() {
         withTables(UsersTable, ReviewsTable, PoemsTable) {
             val validReviewBody = givenAValidInsertReviewBody()
-            userDao.insertUser(givenAValidInsertUserBody())
+            val userId = userDao.insertUser(givenAValidInsertUserBody())?.id!!
 
-            reviewDao.insertReview(1, validReviewBody)
+            reviewDao.insertReview(1, userId, validReviewBody)
 
             assertThrows<ExposedSQLException> {
-                reviewDao.insertReview(1, validReviewBody)
+                reviewDao.insertReview(1, userId, validReviewBody)
             }
         }
     }
@@ -96,14 +96,14 @@ internal class ReviewDaoImplTest : BaseDaoTest() {
     fun `insertReview with correct information, database is storing review and returning the correct data`() {
         withTables(UsersTable, ReviewsTable, PoemsTable) {
             val validReviewBody = givenAValidInsertReviewBody()
-            userDao.insertUser(givenAValidInsertUserBody())
+            val userId = userDao.insertUser(givenAValidInsertUserBody())?.id!!
 
-            val review = reviewDao.insertReview(1, validReviewBody)
+            val review = reviewDao.insertReview(1, userId, validReviewBody)
 
             assertThat(review).matches {
                 it?.body == validReviewBody.body &&
                         it.rating == validReviewBody.rating &&
-                        it.user.id == validReviewBody.userId &&
+                        it.user.id == userId &&
                         it.createdAt == it.updatedAt
             }
         }
@@ -112,9 +112,9 @@ internal class ReviewDaoImplTest : BaseDaoTest() {
     @Test
     fun `updateReview with correct information, database is storing inforamtion and returning the correct content`() {
         withTables(UsersTable, ReviewsTable, PoemsTable) {
-            userDao.insertUser(givenAValidInsertUserBody())
+            val userId = userDao.insertUser(givenAValidInsertUserBody())?.id!!
 
-            val reviewId = reviewDao.insertReview(1, givenAValidInsertReviewBody())?.id
+            val reviewId = reviewDao.insertReview(1, userId, givenAValidInsertReviewBody())?.id
 
             // adding a delay so there is a clear difference between `updatedAt` and `createdAt`
             delay(2000)
@@ -125,7 +125,7 @@ internal class ReviewDaoImplTest : BaseDaoTest() {
             assertThat(review).matches {
                 it?.body == validUpdateReviewBody.body &&
                         it.rating == validUpdateReviewBody.rating &&
-                        it.user.id == validUpdateReviewBody.userId &&
+                        it.user.id == userId &&
                         it.createdAt != it.updatedAt
             }
         }
@@ -135,9 +135,9 @@ internal class ReviewDaoImplTest : BaseDaoTest() {
     fun `deleteReview for id that exists, return true`() {
         withTables(UsersTable, ReviewsTable, PoemsTable) {
             val validReviewBody = givenAValidInsertReviewBody()
-            userDao.insertUser(givenAValidInsertUserBody())
+            val userId = userDao.insertUser(givenAValidInsertUserBody())?.id!!
 
-            reviewDao.insertReview(1, validReviewBody)
+            reviewDao.insertReview(1, userId, validReviewBody)
 
             val deleted = reviewDao.deleteReview(1)
 
@@ -168,15 +168,15 @@ internal class ReviewDaoImplTest : BaseDaoTest() {
     @Test
     fun `calculateRatings where multiple reviews exists for review id, return calculated ratings`() {
         withTables(UsersTable, ReviewsTable, PoemsTable) {
-            userDao.insertUser(givenAValidInsertUserBody())
-            userDao.insertUser(givenAValidInsertUserBody().copy(email = "1"))
-            userDao.insertUser(givenAValidInsertUserBody().copy(email = "2"))
-            userDao.insertUser(givenAValidInsertUserBody().copy(email = "3"))
+            val userId = userDao.insertUser(givenAValidInsertUserBody())?.id!!
+            val userId2 = userDao.insertUser(givenAValidInsertUserBody().copy(email = "1"))?.id!!
+            val userId3 = userDao.insertUser(givenAValidInsertUserBody().copy(email = "2"))?.id!!
+            val userId4 = userDao.insertUser(givenAValidInsertUserBody().copy(email = "3"))?.id!!
 
-            reviewDao.insertReview(1, givenAValidInsertReviewBody())?.id
-            reviewDao.insertReview(1, givenAValidInsertReviewBody().copy(userId = 2, rating = 1))?.id
-            reviewDao.insertReview(1, givenAValidInsertReviewBody().copy(userId = 3, rating = 1))?.id
-            reviewDao.insertReview(1, givenAValidInsertReviewBody().copy(userId = 4))?.id
+            reviewDao.insertReview(1, userId, givenAValidInsertReviewBody())?.id
+            reviewDao.insertReview(1, userId2, givenAValidInsertReviewBody().copy(rating = 1))?.id
+            reviewDao.insertReview(1, userId3, givenAValidInsertReviewBody().copy(rating = 1))?.id
+            reviewDao.insertReview(1, userId4, givenAValidInsertReviewBody())?.id
 
             val ratings = reviewDao.calculateRatings(1)
 
@@ -189,11 +189,11 @@ internal class ReviewDaoImplTest : BaseDaoTest() {
     @Test
     fun `isUserWriter return correct data`() {
         withTables(UsersTable, ReviewsTable, PoemsTable) {
-            val user = userDao.insertUser(givenAValidInsertUserBody())
+            val userId = userDao.insertUser(givenAValidInsertUserBody())?.id!!
 
-            val review = reviewDao.insertReview(1, givenAValidInsertReviewBody())
+            val review = reviewDao.insertReview(1, userId, givenAValidInsertReviewBody())
 
-            val isUserWriter = reviewDao.isUserWriter(review?.id!!, user?.id!!)
+            val isUserWriter = reviewDao.isUserWriter(review?.id!!, userId)
             val isUserWriter2 = reviewDao.isUserWriter(review.id, 243)
 
             assertTrue(isUserWriter)

@@ -19,6 +19,8 @@ import com.poemcollection.modules.categories.CategoryController
 import com.poemcollection.modules.categories.CategoryControllerImpl
 import com.poemcollection.modules.poems.PoemController
 import com.poemcollection.modules.poems.PoemControllerImpl
+import com.poemcollection.modules.reviews.ReviewController
+import com.poemcollection.modules.reviews.ReviewControllerImpl
 import com.poemcollection.modules.users.UserController
 import com.poemcollection.modules.users.UserControllerImpl
 import com.poemcollection.utils.PasswordManager
@@ -81,6 +83,7 @@ fun routeModule() = module {
     singleOf(::UserControllerImpl) { bind<UserController>() }
     singleOf(::CategoryControllerImpl) { bind<CategoryController>() }
     singleOf(::PoemControllerImpl) { bind<PoemController>() }
+    singleOf(::ReviewControllerImpl) { bind<ReviewController>() }
 }
 
 fun daoModule() = module {

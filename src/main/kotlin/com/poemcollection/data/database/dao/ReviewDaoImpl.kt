@@ -4,9 +4,9 @@ import com.poemcollection.data.database.tables.ReviewsTable
 import com.poemcollection.data.database.tables.UsersTable
 import com.poemcollection.data.database.tables.toReview
 import com.poemcollection.data.database.tables.toReviews
+import com.poemcollection.data.dto.requests.review.InsertOrUpdateReview
 import com.poemcollection.domain.interfaces.IReviewDao
 import com.poemcollection.domain.models.Ratings
-import com.poemcollection.data.dto.requests.review.InsertOrUpdateReview
 import com.poemcollection.domain.models.review.Review
 import com.poemcollection.utils.toDatabaseString
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -22,6 +22,7 @@ class ReviewDaoImpl : IReviewDao {
         findReviewById(id)
 
     // TODO: maybe use something like `excludedUserId`?? 😅
+    // (ReviewsTable.poemId eq poemId) and (ReviewsTable.userId neq userId)
     override fun getReviews(poemId: Int?, limit: Int?): List<Review> =
         (ReviewsTable innerJoin UsersTable)
             .select { ReviewsTable.poemId eq poemId }.also {
@@ -33,13 +34,13 @@ class ReviewDaoImpl : IReviewDao {
         (ReviewsTable innerJoin UsersTable)
             .select { ReviewsTable.id eq reviewId }.toReview()
 
-    override fun insertReview(poemId: Int, insertReview: InsertOrUpdateReview): Review? = run {
+    override fun insertReview(poemId: Int, userId: Int, insertReview: InsertOrUpdateReview): Review? = run {
         val id = ReviewsTable.insertAndGetId {
             val time = LocalDateTime.now().toDatabaseString()
 
             it[body] = insertReview.body
             it[rating] = insertReview.rating
-            it[userId] = insertReview.userId
+            it[this.userId] = userId
             it[this.poemId] = poemId
             it[createdAt] = time
             it[updatedAt] = time

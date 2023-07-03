@@ -9,7 +9,7 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.util.pipeline.*
 
-val ApplicationCall.user get() = authentication.principal<User>()!!
+val ApplicationCall.authenticatedUser get() = authentication.principal<User>()!!
 
 suspend inline fun <reified T> ApplicationCall.receiveOrRespondWithError(): T {
     return try {
@@ -32,6 +32,7 @@ fun ApplicationCall.getUserId(): Int = parameters[ParamConstants.USER_ID_KEY]?.t
 fun ApplicationCall.getCategoryIdNullable(): Int? = parameters[ParamConstants.CATEGORY_ID_KEY]?.toIntOrNull()
 fun ApplicationCall.getCategoryId(): Int = getCategoryIdNullable() ?: throw TBDException
 fun ApplicationCall.getPoemId(): Int = parameters[ParamConstants.POEM_ID_KEY]?.toIntOrNull() ?: throw TBDException
+fun ApplicationCall.getReviewId(): Int = parameters[ParamConstants.REVIEW_ID_KEY]?.toIntOrNull() ?: throw TBDException
 
 //suspend fun ApplicationCall.getPoemId(): Int? = parameters[ParamConstants.POEM_ID_KEY]?.toIntOrNull() ?: run {
 //    respond(HttpStatusCode.BadRequest, ErrorCodes.ErrorInvalidParameters.asResponse)

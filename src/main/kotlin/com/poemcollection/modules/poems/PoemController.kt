@@ -3,6 +3,7 @@ package com.poemcollection.modules.poems
 import com.poemcollection.data.dto.requests.poem.InsertOrUpdatePoem
 import com.poemcollection.domain.interfaces.ICategoryDao
 import com.poemcollection.domain.interfaces.IPoemDao
+import com.poemcollection.domain.interfaces.IReviewDao
 import com.poemcollection.domain.interfaces.IUserDao
 import com.poemcollection.domain.models.Ratings
 import com.poemcollection.domain.models.poem.Poem
@@ -17,6 +18,7 @@ class PoemControllerImpl : BaseController(), PoemController, KoinComponent {
     private val categoryDao by inject<ICategoryDao>()
     private val userDao by inject<IUserDao>()
     private val poemDao by inject<IPoemDao>()
+    private val reviewDao by inject<IReviewDao>()
 
     override suspend fun postPoem(userId: Int, insertPoem: InsertOrUpdatePoem): PoemDetail = dbQuery {
         val categoryIds = categoryDao.getListOfExistingCategoryIds(insertPoem.categoryIds)
@@ -40,7 +42,7 @@ class PoemControllerImpl : BaseController(), PoemController, KoinComponent {
         val isUserAdmin = userDao.isUserRoleAdmin(userId)
         val isUserWriter = poemDao.isUserWriter(poemId, userId)
 
-        if (!isUserWriter || !isUserAdmin) throw TBDException
+        if (!isUserWriter && !isUserAdmin) throw TBDException
 
         val categoryIds = categoryDao.getListOfExistingCategoryIds(updatePoem.categoryIds)
         if (categoryIds.count() != updatePoem.categoryIds.count()) {
@@ -56,14 +58,14 @@ class PoemControllerImpl : BaseController(), PoemController, KoinComponent {
             val isUserAdmin = userDao.isUserRoleAdmin(userId)
             val isUserWriter = poemDao.isUserWriter(poemId, userId)
 
-            if (!isUserWriter || !isUserAdmin) throw TBDException
+            if (!isUserWriter && !isUserAdmin) throw TBDException
 
             poemDao.deletePoem(poemId)
         }
     }
 
-    override suspend fun getRatingsForPoem(poemId: Int): Ratings {
-        TODO("Not yet implemented")
+    override suspend fun getRatingsForPoem(poemId: Int): Ratings = dbQuery {
+        reviewDao.calculateRatings(poemId)
     }
 }
 

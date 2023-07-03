@@ -5,10 +5,10 @@ import com.poemcollection.data.dto.requests.user.InsertNewUser
 import com.poemcollection.data.dto.requests.user.UpdatePassword
 import com.poemcollection.data.dto.requests.user.UpdateUser
 import com.poemcollection.domain.models.user.toDto
+import com.poemcollection.utils.authenticatedUser
 import com.poemcollection.utils.getUserId
 import com.poemcollection.utils.receiveOrRespondWithError
 import com.poemcollection.utils.sendOk
-import com.poemcollection.utils.user
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.response.*
@@ -29,23 +29,23 @@ fun Route.userRouting() {
 
         authenticate {
             get("me") {
-                call.respond(call.user.toDto())
+                call.respond(call.authenticatedUser.toDto())
             }
 
             put("me") {
                 val updateUser = call.receiveOrRespondWithError<UpdateUser>()
-                val user = userController.deleteUserById(call.user.id, updateUser)
+                val user = userController.deleteUserById(call.authenticatedUser.id, updateUser)
                 call.respond(user.toDto())
             }
 
             put("me/password") {
                 val updatePassword = call.receiveOrRespondWithError<UpdatePassword>()
-                val user = userController.updateUserPasswordById(call.user.id, updatePassword)
+                val user = userController.updateUserPasswordById(call.authenticatedUser.id, updatePassword)
                 call.respond(user.toDto())
             }
 
             delete("me") {
-                userController.deleteUserById(call.user.id)
+                userController.deleteUserById(call.authenticatedUser.id)
                 sendOk()
             }
         }
