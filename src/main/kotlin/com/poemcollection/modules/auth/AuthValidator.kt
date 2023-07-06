@@ -7,6 +7,8 @@ import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
 import io.ktor.server.config.*
 
+const val adminOnly = "admin"
+
 fun JWTAuthenticationProvider.Config.setupAuthentication(
     config: ApplicationConfig,
     jwtVerifier: JWTVerifier,

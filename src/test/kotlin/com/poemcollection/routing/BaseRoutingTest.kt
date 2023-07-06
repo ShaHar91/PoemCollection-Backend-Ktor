@@ -5,7 +5,9 @@ import com.auth0.jwt.algorithms.Algorithm
 import com.google.gson.Gson
 import com.poemcollection.data.database.tables.UserRoles
 import com.poemcollection.domain.models.user.User
+import com.poemcollection.modules.auth.adminOnly
 import com.poemcollection.utils.toDatabaseString
+import io.ktor.http.*
 import io.ktor.serialization.gson.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -27,7 +29,7 @@ abstract class BaseRoutingTest {
         stopKoin()
     }
 
-    fun <R> withBaseTestApplication(test: TestApplicationEngine.() -> R) {
+    fun <R> withBaseTestApplication(authenticationTest: AuthenticationInstrumentation? = null, test: TestApplicationEngine.() -> R) {
         withTestApplication({
             install(ContentNegotiation) {
                 gson()
@@ -35,6 +37,11 @@ abstract class BaseRoutingTest {
             koinModules?.let {
                 install(Koin) {
                     modules(it)
+                }
+            }
+            authenticationTest?.let {
+                install(Authentication) {
+                    jwtTest(it)
                 }
             }
             moduleList()
@@ -49,16 +56,37 @@ abstract class BaseRoutingTest {
         return gson.fromJson(content, clazz)
     }
 
-    fun AuthenticationConfig.jwtTest(name: String? = null) = jwt(name) {
+    private fun AuthenticationConfig.jwtTest(authenticationTest: AuthenticationInstrumentation) = jwt(authenticationTest.name) {
         validate { User() }
 
         verifier(JWT.require(Algorithm.HMAC256("secret")).build())
 
         validate { credential ->
             val time = LocalDateTime.now().toDatabaseString()
-            User(1, "Chris", "Bol", "chris.bol@example.com", time, time, UserRoles.Admin)
+
+            return@validate when (authenticationTest.name) {
+                adminOnly -> {
+                    if (authenticationTest.userRole != UserRoles.Admin) return@validate null
+
+                    User(1, "Chris", "Bol", "chris.bol@example.com", time, time, authenticationTest.userRole)
+                }
+                "error" -> null // Will be used whenever we want to force an invalid user during the tests!
+                else -> User(1, "Chris", "Bol", "chris.bol@example.com", time, time, authenticationTest.userRole)
+            }
         }
     }
 
     val bearerToken = JWT.create().sign(Algorithm.HMAC256("secret"))
+
+    protected fun TestApplicationEngine.doCall(
+        method: HttpMethod,
+        uri: String,
+        body: String? = null
+    ) = handleRequest(method, uri) {
+        addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+        addHeader(HttpHeaders.Authorization, "Bearer $bearerToken")
+        body?.let(::setBody)
+    }
 }
+
+data class AuthenticationInstrumentation(val name: String? = null, val userRole: UserRoles = UserRoles.User)

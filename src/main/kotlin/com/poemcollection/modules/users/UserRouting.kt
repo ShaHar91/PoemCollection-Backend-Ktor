@@ -5,6 +5,7 @@ import com.poemcollection.data.dto.requests.user.InsertNewUser
 import com.poemcollection.data.dto.requests.user.UpdatePassword
 import com.poemcollection.data.dto.requests.user.UpdateUser
 import com.poemcollection.domain.models.user.toDto
+import com.poemcollection.modules.auth.adminOnly
 import com.poemcollection.utils.authenticatedUser
 import com.poemcollection.utils.getUserId
 import com.poemcollection.utils.receiveOrRespondWithError
@@ -50,7 +51,7 @@ fun Route.userRouting() {
             }
         }
 
-        authenticate("admin") {
+        authenticate(adminOnly) {
             get("{${ParamConstants.USER_ID_KEY}}") {
                 val userId = call.getUserId()
                 val user = userController.getUserById(userId)

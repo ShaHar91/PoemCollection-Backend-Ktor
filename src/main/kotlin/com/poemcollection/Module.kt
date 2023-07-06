@@ -3,10 +3,7 @@ package com.poemcollection
 import com.auth0.jwt.interfaces.JWTVerifier
 import com.poemcollection.data.database.DatabaseProviderContract
 import com.poemcollection.domain.interfaces.IUserDao
-import com.poemcollection.modules.auth.authRouting
-import com.poemcollection.modules.auth.setupAuthentication
-import com.poemcollection.modules.auth.validateUser
-import com.poemcollection.modules.auth.validateUserIsAdmin
+import com.poemcollection.modules.auth.*
 import com.poemcollection.modules.categories.categoryRouting
 import com.poemcollection.modules.poems.poemRouting
 import com.poemcollection.modules.reviews.reviewRouting
@@ -46,7 +43,7 @@ fun Application.module() {
             }
         }
 
-        jwt("admin") {
+        jwt(adminOnly) {
             setupAuthentication(config, jwtVerifier) {
                 it.validateUserIsAdmin(databaseProvider, userDao)
             }

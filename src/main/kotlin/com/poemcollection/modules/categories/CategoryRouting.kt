@@ -2,6 +2,7 @@ package com.poemcollection.modules.categories
 
 import com.poemcollection.ParamConstants
 import com.poemcollection.data.dto.requests.category.InsertOrUpdateCategory
+import com.poemcollection.modules.auth.adminOnly
 import com.poemcollection.utils.getCategoryId
 import com.poemcollection.utils.sendOk
 import io.ktor.server.application.*
@@ -27,7 +28,7 @@ fun Route.categoryRouting() {
             call.respond(category)
         }
 
-        authenticate("admin") {
+        authenticate(adminOnly) {
             post {
                 val insertCategory = call.receive<InsertOrUpdateCategory>()
                 val category = categoryController.postCategory(insertCategory)
