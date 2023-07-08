@@ -8,6 +8,7 @@ import com.poemcollection.modules.categories.CategoryController
 import com.poemcollection.modules.categories.categoryRouting
 import com.poemcollection.routing.AuthenticationInstrumentation
 import com.poemcollection.routing.BaseRoutingTest
+import com.poemcollection.statuspages.InvalidCategoryException
 import com.poemcollection.utils.TBDException
 import com.poemcollection.utils.toDatabaseString
 import io.ktor.http.*
@@ -63,7 +64,7 @@ class CategoryRoutingTest : BaseRoutingTest() {
     }
 
     @Test
-    fun `when fetching a specific category that exists, we return tha category`() = withBaseTestApplication(
+    fun `when fetching a specific category that exists, we return that category`() = withBaseTestApplication(
         AuthenticationInstrumentation(adminOnly)
     ) {
         val time = LocalDateTime.now().toDatabaseString()
@@ -114,10 +115,10 @@ class CategoryRoutingTest : BaseRoutingTest() {
     fun `when creating category already created, we return 400 error`() = withBaseTestApplication(
         AuthenticationInstrumentation(adminOnly, UserRoles.Admin)
     ) {
-        coEvery { categoryController.postCategory(any()) } throws TBDException
+        coEvery { categoryController.postCategory(any()) } throws InvalidCategoryException
 
         val body = toJsonBody(InsertOrUpdateCategory("Hate"))
-        val exception = assertThrows<TBDException> {
+        val exception = assertThrows<InvalidCategoryException> {
             doCall(HttpMethod.Post, "/categories", body)
         }
         assertThat(exception.message).isEqualTo(null)

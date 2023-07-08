@@ -5,6 +5,9 @@ import com.poemcollection.data.dto.requests.category.InsertOrUpdateCategory
 import com.poemcollection.domain.interfaces.ICategoryDao
 import com.poemcollection.domain.models.category.toDto
 import com.poemcollection.modules.BaseController
+import com.poemcollection.modules.ExceptionType
+import com.poemcollection.statuspages.ApiException
+import com.poemcollection.statuspages.InvalidCategoryException
 import com.poemcollection.utils.TBDException
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -14,7 +17,11 @@ class CategoryControllerImpl : BaseController(), CategoryController, KoinCompone
     private val categoryDao by inject<ICategoryDao>()
 
     override suspend fun postCategory(insertCategory: InsertOrUpdateCategory): CategoryDto = dbQuery {
-        categoryDao.insertCategory(insertCategory)?.toDto() ?: throw TBDException
+        val category = safeExposed {
+            categoryDao.insertCategory(insertCategory)
+        }
+
+        category?.toDto() ?: throw InvalidCategoryException
     }
 
     override suspend fun getAllCategories(): List<CategoryDto> = dbQuery {
@@ -32,6 +39,12 @@ class CategoryControllerImpl : BaseController(), CategoryController, KoinCompone
     override suspend fun deleteCategoryById(categoryId: Int) {
         dbQuery {
             categoryDao.deleteCategory(categoryId)
+        }
+    }
+
+    override fun parseExceptionType(exceptionType: ExceptionType): ApiException {
+        return when (exceptionType) {
+            ExceptionType.UniqueConstraint -> InvalidCategoryException
         }
     }
 }

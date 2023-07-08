@@ -29,7 +29,7 @@ abstract class BaseRoutingTest {
         stopKoin()
     }
 
-    fun <R> withBaseTestApplication(authenticationTest: AuthenticationInstrumentation? = null, test: TestApplicationEngine.() -> R) {
+    fun <R> withBaseTestApplication(vararg authenticationTest: AuthenticationInstrumentation = emptyArray(), test: TestApplicationEngine.() -> R) {
         withTestApplication({
             install(ContentNegotiation) {
                 gson()
@@ -39,9 +39,12 @@ abstract class BaseRoutingTest {
                     modules(it)
                 }
             }
-            authenticationTest?.let {
+
+            if (authenticationTest.isNotEmpty()) {
                 install(Authentication) {
-                    jwtTest(it)
+                    authenticationTest.forEach {
+                        jwtTest(it)
+                    }
                 }
             }
             moduleList()

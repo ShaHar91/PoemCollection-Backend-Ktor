@@ -8,6 +8,7 @@ import com.poemcollection.modules.categories.categoryRouting
 import com.poemcollection.modules.poems.poemRouting
 import com.poemcollection.modules.reviews.reviewRouting
 import com.poemcollection.modules.users.userRouting
+import com.poemcollection.statuspages.generalStatusPages
 import io.ktor.serialization.gson.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -32,9 +33,11 @@ fun Application.module() {
     install(CallLogging) {
         level = Level.DEBUG
     }
-    install(ContentNegotiation) { gson() }
+    install(ContentNegotiation) {
+        gson()
+    }
     install(StatusPages) {
-        //TODO: still TBD what to use and how!
+        generalStatusPages()
     }
     install(Authentication) {
         jwt {

@@ -1,10 +1,11 @@
 package com.poemcollection.modules.users
 
-import com.poemcollection.domain.interfaces.IUserDao
 import com.poemcollection.data.dto.requests.user.InsertNewUser
 import com.poemcollection.data.dto.requests.user.UpdatePassword
 import com.poemcollection.data.dto.requests.user.UpdateUser
-import com.poemcollection.domain.models.user.User
+import com.poemcollection.data.dto.requests.user.UserDto
+import com.poemcollection.domain.interfaces.IUserDao
+import com.poemcollection.domain.models.user.toDto
 import com.poemcollection.modules.BaseController
 import com.poemcollection.utils.PasswordManagerContract
 import com.poemcollection.utils.TBDException
@@ -16,7 +17,7 @@ class UserControllerImpl : BaseController(), UserController, KoinComponent {
     private val userDao by inject<IUserDao>()
     private val passwordEncryption by inject<PasswordManagerContract>()
 
-    override suspend fun postUser(insertNewUser: InsertNewUser): User = dbQuery {
+    override suspend fun postUser(insertNewUser: InsertNewUser): UserDto = dbQuery {
         if (!insertNewUser.isValid) throw TBDException
 
         val userUnique = userDao.userUnique(insertNewUser.email)
@@ -28,20 +29,20 @@ class UserControllerImpl : BaseController(), UserController, KoinComponent {
 
         val encryptedPassword = passwordEncryption.encryptPassword(insertNewUser.password)
 
-        userDao.insertUser(insertNewUser.copy(password = encryptedPassword, repeatPassword = null)) ?: throw TBDException
+        userDao.insertUser(insertNewUser.copy(password = encryptedPassword, repeatPassword = null))?.toDto() ?: throw TBDException
     }
 
-    override suspend fun getUserById(userId: Int): User = dbQuery {
-        userDao.getUser(userId) ?: throw TBDException
+    override suspend fun getUserById(userId: Int): UserDto = dbQuery {
+        userDao.getUser(userId)?.toDto() ?: throw TBDException
     }
 
-    override suspend fun deleteUserById(userId: Int, updateUser: UpdateUser): User = dbQuery {
+    override suspend fun updateUserById(userId: Int, updateUser: UpdateUser): UserDto = dbQuery {
         if (updateUser.firstName == null && updateUser.lastName == null) throw TBDException
 
-        userDao.updateUser(userId, updateUser) ?: throw TBDException
+        userDao.updateUser(userId, updateUser)?.toDto() ?: throw TBDException
     }
 
-    override suspend fun updateUserPasswordById(userId: Int, updatePassword: UpdatePassword): User = dbQuery {
+    override suspend fun updateUserPasswordById(userId: Int, updatePassword: UpdatePassword): UserDto = dbQuery {
         val userHashable = userDao.getUserHashableById(userId) ?: throw TBDException
 
         if (listOf(updatePassword.password, updatePassword.repeatPassword).any { it == updatePassword.oldPassword }) throw TBDException
@@ -55,7 +56,7 @@ class UserControllerImpl : BaseController(), UserController, KoinComponent {
 
         val encryptedPassword = passwordEncryption.encryptPassword(updatePassword.password)
 
-        userDao.updateUserPassword(userId, encryptedPassword) ?: throw TBDException
+        userDao.updateUserPassword(userId, encryptedPassword)?.toDto() ?: throw TBDException
     }
 
     override suspend fun deleteUserById(userId: Int) {
@@ -64,9 +65,9 @@ class UserControllerImpl : BaseController(), UserController, KoinComponent {
 }
 
 interface UserController {
-    suspend fun postUser(insertNewUser: InsertNewUser): User
-    suspend fun getUserById(userId: Int): User
-    suspend fun deleteUserById(userId: Int, updateUser: UpdateUser): User
-    suspend fun updateUserPasswordById(userId: Int, updatePassword: UpdatePassword): User
+    suspend fun postUser(insertNewUser: InsertNewUser): UserDto
+    suspend fun getUserById(userId: Int): UserDto
+    suspend fun updateUserById(userId: Int, updateUser: UpdateUser): UserDto
+    suspend fun updateUserPasswordById(userId: Int, updatePassword: UpdatePassword): UserDto
     suspend fun deleteUserById(userId: Int)
 }
