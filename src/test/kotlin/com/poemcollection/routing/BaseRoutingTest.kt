@@ -64,7 +64,7 @@ abstract class BaseRoutingTest {
 
         verifier(JWT.require(Algorithm.HMAC256("secret")).build())
 
-        validate { credential ->
+        validate { _ ->
             val time = LocalDateTime.now().toDatabaseString()
 
             return@validate when (authenticationTest.name) {
@@ -73,21 +73,25 @@ abstract class BaseRoutingTest {
 
                     User(1, "Chris", "Bol", "chris.bol@example.com", time, time, authenticationTest.userRole)
                 }
+
                 "error" -> null // Will be used whenever we want to force an invalid user during the tests!
                 else -> User(1, "Chris", "Bol", "chris.bol@example.com", time, time, authenticationTest.userRole)
             }
         }
     }
 
-    val bearerToken = JWT.create().sign(Algorithm.HMAC256("secret"))
+    private val bearerToken = JWT.create().sign(Algorithm.HMAC256("secret"))
 
     protected fun TestApplicationEngine.doCall(
         method: HttpMethod,
         uri: String,
-        body: String? = null
+        body: String? = null,
+        authorized: Boolean = true
     ) = handleRequest(method, uri) {
         addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-        addHeader(HttpHeaders.Authorization, "Bearer $bearerToken")
+        if (authorized) {
+            addHeader(HttpHeaders.Authorization, "Bearer $bearerToken")
+        }
         body?.let(::setBody)
     }
 }

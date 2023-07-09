@@ -4,6 +4,7 @@ import com.poemcollection.ParamConstants
 import com.poemcollection.data.dto.requests.user.InsertNewUser
 import com.poemcollection.data.dto.requests.user.UpdatePassword
 import com.poemcollection.data.dto.requests.user.UpdateUser
+import com.poemcollection.domain.models.user.toDto
 import com.poemcollection.modules.auth.adminOnly
 import com.poemcollection.utils.authenticatedUser
 import com.poemcollection.utils.getUserId
@@ -28,53 +29,57 @@ fun Route.userRouting() {
         }
 
         authenticate {
-            get("me") {
-                call.respond(call.authenticatedUser)
-            }
+            route("me") {
+                get {
+                    call.respond(call.authenticatedUser.toDto())
+                }
 
-            put("me") {
-                val updateUser = call.receiveOrRespondWithError<UpdateUser>()
-                val user = userController.updateUserById(call.authenticatedUser.id, updateUser)
-                call.respond(user)
-            }
+                put {
+                    val updateUser = call.receiveOrRespondWithError<UpdateUser>()
+                    val user = userController.updateUserById(call.authenticatedUser.id, updateUser)
+                    call.respond(user)
+                }
 
-            put("me/password") {
-                val updatePassword = call.receiveOrRespondWithError<UpdatePassword>()
-                val user = userController.updateUserPasswordById(call.authenticatedUser.id, updatePassword)
-                call.respond(user)
-            }
+                put("password") {
+                    val updatePassword = call.receiveOrRespondWithError<UpdatePassword>()
+                    val user = userController.updateUserPasswordById(call.authenticatedUser.id, updatePassword)
+                    call.respond(user)
+                }
 
-            delete("me") {
-                userController.deleteUserById(call.authenticatedUser.id)
-                sendOk()
+                delete {
+                    userController.deleteUserById(call.authenticatedUser.id)
+                    sendOk()
+                }
             }
         }
 
         authenticate(adminOnly) {
-            get("{${ParamConstants.USER_ID_KEY}}") {
-                val userId = call.getUserId()
-                val user = userController.getUserById(userId)
-                call.respond(user)
-            }
+            route("{${ParamConstants.USER_ID_KEY}}") {
+                get {
+                    val userId = call.getUserId()
+                    val user = userController.getUserById(userId)
+                    call.respond(user)
+                }
 
-            put("{${ParamConstants.USER_ID_KEY}}") {
-                val userId = call.getUserId()
-                val updateUser = call.receiveOrRespondWithError<UpdateUser>()
-                val user = userController.updateUserById(userId, updateUser)
-                call.respond(user)
-            }
+                put {
+                    val userId = call.getUserId()
+                    val updateUser = call.receiveOrRespondWithError<UpdateUser>()
+                    val user = userController.updateUserById(userId, updateUser)
+                    call.respond(user)
+                }
 
-            put("{${ParamConstants.USER_ID_KEY}}/password") {
-                val userId = call.getUserId()
-                val updatePassword = call.receiveOrRespondWithError<UpdatePassword>()
-                val user = userController.updateUserPasswordById(userId, updatePassword)
-                call.respond(user)
-            }
+                put("/password") {
+                    val userId = call.getUserId()
+                    val updatePassword = call.receiveOrRespondWithError<UpdatePassword>()
+                    val user = userController.updateUserPasswordById(userId, updatePassword)
+                    call.respond(user)
+                }
 
-            delete("{${ParamConstants.USER_ID_KEY}}") {
-                val userId = call.getUserId()
-                userController.deleteUserById(userId)
-                sendOk()
+                delete {
+                    val userId = call.getUserId()
+                    userController.deleteUserById(userId)
+                    sendOk()
+                }
             }
         }
     }

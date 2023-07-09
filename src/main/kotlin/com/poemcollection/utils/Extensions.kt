@@ -3,6 +3,7 @@ package com.poemcollection.utils
 import com.poemcollection.ParamConstants
 import com.poemcollection.domain.models.user.User
 import com.poemcollection.statuspages.ApiException
+import com.poemcollection.statuspages.InternalServerException
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -19,8 +20,8 @@ suspend inline fun <reified T> ApplicationCall.receiveOrRespondWithError(): T {
             throw TBDException
         }
     } catch (e: Exception) {
-        // TODO: Not sure when it triggered this, more investigation is needed!
-        throw TBDException
+        // This happens when no "body" was added to the network call
+        throw InternalServerException()
     }
 }
 
