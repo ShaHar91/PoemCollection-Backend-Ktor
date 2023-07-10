@@ -40,6 +40,30 @@ class CategoryDaoImplTest : BaseDaoTest() {
     }
 
     @Test
+    fun `getCategoryByName where item exists, return correct category`() {
+        withTables(CategoriesTable) {
+            val validCategory = givenAValidInsertCategoryBody()
+            dao.insertCategory(validCategory)?.id
+            val category = dao.getCategoryByName(validCategory.name)
+
+            assertThat(category).matches {
+                it?.name == "Love" &&
+                        it.id == 1 &&
+                        it.createdAt == it.updatedAt
+            }
+        }
+    }
+
+    @Test
+    fun `getCategoryByName where item does not exists, returns 'null'`() {
+        withTables(CategoriesTable) {
+            val category = dao.getCategoryByName("Love")
+
+            assertThat(category).isNull()
+        }
+    }
+
+    @Test
     fun `insertCategory where information is correct, database is storing category and returning the correct content`() {
         withTables(CategoriesTable) {
             val validCategory = givenAValidInsertCategoryBody()
