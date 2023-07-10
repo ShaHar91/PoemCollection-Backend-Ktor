@@ -3,6 +3,7 @@ package com.poemcollection.routing.poems
 import com.poemcollection.data.dto.requests.poem.InsertOrUpdatePoem
 import com.poemcollection.data.dto.requests.poem.PoemDetailDto
 import com.poemcollection.data.dto.requests.poem.PoemDto
+import com.poemcollection.domain.models.Ratings
 import com.poemcollection.modules.auth.adminOnly
 import com.poemcollection.modules.poems.PoemController
 import com.poemcollection.modules.poems.poemRouting
@@ -193,6 +194,36 @@ class PoemRoutingTest : BaseRoutingTest() {
 
         val exception = assertThrows<TBDException> {
             doCall(HttpMethod.Delete, "/poems/1")
+        }
+        Assertions.assertThat(exception.message).isEqualTo(null)
+    }
+
+    @Test
+    fun `when fetching ratings, we return data`() = withBaseTestApplication(
+        AuthenticationInstrumentation(adminOnly),
+        AuthenticationInstrumentation()
+    ) {
+        val ratingsResponse = Ratings()
+        coEvery { poemController.getRatingsForPoem(any()) } returns ratingsResponse
+
+        val call = doCall(HttpMethod.Get, "/poems/1/ratings")
+
+        call.also {
+            Assertions.assertThat(HttpStatusCode.OK).isEqualTo(it.response.status())
+            val responseBody = it.response.parseBody(Ratings::class.java)
+            Assertions.assertThat(ratingsResponse).isEqualTo(responseBody)
+        }
+    }
+
+    @Test
+    fun `when fetching ratings with error, we return error`() = withBaseTestApplication(
+        AuthenticationInstrumentation(adminOnly),
+        AuthenticationInstrumentation()
+    ) {
+        coEvery { poemController.getRatingsForPoem(any()) } throws TBDException
+
+        val exception = assertThrows<TBDException> {
+            doCall(HttpMethod.Get, "/poems/1/ratings")
         }
         Assertions.assertThat(exception.message).isEqualTo(null)
     }
