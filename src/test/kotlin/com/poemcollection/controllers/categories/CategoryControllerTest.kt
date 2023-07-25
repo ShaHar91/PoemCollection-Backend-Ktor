@@ -3,20 +3,19 @@ package com.poemcollection.controllers.categories
 import com.poemcollection.controllers.BaseControllerTest
 import com.poemcollection.controllers.categories.CategoryInstrumentation.givenACategory
 import com.poemcollection.controllers.categories.CategoryInstrumentation.givenAValidInsertCategory
+import com.poemcollection.controllers.categories.CategoryInstrumentation.givenAValidUpdateCategory
 import com.poemcollection.data.dto.requests.category.CategoryDto
 import com.poemcollection.domain.interfaces.ICategoryDao
 import com.poemcollection.modules.categories.CategoryController
 import com.poemcollection.modules.categories.CategoryControllerImpl
 import com.poemcollection.statuspages.InvalidCategoryException
+import com.poemcollection.utils.TBDException
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.*
 import org.koin.dsl.module
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -45,6 +44,7 @@ class CategoryControllerTest : BaseControllerTest() {
         val createdCategory = givenACategory()
 
         // Setup
+        coEvery { categoryDao.getCategoryByName(any()) } returns null
         coEvery { categoryDao.insertCategory(any()) } returns createdCategory
 
         runBlocking {
@@ -93,6 +93,79 @@ class CategoryControllerTest : BaseControllerTest() {
 
             assertThat(responseCategories).hasSize(1)
             assertThat(responseCategories).allMatch { it is CategoryDto }
+        }
+    }
+
+    @Test
+    fun `when requesting specific category, we return valid categoryDto`() {
+        val createdCategory = givenACategory()
+
+        coEvery { categoryDao.getCategory(any()) } returns createdCategory
+
+        runBlocking {
+            val responseCategory = controller.getCategoryById(1)
+
+            // Assertion
+            assertThat(responseCategory.id).isEqualTo(createdCategory.id)
+            assertThat(responseCategory.name).isEqualTo(createdCategory.name)
+        }
+    }
+
+    @Test
+    fun `when requesting specific category which does not exist, we throw exception`() {
+        coEvery { categoryDao.getCategory(any()) } throws TBDException
+
+        assertThrows<TBDException> {
+            runBlocking { controller.getCategoryById(1) }
+        }
+    }
+
+    @Test
+    fun `when updating specific category, we return valid categoryDto`() {
+        val updateCategory = givenAValidUpdateCategory()
+        val createdCategory = givenACategory()
+
+        coEvery { categoryDao.updateCategory(any(), any()) } returns createdCategory
+
+        runBlocking {
+            val responseCategory = controller.updateCategoryById(1, updateCategory)
+
+            // Assertion
+            assertThat(responseCategory.id).isEqualTo(createdCategory.id)
+            assertThat(responseCategory.name).isEqualTo(createdCategory.name)
+        }
+    }
+
+    @Test
+    fun `when updating specific category which does not exist, we throw exception`() {
+        val updateCategory = givenAValidUpdateCategory()
+
+        coEvery { categoryDao.updateCategory(any(), any()) } throws TBDException
+
+        assertThrows<TBDException> {
+            runBlocking { controller.updateCategoryById(1, updateCategory) }
+        }
+    }
+
+    @Test
+    fun `when deleting specific category, we return valid categoryDto`() {
+
+        coEvery { categoryDao.deleteCategory(any()) } returns true
+
+        assertDoesNotThrow {
+            runBlocking {
+                controller.deleteCategoryById(1)
+            }
+        }
+    }
+
+    @Test
+    fun `when deleting specific category which does not exist, we throw exception`() {
+
+        coEvery { categoryDao.deleteCategory(any()) } returns false
+
+        assertThrows<TBDException> {
+            runBlocking { controller.deleteCategoryById(1) }
         }
     }
 }

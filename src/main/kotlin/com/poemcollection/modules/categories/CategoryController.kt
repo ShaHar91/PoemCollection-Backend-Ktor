@@ -15,6 +15,7 @@ class CategoryControllerImpl : BaseController(), CategoryController, KoinCompone
     private val categoryDao by inject<ICategoryDao>()
 
     override suspend fun postCategory(insertCategory: InsertOrUpdateCategory): CategoryDto = dbQuery {
+        // Can't have a category with the same name
         categoryDao.getCategoryByName(insertCategory.name)?.let {
             throw InvalidCategoryException
         }
@@ -37,7 +38,8 @@ class CategoryControllerImpl : BaseController(), CategoryController, KoinCompone
 
     override suspend fun deleteCategoryById(categoryId: Int) {
         dbQuery {
-            categoryDao.deleteCategory(categoryId)
+            val deleted = categoryDao.deleteCategory(categoryId)
+            if (!deleted) throw TBDException
         }
     }
 }

@@ -9,6 +9,8 @@ object CategoryInstrumentation {
 
     fun givenAValidInsertCategory() = InsertOrUpdateCategory("Love")
 
+    fun givenAValidUpdateCategory() = InsertOrUpdateCategory("Hate")
+
     fun givenACategory() = run {
         val time = LocalDateTime.now().toDatabaseString()
         Category(1, "Love", time, time)

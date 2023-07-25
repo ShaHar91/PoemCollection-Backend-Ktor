@@ -1,9 +1,6 @@
 package com.poemcollection.modules.users
 
-import com.poemcollection.data.dto.requests.user.InsertNewUser
-import com.poemcollection.data.dto.requests.user.UpdatePassword
-import com.poemcollection.data.dto.requests.user.UpdateUser
-import com.poemcollection.data.dto.requests.user.UserDto
+import com.poemcollection.data.dto.requests.user.*
 import com.poemcollection.domain.interfaces.IUserDao
 import com.poemcollection.domain.models.user.toDto
 import com.poemcollection.modules.BaseController
@@ -37,18 +34,22 @@ class UserControllerImpl : BaseController(), UserController, KoinComponent {
     }
 
     override suspend fun updateUserById(userId: Int, updateUser: UpdateUser): UserDto = dbQuery {
-        if (updateUser.firstName == null && updateUser.lastName == null) throw TBDException
+        //TODO: should we check for Admin or logged in user here as well?
+
+        if (!updateUser.hasData()) throw TBDException
 
         userDao.updateUser(userId, updateUser)?.toDto() ?: throw TBDException
     }
 
     override suspend fun updateUserPasswordById(userId: Int, updatePassword: UpdatePassword): UserDto = dbQuery {
+        //TODO: should we check for Admin or logged in user here as well?
+
         val userHashable = userDao.getUserHashableById(userId) ?: throw TBDException
 
         if (listOf(updatePassword.password, updatePassword.repeatPassword).any { it == updatePassword.oldPassword }) throw TBDException
 
         val isValidPassword = passwordEncryption.validatePassword(updatePassword.oldPassword, userHashable.password ?: "")
-        if (!isValidPassword) throw  TBDException
+        if (!isValidPassword) throw TBDException
 
         if (!updatePassword.isPasswordSame) throw TBDException
 
@@ -60,7 +61,12 @@ class UserControllerImpl : BaseController(), UserController, KoinComponent {
     }
 
     override suspend fun deleteUserById(userId: Int) {
-        return dbQuery { userDao.deleteUser(userId) }
+        //TODO: should we check for Admin or logged in user here as well?
+
+        return dbQuery {
+            val deleted = userDao.deleteUser(userId)
+            if (!deleted) throw TBDException
+        }
     }
 }
 

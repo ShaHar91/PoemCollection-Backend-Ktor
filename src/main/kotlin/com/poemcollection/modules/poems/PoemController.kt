@@ -23,6 +23,8 @@ class PoemControllerImpl : BaseController(), PoemController, KoinComponent {
 
     override suspend fun postPoem(userId: Int, insertPoem: InsertOrUpdatePoem): PoemDetailDto = dbQuery {
         val categoryIds = categoryDao.getListOfExistingCategoryIds(insertPoem.categoryIds)
+
+        // A poem can only be added when all the added categories exist
         if (categoryIds.count() != insertPoem.categoryIds.count()) {
             val nonExistingIds = insertPoem.categoryIds.filterNot { categoryIds.contains(it) }
             throw TBDException // with the "nonExistingIds" added to it!!
@@ -61,7 +63,8 @@ class PoemControllerImpl : BaseController(), PoemController, KoinComponent {
 
             if (!isUserWriter && !isUserAdmin) throw TBDException
 
-            poemDao.deletePoem(poemId)
+            val deleted = poemDao.deletePoem(poemId)
+            if (!deleted) throw TBDException
         }
     }
 

@@ -10,4 +10,4 @@ data class UpdateUser(
     val email: String? = null
 ) : NameAble
 
-fun UpdateUser.hasData() = firstName != null || lastName != null || email != null
+fun UpdateUser.hasData() = !firstName.isNullOrBlank() || !lastName.isNullOrBlank() || !email.isNullOrBlank()

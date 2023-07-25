@@ -28,6 +28,8 @@ class ReviewControllerImpl : BaseController(), ReviewController, KoinComponent {
     }
 
     override suspend fun updateReview(reviewId: Int, userId: Int, updateReview: InsertOrUpdateReview): ReviewDto = dbQuery {
+        //TODO: do we need to check if the reviewId is available?
+
         val isUserAdmin = userDao.isUserRoleAdmin(userId)
         val isUserWriter = reviewDao.isUserWriter(reviewId, userId)
 
@@ -38,12 +40,15 @@ class ReviewControllerImpl : BaseController(), ReviewController, KoinComponent {
 
     override suspend fun deleteReview(userId: Int, reviewId: Int) {
         dbQuery {
+            //TODO: do we need to check if the reviewId is available?
+
             val isUserAdmin = userDao.isUserRoleAdmin(userId)
             val isUserWriter = reviewDao.isUserWriter(reviewId, userId)
 
             if (!isUserWriter && !isUserAdmin) throw TBDException
 
-            reviewDao.deleteReview(reviewId)
+            val deleted = reviewDao.deleteReview(reviewId)
+            if (!deleted) throw TBDException
         }
     }
 }
