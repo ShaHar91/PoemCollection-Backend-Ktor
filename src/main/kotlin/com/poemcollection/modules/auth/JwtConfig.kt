@@ -24,10 +24,10 @@ class JwtConfig(
         const val USERS_AUDIENCE = "users"
     }
 
-    constructor(config: ApplicationConfig) : this(
+    constructor(config: ApplicationConfig, secret: String) : this(
         config.property("jwt.issuer").getString(),
         config.property("jwt.audience").getString(),
-        System.getenv("JWT_SECRET")
+        secret
     )
 
     override val verifier: JWTVerifier = JWT

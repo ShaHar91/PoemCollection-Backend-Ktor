@@ -25,7 +25,6 @@ import com.poemcollection.modules.users.UserController
 import com.poemcollection.modules.users.UserControllerImpl
 import com.poemcollection.utils.PasswordManager
 import com.poemcollection.utils.PasswordManagerContract
-import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.config.*
 import io.ktor.server.plugins.cors.routing.*
@@ -60,7 +59,7 @@ fun Application.configureKoin() {
 
                     single<TokenProvider> {
                         val config = get<ApplicationConfig>()
-                        JwtConfig(config)
+                        JwtConfig(config, System.getenv("JWT_SECRET"))
                     }
                     single<JWTVerifier> {
                         val tokenProvider = get<TokenProvider>()

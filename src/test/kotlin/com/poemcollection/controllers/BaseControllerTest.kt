@@ -11,7 +11,7 @@ import org.koin.dsl.module
 
 abstract class BaseControllerTest {
 
-    private val databaseProvider: DatabaseProviderContract = mockk()
+    internal val databaseProvider: DatabaseProviderContract = mockk()
 
     init {
         stopKoin()

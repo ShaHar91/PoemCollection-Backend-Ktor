@@ -34,4 +34,4 @@ fun ResultRow.toPoemWithUser() = Poem(
 )
 
 fun Iterable<ResultRow>.toPoems() = this.map { it.toPoemWithUser() }
-fun Iterable<ResultRow>.toPoem() = this.firstOrNull()?.toPoemWithUser()
+//fun Iterable<ResultRow>.toPoem() = this.firstOrNull()?.toPoemWithUser()
