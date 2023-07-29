@@ -10,6 +10,7 @@ import com.poemcollection.utils.authenticatedUser
 import com.poemcollection.utils.getUserId
 import com.poemcollection.utils.receiveOrRespondWithError
 import com.poemcollection.utils.sendOk
+import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.response.*
@@ -25,7 +26,7 @@ fun Route.userRouting() {
         post("register") {
             val insertNewUser = call.receiveOrRespondWithError<InsertNewUser>()
             val user = userController.postUser(insertNewUser)
-            call.respond(user)
+            call.respond(HttpStatusCode.Created, user)
         }
 
         authenticate {

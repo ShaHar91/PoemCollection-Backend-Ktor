@@ -3,6 +3,7 @@ package com.poemcollection.modules.poems
 import com.poemcollection.ParamConstants
 import com.poemcollection.data.dto.requests.poem.InsertOrUpdatePoem
 import com.poemcollection.utils.*
+import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.response.*
@@ -44,7 +45,7 @@ fun Route.poemRouting() {
                     val updatePoem = call.receiveOrRespondWithError<InsertOrUpdatePoem>()
                     val userId = call.authenticatedUser.id
                     val poemDetail = poemController.updatePoemById(userId, poemId, updatePoem)
-                    call.respond(poemDetail)
+                    call.respond(HttpStatusCode.Created, poemDetail)
                 }
 
                 delete {

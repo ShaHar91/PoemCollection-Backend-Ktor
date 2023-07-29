@@ -13,7 +13,7 @@ import com.poemcollection.domain.interfaces.IUserDao
 import com.poemcollection.domain.models.Ratings
 import com.poemcollection.modules.poems.PoemController
 import com.poemcollection.modules.poems.PoemControllerImpl
-import com.poemcollection.utils.TBDException
+import com.poemcollection.statuspages.*
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -73,7 +73,7 @@ class PoemControllerTest : BaseControllerTest() {
 
         coEvery { categoryDao.getListOfExistingCategoryIds(any()) } returns emptyList()
 
-        assertThrows<TBDException> {
+        assertThrows<ErrorUnknownCategoryIdsForUpdate> {
             runBlocking { controller.postPoem(1, postPoem) }
         }
     }
@@ -85,7 +85,7 @@ class PoemControllerTest : BaseControllerTest() {
         coEvery { categoryDao.getListOfExistingCategoryIds(any()) } returns listOf(1)
         coEvery { poemDao.insertPoem(any(), any()) } returns null
 
-        assertThrows<TBDException> {
+        assertThrows<ErrorFailedCreate> {
             runBlocking { controller.postPoem(1, postPoem) }
         }
     }
@@ -122,9 +122,9 @@ class PoemControllerTest : BaseControllerTest() {
 
     @Test
     fun `when requesting specific poem which does not exist, we throw exception`() {
-        coEvery { poemDao.getPoem(any()) } throws TBDException
+        coEvery { poemDao.getPoem(any()) } throws ErrorNotFound
 
-        assertThrows<TBDException> {
+        assertThrows<ErrorNotFound> {
             runBlocking { controller.getPoemById(1) }
         }
     }
@@ -156,7 +156,7 @@ class PoemControllerTest : BaseControllerTest() {
         coEvery { userDao.isUserRoleAdmin(any()) } returns false
         coEvery { poemDao.isUserWriter(any(), any()) } returns false
 
-        assertThrows<TBDException> {
+        assertThrows<ErrorUnauthorized> {
             runBlocking { controller.updatePoemById(1, 1, updatedPoem) }
         }
     }
@@ -169,7 +169,7 @@ class PoemControllerTest : BaseControllerTest() {
         coEvery { poemDao.isUserWriter(any(), any()) } returns true
         coEvery { categoryDao.getListOfExistingCategoryIds(any()) } returns emptyList()
 
-        assertThrows<TBDException> {
+        assertThrows<ErrorUnknownCategoryIdsForUpdate> {
             runBlocking { controller.updatePoemById(1, 1, postPoem) }
         }
     }
@@ -190,7 +190,7 @@ class PoemControllerTest : BaseControllerTest() {
         coEvery { userDao.isUserRoleAdmin(any()) } returns false
         coEvery { poemDao.isUserWriter(any(), any()) } returns false
 
-        assertThrows<TBDException> {
+        assertThrows<ErrorUnauthorized> {
             runBlocking { controller.deletePoemById(1, 1) }
         }
     }
@@ -201,7 +201,7 @@ class PoemControllerTest : BaseControllerTest() {
         coEvery { poemDao.isUserWriter(any(), any()) } returns true
         coEvery { poemDao.deletePoem(any()) } returns false
 
-        assertThrows<TBDException> {
+        assertThrows<ErrorFailedDelete> {
             runBlocking { controller.deletePoemById(1, 1) }
         }
     }

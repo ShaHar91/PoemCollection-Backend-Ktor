@@ -3,6 +3,7 @@ package com.poemcollection.utils
 import com.poemcollection.ParamConstants
 import com.poemcollection.domain.models.user.User
 import com.poemcollection.statuspages.ApiException
+import com.poemcollection.statuspages.ErrorInvalidUUID
 import com.poemcollection.statuspages.InternalServerException
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -25,11 +26,11 @@ suspend inline fun <reified T> ApplicationCall.receiveOrRespondWithError(): T {
     }
 }
 
-fun ApplicationCall.getUserId(): Int = parameters[ParamConstants.USER_ID_KEY]?.toIntOrNull() ?: throw TBDException
+fun ApplicationCall.getUserId(): Int = parameters[ParamConstants.USER_ID_KEY]?.toIntOrNull() ?: throw ErrorInvalidUUID
 fun ApplicationCall.getCategoryIdNullable(): Int? = parameters[ParamConstants.CATEGORY_ID_KEY]?.toIntOrNull()
-fun ApplicationCall.getCategoryId(): Int = getCategoryIdNullable() ?: throw TBDException
-fun ApplicationCall.getPoemId(): Int = parameters[ParamConstants.POEM_ID_KEY]?.toIntOrNull() ?: throw TBDException
-fun ApplicationCall.getReviewId(): Int = parameters[ParamConstants.REVIEW_ID_KEY]?.toIntOrNull() ?: throw TBDException
+fun ApplicationCall.getCategoryId(): Int = getCategoryIdNullable() ?: throw ErrorInvalidUUID
+fun ApplicationCall.getPoemId(): Int = parameters[ParamConstants.POEM_ID_KEY]?.toIntOrNull() ?: throw ErrorInvalidUUID
+fun ApplicationCall.getReviewId(): Int = parameters[ParamConstants.REVIEW_ID_KEY]?.toIntOrNull() ?: throw ErrorInvalidUUID
 
 suspend fun PipelineContext<Unit, ApplicationCall>.sendOk() {
     call.respond(HttpStatusCode.OK)

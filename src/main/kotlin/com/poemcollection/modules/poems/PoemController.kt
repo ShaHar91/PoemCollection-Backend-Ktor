@@ -10,7 +10,7 @@ import com.poemcollection.domain.interfaces.IUserDao
 import com.poemcollection.domain.models.Ratings
 import com.poemcollection.domain.models.poem.toDto
 import com.poemcollection.modules.BaseController
-import com.poemcollection.utils.TBDException
+import com.poemcollection.statuspages.*
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -27,10 +27,10 @@ class PoemControllerImpl : BaseController(), PoemController, KoinComponent {
         // A poem can only be added when all the added categories exist
         if (categoryIds.count() != insertPoem.categoryIds.count()) {
             val nonExistingIds = insertPoem.categoryIds.filterNot { categoryIds.contains(it) }
-            throw TBDException // with the "nonExistingIds" added to it!!
+            throw ErrorUnknownCategoryIdsForUpdate(nonExistingIds)
         }
 
-        poemDao.insertPoem(insertPoem, userId)?.toDto() ?: throw TBDException
+        poemDao.insertPoem(insertPoem, userId)?.toDto() ?: throw ErrorFailedCreate
     }
 
     override suspend fun getAllPoems(categoryId: Int?): List<PoemDto> = dbQuery {
@@ -38,22 +38,22 @@ class PoemControllerImpl : BaseController(), PoemController, KoinComponent {
     }
 
     override suspend fun getPoemById(poemId: Int): PoemDetailDto = dbQuery {
-        poemDao.getPoem(poemId)?.toDto() ?: throw TBDException
+        poemDao.getPoem(poemId)?.toDto() ?: throw ErrorNotFound
     }
 
     override suspend fun updatePoemById(userId: Int, poemId: Int, updatePoem: InsertOrUpdatePoem): PoemDetailDto = dbQuery {
         val isUserAdmin = userDao.isUserRoleAdmin(userId)
         val isUserWriter = poemDao.isUserWriter(poemId, userId)
 
-        if (!isUserWriter && !isUserAdmin) throw TBDException
+        if (!isUserWriter && !isUserAdmin) throw ErrorUnauthorized
 
         val categoryIds = categoryDao.getListOfExistingCategoryIds(updatePoem.categoryIds)
         if (categoryIds.count() != updatePoem.categoryIds.count()) {
             val nonExistingIds = updatePoem.categoryIds.filterNot { categoryIds.contains(it) }
-            throw TBDException // with the "nonExistingIds" added to it!!
+            throw ErrorUnknownCategoryIdsForUpdate(nonExistingIds)
         }
 
-        poemDao.updatePoem(poemId, updatePoem)?.toDto() ?: throw TBDException
+        poemDao.updatePoem(poemId, updatePoem)?.toDto() ?: throw ErrorFailedUpdate
     }
 
     override suspend fun deletePoemById(userId: Int, poemId: Int) {
@@ -61,10 +61,10 @@ class PoemControllerImpl : BaseController(), PoemController, KoinComponent {
             val isUserAdmin = userDao.isUserRoleAdmin(userId)
             val isUserWriter = poemDao.isUserWriter(poemId, userId)
 
-            if (!isUserWriter && !isUserAdmin) throw TBDException
+            if (!isUserWriter && !isUserAdmin) throw ErrorUnauthorized
 
             val deleted = poemDao.deletePoem(poemId)
-            if (!deleted) throw TBDException
+            if (!deleted) throw ErrorFailedDelete
         }
     }
 

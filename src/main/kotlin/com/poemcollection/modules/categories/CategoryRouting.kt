@@ -5,6 +5,7 @@ import com.poemcollection.data.dto.requests.category.InsertOrUpdateCategory
 import com.poemcollection.modules.auth.adminOnly
 import com.poemcollection.utils.getCategoryId
 import com.poemcollection.utils.sendOk
+import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.request.*
@@ -32,7 +33,7 @@ fun Route.categoryRouting() {
             post {
                 val insertCategory = call.receive<InsertOrUpdateCategory>()
                 val category = categoryController.postCategory(insertCategory)
-                call.respond(category)
+                call.respond(HttpStatusCode.Created, category)
             }
 
             put("{${ParamConstants.CATEGORY_ID_KEY}}") {

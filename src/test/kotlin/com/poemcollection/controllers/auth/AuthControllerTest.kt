@@ -9,8 +9,10 @@ import com.poemcollection.model.CredentialsResponse
 import com.poemcollection.modules.auth.AuthController
 import com.poemcollection.modules.auth.AuthControllerImpl
 import com.poemcollection.modules.auth.TokenProvider
+import com.poemcollection.statuspages.ErrorInvalidCredentials
+import com.poemcollection.statuspages.ErrorInvalidParameters
+import com.poemcollection.statuspages.ErrorNotFound
 import com.poemcollection.utils.PasswordManagerContract
-import com.poemcollection.utils.TBDException
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -48,7 +50,7 @@ class AuthControllerTest : BaseControllerTest() {
 
     @Test
     fun `when authorizing user with invalid email, we throw exception`() {
-        assertThrows<TBDException> {
+        assertThrows<ErrorInvalidParameters> {
             runBlocking { controller.authorizeUser(givenAnInvalidCreateToken()) }
         }
     }
@@ -57,7 +59,7 @@ class AuthControllerTest : BaseControllerTest() {
     fun `when authorizing user which does not exist, we throw exception`() {
         coEvery { userDao.getUserHashableByEmail(any()) } returns null
 
-        assertThrows<TBDException> {
+        assertThrows<ErrorNotFound> {
             runBlocking { controller.authorizeUser(givenAValidCreateToken()) }
         }
     }
@@ -67,7 +69,7 @@ class AuthControllerTest : BaseControllerTest() {
         coEvery { userDao.getUserHashableByEmail(any()) } returns User()
         coEvery { passwordEncryption.validatePassword(any(), any()) } returns false
 
-        assertThrows<TBDException> {
+        assertThrows<ErrorInvalidCredentials> {
             runBlocking { controller.authorizeUser(givenAValidCreateToken()) }
         }
     }

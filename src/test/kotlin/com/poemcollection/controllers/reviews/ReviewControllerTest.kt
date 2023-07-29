@@ -10,7 +10,7 @@ import com.poemcollection.domain.interfaces.IUserDao
 import com.poemcollection.domain.models.review.toDto
 import com.poemcollection.modules.reviews.ReviewController
 import com.poemcollection.modules.reviews.ReviewControllerImpl
-import com.poemcollection.utils.TBDException
+import com.poemcollection.statuspages.*
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -61,7 +61,7 @@ class ReviewControllerTest : BaseControllerTest() {
 
         coEvery { reviewDao.insertReview(any(), any(), any()) } returns null
 
-        assertThrows<TBDException> {
+        assertThrows<ErrorFailedCreate> {
             runBlocking { controller.postReview(1, 1, postReview) }
         }
     }
@@ -109,9 +109,9 @@ class ReviewControllerTest : BaseControllerTest() {
 
     @Test
     fun `when fetching specific review which does not exist, we throw exception`() {
-        coEvery { reviewDao.getReview(any()) } throws TBDException
+        coEvery { reviewDao.getReview(any()) } throws ErrorNotFound
 
-        assertThrows<TBDException> {
+        assertThrows<ErrorNotFound> {
             runBlocking { controller.getReviewById(1) }
         }
     }
@@ -139,7 +139,7 @@ class ReviewControllerTest : BaseControllerTest() {
         coEvery { userDao.isUserRoleAdmin(any()) } returns false
         coEvery { reviewDao.isUserWriter(any(), any()) } returns false
 
-        assertThrows<TBDException> {
+        assertThrows<ErrorUnauthorized> {
             runBlocking { controller.updateReview(1, 1, updateReview) }
         }
     }
@@ -150,9 +150,9 @@ class ReviewControllerTest : BaseControllerTest() {
 
         coEvery { userDao.isUserRoleAdmin(any()) } returns true
         coEvery { reviewDao.isUserWriter(any(), any()) } returns true
-        coEvery { reviewDao.updateReview(any(), any()) } throws TBDException
+        coEvery { reviewDao.updateReview(any(), any()) } throws ErrorFailedUpdate
 
-        assertThrows<TBDException> {
+        assertThrows<ErrorFailedUpdate> {
             runBlocking { controller.updateReview(1, 1, updateReview) }
         }
     }
@@ -173,7 +173,7 @@ class ReviewControllerTest : BaseControllerTest() {
         coEvery { userDao.isUserRoleAdmin(any()) } returns false
         coEvery { reviewDao.isUserWriter(any(), any()) } returns false
 
-        assertThrows<TBDException> {
+        assertThrows<ErrorUnauthorized> {
             runBlocking { controller.deleteReview(1, 1) }
         }
     }
@@ -184,7 +184,7 @@ class ReviewControllerTest : BaseControllerTest() {
         coEvery { reviewDao.isUserWriter(any(), any()) } returns true
         coEvery { reviewDao.deleteReview(any()) } returns false
 
-        assertThrows<TBDException> {
+        assertThrows<ErrorFailedDelete> {
             runBlocking { controller.deleteReview(1, 1) }
         }
     }

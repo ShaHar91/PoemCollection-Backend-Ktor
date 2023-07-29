@@ -5,8 +5,8 @@ import com.poemcollection.data.dto.requests.category.InsertOrUpdateCategory
 import com.poemcollection.domain.interfaces.ICategoryDao
 import com.poemcollection.domain.models.category.toDto
 import com.poemcollection.modules.BaseController
-import com.poemcollection.statuspages.InvalidCategoryException
-import com.poemcollection.utils.TBDException
+import com.poemcollection.statuspages.*
+
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -17,11 +17,11 @@ class CategoryControllerImpl : BaseController(), CategoryController, KoinCompone
     override suspend fun postCategory(insertCategory: InsertOrUpdateCategory): CategoryDto = dbQuery {
         // Can't have a category with the same name
         categoryDao.getCategoryByName(insertCategory.name)?.let {
-            throw InvalidCategoryException
+            throw ErrorDuplicateEntity
         }
         val category = categoryDao.insertCategory(insertCategory)
 
-        category?.toDto() ?: throw InvalidCategoryException
+        category?.toDto() ?: throw ErrorFailedCreate
     }
 
     override suspend fun getAllCategories(): List<CategoryDto> = dbQuery {
@@ -29,17 +29,17 @@ class CategoryControllerImpl : BaseController(), CategoryController, KoinCompone
     }
 
     override suspend fun getCategoryById(categoryId: Int): CategoryDto = dbQuery {
-        categoryDao.getCategory(categoryId)?.toDto() ?: throw TBDException
+        categoryDao.getCategory(categoryId)?.toDto() ?: throw ErrorNotFound
     }
 
     override suspend fun updateCategoryById(categoryId: Int, updateCategory: InsertOrUpdateCategory): CategoryDto = dbQuery {
-        categoryDao.updateCategory(categoryId, updateCategory)?.toDto() ?: throw TBDException
+        categoryDao.updateCategory(categoryId, updateCategory)?.toDto() ?: throw ErrorFailedUpdate
     }
 
     override suspend fun deleteCategoryById(categoryId: Int) {
         dbQuery {
             val deleted = categoryDao.deleteCategory(categoryId)
-            if (!deleted) throw TBDException
+            if (!deleted) throw ErrorFailedDelete
         }
     }
 }

@@ -16,8 +16,8 @@ import com.poemcollection.data.dto.requests.user.UpdateUser
 import com.poemcollection.domain.interfaces.IUserDao
 import com.poemcollection.modules.users.UserController
 import com.poemcollection.modules.users.UserControllerImpl
+import com.poemcollection.statuspages.*
 import com.poemcollection.utils.PasswordManagerContract
-import com.poemcollection.utils.TBDException
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -52,7 +52,7 @@ class UserControllerTest : BaseControllerTest() {
     fun `when creating new user and request object is invalid, we throw an error`() {
         val postUser = givenAnInvalidInsertUser()
 
-        assertThrows<TBDException> {
+        assertThrows<ErrorInvalidParameters> {
             runBlocking { controller.postUser(postUser) }
         }
     }
@@ -63,7 +63,7 @@ class UserControllerTest : BaseControllerTest() {
 
         coEvery { userDao.userUnique(any()) } returns false
 
-        assertThrows<TBDException> {
+        assertThrows<ErrorEmailExists> {
             runBlocking { controller.postUser(postUser) }
         }
     }
@@ -74,7 +74,7 @@ class UserControllerTest : BaseControllerTest() {
 
         coEvery { userDao.userUnique(any()) } returns true
 
-        assertThrows<TBDException> {
+        assertThrows<ErrorPasswordsDoNotMatch> {
             runBlocking { controller.postUser(postUser) }
         }
     }
@@ -85,7 +85,7 @@ class UserControllerTest : BaseControllerTest() {
 
         coEvery { userDao.userUnique(any()) } returns true
 
-        assertThrows<TBDException> {
+        assertThrows<ErrorWeakPassword> {
             runBlocking { controller.postUser(postUser) }
         }
     }
@@ -135,7 +135,7 @@ class UserControllerTest : BaseControllerTest() {
     fun `when fetching user by id, but not existing, we throw error`() {
         coEvery { userDao.getUser(any()) } returns null
 
-        assertThrows<TBDException> {
+        assertThrows<ErrorNotFound> {
             runBlocking { controller.getUserById(1) }
         }
     }
@@ -162,7 +162,7 @@ class UserControllerTest : BaseControllerTest() {
 
     @Test
     fun `when updating user by id, where request object is not valid, we throw error`() {
-        assertThrows<TBDException> {
+        assertThrows<ErrorInvalidParameters> {
             runBlocking { controller.updateUserById(1, UpdateUser("", "", "")) }
         }
     }
@@ -173,7 +173,7 @@ class UserControllerTest : BaseControllerTest() {
 
         coEvery { userDao.updateUser(any(), any()) } returns null
 
-        assertThrows<TBDException> {
+        assertThrows<ErrorFailedUpdate> {
             runBlocking { controller.updateUserById(1, updateUser) }
         }
     }
@@ -181,9 +181,9 @@ class UserControllerTest : BaseControllerTest() {
     @Test
     fun `when updating password and user does not exist, we throw an error`() {
 
-        coEvery { userDao.getUserHashableById(any()) } throws TBDException
+        coEvery { userDao.getUserHashableById(any()) } throws ErrorNotFound
 
-        assertThrows<TBDException> {
+        assertThrows<ErrorNotFound> {
             runBlocking { controller.updateUserPasswordById(1, givenValidUpdatePassword()) }
         }
     }
@@ -195,7 +195,7 @@ class UserControllerTest : BaseControllerTest() {
 
         coEvery { userDao.getUserHashableById(any()) } returns user
 
-        assertThrows<TBDException> {
+        assertThrows<ErrorSameAsOldPassword> {
             runBlocking { controller.updateUserPasswordById(1, postUpdatePassword) }
         }
     }
@@ -206,9 +206,9 @@ class UserControllerTest : BaseControllerTest() {
         val user = givenAValidUser()
 
         coEvery { userDao.getUserHashableById(any()) } returns user
-        coEvery { passwordEncryption.validatePassword(any(), any()) } throws TBDException
+        coEvery { passwordEncryption.validatePassword(any(), any()) } returns false
 
-        assertThrows<TBDException> {
+        assertThrows<ErrorInvalidCredentials> {
             runBlocking { controller.updateUserPasswordById(1, postUpdatePassword) }
         }
     }
@@ -221,7 +221,7 @@ class UserControllerTest : BaseControllerTest() {
         coEvery { userDao.getUserHashableById(any()) } returns user
         coEvery { passwordEncryption.validatePassword(any(), any()) } returns true
 
-        assertThrows<TBDException> {
+        assertThrows<ErrorPasswordsDoNotMatch> {
             runBlocking { controller.updateUserPasswordById(1, postUpdatePassword) }
         }
     }
@@ -234,7 +234,7 @@ class UserControllerTest : BaseControllerTest() {
         coEvery { userDao.getUserHashableById(any()) } returns user
         coEvery { passwordEncryption.validatePassword(any(), any()) } returns true
 
-        assertThrows<TBDException> {
+        assertThrows<ErrorWeakPassword> {
             runBlocking { controller.updateUserPasswordById(1, postUpdatePassword) }
         }
     }
@@ -279,7 +279,7 @@ class UserControllerTest : BaseControllerTest() {
 
         coEvery { userDao.deleteUser(any()) } returns false
 
-        assertThrows<TBDException> {
+        assertThrows<ErrorFailedDelete> {
             runBlocking { controller.deleteUserById(1) }
         }
     }

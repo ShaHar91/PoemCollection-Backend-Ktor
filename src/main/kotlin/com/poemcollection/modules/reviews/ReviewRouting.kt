@@ -3,6 +3,7 @@ package com.poemcollection.modules.reviews
 import com.poemcollection.ParamConstants
 import com.poemcollection.data.dto.requests.review.InsertOrUpdateReview
 import com.poemcollection.utils.*
+import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.response.*
@@ -20,7 +21,7 @@ fun Route.reviewRouting() {
                 val userId = call.authenticatedUser.id
                 val insertPoem = call.receiveOrRespondWithError<InsertOrUpdateReview>()
                 val review = reviewController.postReview(poemId, userId, insertPoem)
-                call.respond(review)
+                call.respond(HttpStatusCode.Created, review)
             }
         }
 

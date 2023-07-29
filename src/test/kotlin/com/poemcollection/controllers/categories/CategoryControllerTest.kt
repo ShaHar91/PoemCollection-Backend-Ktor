@@ -8,8 +8,7 @@ import com.poemcollection.data.dto.requests.category.CategoryDto
 import com.poemcollection.domain.interfaces.ICategoryDao
 import com.poemcollection.modules.categories.CategoryController
 import com.poemcollection.modules.categories.CategoryControllerImpl
-import com.poemcollection.statuspages.InvalidCategoryException
-import com.poemcollection.utils.TBDException
+import com.poemcollection.statuspages.*
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -65,7 +64,7 @@ class CategoryControllerTest : BaseControllerTest() {
         // Setup
         coEvery { categoryDao.getCategoryByName(any()) } returns createdCategory
 
-        assertThrows<InvalidCategoryException> {
+        assertThrows<ErrorDuplicateEntity> {
             runBlocking { controller.postCategory(postCategory) }
         }
     }
@@ -77,7 +76,7 @@ class CategoryControllerTest : BaseControllerTest() {
         coEvery { categoryDao.getCategoryByName(any()) } returns null
         coEvery { categoryDao.insertCategory(any()) } returns null
 
-        assertThrows<InvalidCategoryException> {
+        assertThrows<ErrorFailedCreate> {
             runBlocking { controller.postCategory(postCategory) }
         }
     }
@@ -113,9 +112,9 @@ class CategoryControllerTest : BaseControllerTest() {
 
     @Test
     fun `when requesting specific category which does not exist, we throw exception`() {
-        coEvery { categoryDao.getCategory(any()) } throws TBDException
+        coEvery { categoryDao.getCategory(any()) } throws ErrorNotFound
 
-        assertThrows<TBDException> {
+        assertThrows<ErrorNotFound> {
             runBlocking { controller.getCategoryById(1) }
         }
     }
@@ -140,9 +139,9 @@ class CategoryControllerTest : BaseControllerTest() {
     fun `when updating specific category which does not exist, we throw exception`() {
         val updateCategory = givenAValidUpdateCategory()
 
-        coEvery { categoryDao.updateCategory(any(), any()) } throws TBDException
+        coEvery { categoryDao.updateCategory(any(), any()) } throws ErrorFailedUpdate
 
-        assertThrows<TBDException> {
+        assertThrows<ErrorFailedUpdate> {
             runBlocking { controller.updateCategoryById(1, updateCategory) }
         }
     }
@@ -164,7 +163,7 @@ class CategoryControllerTest : BaseControllerTest() {
 
         coEvery { categoryDao.deleteCategory(any()) } returns false
 
-        assertThrows<TBDException> {
+        assertThrows<ErrorFailedDelete> {
             runBlocking { controller.deleteCategoryById(1) }
         }
     }

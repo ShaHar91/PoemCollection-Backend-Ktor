@@ -9,7 +9,6 @@ import com.poemcollection.modules.categories.categoryRouting
 import com.poemcollection.routing.AuthenticationInstrumentation
 import com.poemcollection.routing.BaseRoutingTest
 import com.poemcollection.statuspages.InvalidCategoryException
-import com.poemcollection.utils.TBDException
 import com.poemcollection.utils.toDatabaseString
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -84,9 +83,9 @@ class CategoryRoutingTest : BaseRoutingTest() {
     fun `when fetching a specific category that does not exists, we return error`() = withBaseTestApplication(
         AuthenticationInstrumentation(adminOnly)
     ) {
-        coEvery { categoryController.getCategoryById(any()) } throws TBDException
+        coEvery { categoryController.getCategoryById(any()) } throws Exception()
 
-        val exception = assertThrows<TBDException> {
+        val exception = assertThrows<Exception> {
             doCall(HttpMethod.Get, "/categories/1")
         }
 
@@ -105,7 +104,7 @@ class CategoryRoutingTest : BaseRoutingTest() {
         val call = doCall(HttpMethod.Post, "/categories", body)
 
         call.also {
-            assertThat(HttpStatusCode.OK).isEqualTo(it.response.status())
+            assertThat(HttpStatusCode.Created).isEqualTo(it.response.status())
             val responseBody = it.response.parseBody(CategoryDto::class.java)
             assertThat(categoryResponse).isEqualTo(responseBody)
         }
@@ -156,10 +155,10 @@ class CategoryRoutingTest : BaseRoutingTest() {
     fun `when updating category with wrong categoryId, we return error`() = withBaseTestApplication(
         AuthenticationInstrumentation(adminOnly, UserRoles.Admin)
     ) {
-        coEvery { categoryController.updateCategoryById(any(), any()) } throws TBDException
+        coEvery { categoryController.updateCategoryById(any(), any()) } throws Exception()
 
         val body = toJsonBody(InsertOrUpdateCategory("Hate"))
-        val exception = assertThrows<TBDException> {
+        val exception = assertThrows<Exception> {
             doCall(HttpMethod.Put, "/categories/1", body)
         }
         assertThat(exception.message).isEqualTo(null)
@@ -192,9 +191,9 @@ class CategoryRoutingTest : BaseRoutingTest() {
     fun `when deleting category with wrong categoryId, we return error`() = withBaseTestApplication(
         AuthenticationInstrumentation(adminOnly, UserRoles.Admin)
     ) {
-        coEvery { categoryController.deleteCategoryById(any()) } throws TBDException
+        coEvery { categoryController.deleteCategoryById(any()) } throws Exception()
 
-        val exception = assertThrows<TBDException> {
+        val exception = assertThrows<Exception> {
             doCall(HttpMethod.Delete, "/categories/1")
         }
         assertThat(exception.message).isEqualTo(null)

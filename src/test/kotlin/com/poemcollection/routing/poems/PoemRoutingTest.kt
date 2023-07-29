@@ -9,7 +9,6 @@ import com.poemcollection.modules.poems.PoemController
 import com.poemcollection.modules.poems.poemRouting
 import com.poemcollection.routing.AuthenticationInstrumentation
 import com.poemcollection.routing.BaseRoutingTest
-import com.poemcollection.utils.TBDException
 import com.poemcollection.utils.toDatabaseString
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -129,9 +128,9 @@ class PoemRoutingTest : BaseRoutingTest() {
         AuthenticationInstrumentation(adminOnly),
         AuthenticationInstrumentation()
     ) {
-        coEvery { poemController.getPoemById(any()) } throws TBDException
+        coEvery { poemController.getPoemById(any()) } throws Exception()
 
-        val exception = assertThrows<TBDException> {
+        val exception = assertThrows<Exception> {
             doCall(HttpMethod.Get, "/poems/1")
         }
 
@@ -151,7 +150,7 @@ class PoemRoutingTest : BaseRoutingTest() {
         val call = doCall(HttpMethod.Put, "/poems/1", body)
 
         call.also {
-            Assertions.assertThat(HttpStatusCode.OK).isEqualTo(it.response.status())
+            Assertions.assertThat(HttpStatusCode.Created).isEqualTo(it.response.status())
             val responseBody = it.response.parseBody(PoemDetailDto::class.java)
             Assertions.assertThat(poemResponse).isEqualTo(responseBody)
         }
@@ -162,10 +161,10 @@ class PoemRoutingTest : BaseRoutingTest() {
         AuthenticationInstrumentation(adminOnly),
         AuthenticationInstrumentation()
     ) {
-        coEvery { poemController.updatePoemById(any(), any(), any()) } throws TBDException
+        coEvery { poemController.updatePoemById(any(), any(), any()) } throws Exception()
 
         val body = toJsonBody(InsertOrUpdatePoem())
-        val exception = assertThrows<TBDException> {
+        val exception = assertThrows<Exception> {
             doCall(HttpMethod.Put, "/poems/1", body)
         }
         Assertions.assertThat(exception.message).isEqualTo(null)
@@ -190,9 +189,9 @@ class PoemRoutingTest : BaseRoutingTest() {
         AuthenticationInstrumentation(adminOnly),
         AuthenticationInstrumentation()
     ) {
-        coEvery { poemController.deletePoemById(any(), any()) } throws TBDException
+        coEvery { poemController.deletePoemById(any(), any()) } throws Exception()
 
-        val exception = assertThrows<TBDException> {
+        val exception = assertThrows<Exception> {
             doCall(HttpMethod.Delete, "/poems/1")
         }
         Assertions.assertThat(exception.message).isEqualTo(null)
@@ -220,9 +219,9 @@ class PoemRoutingTest : BaseRoutingTest() {
         AuthenticationInstrumentation(adminOnly),
         AuthenticationInstrumentation()
     ) {
-        coEvery { poemController.getRatingsForPoem(any()) } throws TBDException
+        coEvery { poemController.getRatingsForPoem(any()) } throws Exception()
 
-        val exception = assertThrows<TBDException> {
+        val exception = assertThrows<Exception> {
             doCall(HttpMethod.Get, "/poems/1/ratings")
         }
         Assertions.assertThat(exception.message).isEqualTo(null)

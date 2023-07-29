@@ -6,7 +6,7 @@ import com.poemcollection.domain.interfaces.IReviewDao
 import com.poemcollection.domain.interfaces.IUserDao
 import com.poemcollection.domain.models.review.toDto
 import com.poemcollection.modules.BaseController
-import com.poemcollection.utils.TBDException
+import com.poemcollection.statuspages.*
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -16,7 +16,7 @@ class ReviewControllerImpl : BaseController(), ReviewController, KoinComponent {
     private val userDao by inject<IUserDao>()
 
     override suspend fun postReview(poemId: Int, userId: Int, insertReview: InsertOrUpdateReview): ReviewDto = dbQuery {
-        reviewDao.insertReview(poemId, userId, insertReview)?.toDto() ?: throw TBDException
+        reviewDao.insertReview(poemId, userId, insertReview)?.toDto() ?: throw ErrorFailedCreate
     }
 
     override suspend fun getAllReviews(poemId: Int, limit: Int?): List<ReviewDto> = dbQuery {
@@ -24,7 +24,7 @@ class ReviewControllerImpl : BaseController(), ReviewController, KoinComponent {
     }
 
     override suspend fun getReviewById(reviewId: Int): ReviewDto = dbQuery {
-        reviewDao.getReview(reviewId)?.toDto() ?: throw TBDException
+        reviewDao.getReview(reviewId)?.toDto() ?: throw ErrorNotFound
     }
 
     override suspend fun updateReview(reviewId: Int, userId: Int, updateReview: InsertOrUpdateReview): ReviewDto = dbQuery {
@@ -33,9 +33,9 @@ class ReviewControllerImpl : BaseController(), ReviewController, KoinComponent {
         val isUserAdmin = userDao.isUserRoleAdmin(userId)
         val isUserWriter = reviewDao.isUserWriter(reviewId, userId)
 
-        if (!isUserWriter && !isUserAdmin) throw TBDException
+        if (!isUserWriter && !isUserAdmin) throw ErrorUnauthorized
 
-        reviewDao.updateReview(reviewId, updateReview)?.toDto() ?: throw TBDException
+        reviewDao.updateReview(reviewId, updateReview)?.toDto() ?: throw ErrorFailedUpdate
     }
 
     override suspend fun deleteReview(userId: Int, reviewId: Int) {
@@ -45,10 +45,10 @@ class ReviewControllerImpl : BaseController(), ReviewController, KoinComponent {
             val isUserAdmin = userDao.isUserRoleAdmin(userId)
             val isUserWriter = reviewDao.isUserWriter(reviewId, userId)
 
-            if (!isUserWriter && !isUserAdmin) throw TBDException
+            if (!isUserWriter && !isUserAdmin) throw ErrorUnauthorized
 
             val deleted = reviewDao.deleteReview(reviewId)
-            if (!deleted) throw TBDException
+            if (!deleted) throw ErrorFailedDelete
         }
     }
 }

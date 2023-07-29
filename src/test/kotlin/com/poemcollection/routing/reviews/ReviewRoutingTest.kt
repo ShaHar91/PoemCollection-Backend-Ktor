@@ -8,7 +8,6 @@ import com.poemcollection.modules.reviews.ReviewController
 import com.poemcollection.modules.reviews.reviewRouting
 import com.poemcollection.routing.AuthenticationInstrumentation
 import com.poemcollection.routing.BaseRoutingTest
-import com.poemcollection.utils.TBDException
 import com.poemcollection.utils.toDatabaseString
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -56,7 +55,7 @@ class ReviewRoutingTest : BaseRoutingTest() {
         val call = doCall(HttpMethod.Post, "/poems/1/reviews", body)
 
         call.also {
-            Assertions.assertThat(HttpStatusCode.OK).isEqualTo(it.response.status())
+            Assertions.assertThat(HttpStatusCode.Created).isEqualTo(it.response.status())
             val responseBody = it.response.parseBody(ReviewDto::class.java)
             Assertions.assertThat(reviewResponse).isEqualTo(responseBody)
         }
@@ -112,9 +111,9 @@ class ReviewRoutingTest : BaseRoutingTest() {
         AuthenticationInstrumentation(adminOnly),
         AuthenticationInstrumentation()
     ) {
-        coEvery { reviewController.getReviewById(any()) } throws TBDException
+        coEvery { reviewController.getReviewById(any()) } throws Exception()
 
-        val exception = assertThrows<TBDException> {
+        val exception = assertThrows<Exception> {
             doCall(HttpMethod.Get, "/poems/1/reviews/1")
         }
 
@@ -145,10 +144,10 @@ class ReviewRoutingTest : BaseRoutingTest() {
         AuthenticationInstrumentation(adminOnly),
         AuthenticationInstrumentation()
     ) {
-        coEvery { reviewController.updateReview(any(), any(), any()) } throws TBDException
+        coEvery { reviewController.updateReview(any(), any(), any()) } throws Exception()
 
         val body = toJsonBody(InsertOrUpdateReview("This is not a good poem!", 0))
-        val exception = assertThrows<TBDException> {
+        val exception = assertThrows<Exception> {
             doCall(HttpMethod.Put, "/poems/1/reviews/1", body)
         }
 
@@ -185,9 +184,9 @@ class ReviewRoutingTest : BaseRoutingTest() {
         AuthenticationInstrumentation(adminOnly),
         AuthenticationInstrumentation()
     ) {
-        coEvery { reviewController.deleteReview(any(), any()) } throws TBDException
+        coEvery { reviewController.deleteReview(any(), any()) } throws Exception()
 
-        val exception = assertThrows<TBDException> {
+        val exception = assertThrows<Exception> {
             doCall(HttpMethod.Delete, "/poems/1/reviews/1")
         }
 

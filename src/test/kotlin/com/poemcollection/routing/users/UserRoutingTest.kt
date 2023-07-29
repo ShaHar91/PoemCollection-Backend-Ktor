@@ -71,7 +71,7 @@ class UserRoutingTest : BaseRoutingTest() {
         val call = doCall(HttpMethod.Post, "/users/register", body)
 
         call.also {
-            assertThat(HttpStatusCode.OK).isEqualTo(it.response.status())
+            assertThat(HttpStatusCode.Created).isEqualTo(it.response.status())
             val responseBody = it.response.parseBody(UserDto::class.java)
             assertThat(userDto).isEqualTo(responseBody)
         }
