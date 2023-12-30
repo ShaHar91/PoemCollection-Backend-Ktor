@@ -43,7 +43,10 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-core:$exposed_version")
     implementation("org.jetbrains.exposed:exposed-dao:$exposed_version")
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposed_version")
-    implementation("org.xerial:sqlite-jdbc:3.36.0.3")
+
+    implementation("mysql:mysql-connector-java:8.0.33")
+
+//    implementation("org.xerial:sqlite-jdbc:3.36.0.3")
 
     implementation("commons-codec:commons-codec:$commons_codec_version")
 

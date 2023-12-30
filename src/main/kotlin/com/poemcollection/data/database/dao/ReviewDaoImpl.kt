@@ -82,5 +82,5 @@ class ReviewDaoImpl : IReviewDao {
     }
 
     override fun isUserWriter(reviewId: Int, userId: Int): Boolean =
-        ReviewsTable.select { ReviewsTable.id eq reviewId }.first()[ReviewsTable.userId].value == userId
+        ReviewsTable.select { ReviewsTable.id eq reviewId }.first()[ReviewsTable.userId]?.value == userId
 }

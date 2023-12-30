@@ -10,7 +10,7 @@ import java.time.LocalDateTime
 object ReviewsTable : IntIdTable() {
     val body = mediumText("body")
     val rating = integer("rating").default(0)
-    val userId = reference("userId", UsersTable, onDelete = ReferenceOption.SET_NULL) // As long as this foreign key references the primary key of the Users table this is enough.
+    val userId = reference("userId", UsersTable, onDelete = ReferenceOption.SET_NULL).nullable() // As long as this foreign key references the primary key of the Users table this is enough.
     val poemId = reference("poemId", PoemsTable, onDelete = ReferenceOption.CASCADE) // As long as this foreign key references the primary key of the Poems table this is enough.
     val createdAt = varchar("createdAt", 255).default(LocalDateTime.now().toDatabaseString())
     val updatedAt = varchar("updatedAt", 255).default(LocalDateTime.now().toDatabaseString())
